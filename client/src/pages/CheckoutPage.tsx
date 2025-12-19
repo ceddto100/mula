@@ -9,7 +9,7 @@ import { ShippingAddress } from '../types';
 import toast from 'react-hot-toast';
 
 const CheckoutPage: React.FC = () => {
-  const { cart, itemCount } = useCart();
+  const { cart } = useCart();
   const { user } = useAuth();
   const navigate = useNavigate();
   const [isProcessing, setIsProcessing] = useState(false);

@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
-import { Cart, CartItem } from '../types';
+import { Cart } from '../types';
 import { cartApi, AddToCartData } from '../api/cart.api';
 import { useAuth } from './AuthContext';
 import toast from 'react-hot-toast';
