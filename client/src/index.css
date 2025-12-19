@@ -2,6 +2,11 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Base styles */
+body {
+  @apply antialiased;
+}
+
 /* Custom scrollbar */
 ::-webkit-scrollbar {
   width: 8px;
@@ -62,4 +67,9 @@ input[type="number"] {
 /* Loading skeleton */
 .skeleton {
   @apply bg-gray-200 animate-pulse rounded;
+}
+
+/* Luxury brand typography */
+.font-serif {
+  font-family: 'Playfair Display', Georgia, serif;
 }
