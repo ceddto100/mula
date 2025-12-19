@@ -3,11 +3,10 @@ import { Link } from 'react-router-dom';
 import { FiArrowRight } from 'react-icons/fi';
 import Layout from '../components/layout/Layout';
 import ProductGrid from '../components/product/ProductGrid';
-import { useFeaturedProducts, useCategories } from '../hooks/useProducts';
+import { useFeaturedProducts } from '../hooks/useProducts';
 
 const Home: React.FC = () => {
   const { products: featuredProducts, isLoading } = useFeaturedProducts(8);
-  const { categories } = useCategories();
 
   return (
     <Layout>

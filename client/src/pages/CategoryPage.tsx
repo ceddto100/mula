@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useParams, useSearchParams } from 'react-router-dom';
 import Layout from '../components/layout/Layout';
 import ProductGrid from '../components/product/ProductGrid';
