@@ -1,117 +1,190 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { FiInstagram, FiFacebook, FiTwitter } from 'react-icons/fi';
+import { FiInstagram, FiFacebook, FiTwitter, FiYoutube } from 'react-icons/fi';
 
 const Footer: React.FC = () => {
   return (
-    <footer className="bg-gray-900 text-white">
-      <div className="max-w-7xl mx-auto px-4 py-12">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
-          {/* Brand */}
+    <footer className="bg-white border-t border-gray-200">
+      {/* Main Footer */}
+      <div className="max-w-7xl mx-auto px-4 py-12 lg:py-16">
+        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-8">
+          {/* Customer Service */}
           <div>
-            <h3 className="text-2xl font-bold tracking-wider mb-4">MULA</h3>
-            <p className="text-gray-400 text-sm">
-              Premium clothing for the modern lifestyle. Quality meets style.
-            </p>
+            <h4 className="text-xs tracking-wider font-medium mb-4">CUSTOMER SERVICE</h4>
+            <ul className="space-y-3 text-sm text-gray-600">
+              <li>
+                <Link to="/contact" className="hover:text-gray-900 transition-colors">
+                  Contact Us
+                </Link>
+              </li>
+              <li>
+                <Link to="/shipping" className="hover:text-gray-900 transition-colors">
+                  Shipping
+                </Link>
+              </li>
+              <li>
+                <Link to="/returns" className="hover:text-gray-900 transition-colors">
+                  Returns & Exchanges
+                </Link>
+              </li>
+              <li>
+                <Link to="/faq" className="hover:text-gray-900 transition-colors">
+                  FAQ
+                </Link>
+              </li>
+              <li>
+                <Link to="/size-guide" className="hover:text-gray-900 transition-colors">
+                  Size Guide
+                </Link>
+              </li>
+            </ul>
+          </div>
+
+          {/* Company */}
+          <div>
+            <h4 className="text-xs tracking-wider font-medium mb-4">COMPANY</h4>
+            <ul className="space-y-3 text-sm text-gray-600">
+              <li>
+                <Link to="/about" className="hover:text-gray-900 transition-colors">
+                  About Us
+                </Link>
+              </li>
+              <li>
+                <Link to="/careers" className="hover:text-gray-900 transition-colors">
+                  Careers
+                </Link>
+              </li>
+              <li>
+                <Link to="/stores" className="hover:text-gray-900 transition-colors">
+                  Store Locator
+                </Link>
+              </li>
+              <li>
+                <Link to="/sustainability" className="hover:text-gray-900 transition-colors">
+                  Sustainability
+                </Link>
+              </li>
+            </ul>
           </div>
 
           {/* Shop */}
           <div>
-            <h4 className="font-semibold mb-4">Shop</h4>
-            <ul className="space-y-2 text-sm text-gray-400">
+            <h4 className="text-xs tracking-wider font-medium mb-4">SHOP</h4>
+            <ul className="space-y-3 text-sm text-gray-600">
               <li>
-                <Link to="/category/men" className="hover:text-white transition-colors">
+                <Link to="/category/men" className="hover:text-gray-900 transition-colors">
                   Men
                 </Link>
               </li>
               <li>
-                <Link to="/category/women" className="hover:text-white transition-colors">
+                <Link to="/category/women" className="hover:text-gray-900 transition-colors">
                   Women
                 </Link>
               </li>
               <li>
-                <Link to="/category/accessories" className="hover:text-white transition-colors">
-                  Accessories
+                <Link to="/category/kids" className="hover:text-gray-900 transition-colors">
+                  Kids & Baby
                 </Link>
               </li>
               <li>
-                <Link to="/category/new-arrivals" className="hover:text-white transition-colors">
-                  New Arrivals
+                <Link to="/category/home" className="hover:text-gray-900 transition-colors">
+                  Home
                 </Link>
               </li>
               <li>
-                <Link to="/category/sale" className="hover:text-white transition-colors">
+                <Link to="/category/sale" className="hover:text-gray-900 transition-colors">
                   Sale
                 </Link>
               </li>
             </ul>
           </div>
 
-          {/* Help */}
+          {/* Legal */}
           <div>
-            <h4 className="font-semibold mb-4">Help</h4>
-            <ul className="space-y-2 text-sm text-gray-400">
+            <h4 className="text-xs tracking-wider font-medium mb-4">LEGAL</h4>
+            <ul className="space-y-3 text-sm text-gray-600">
               <li>
-                <Link to="/contact" className="hover:text-white transition-colors">
-                  Contact Us
+                <Link to="/privacy" className="hover:text-gray-900 transition-colors">
+                  Privacy Policy
                 </Link>
               </li>
               <li>
-                <Link to="/shipping" className="hover:text-white transition-colors">
-                  Shipping Info
+                <Link to="/terms" className="hover:text-gray-900 transition-colors">
+                  Terms of Use
                 </Link>
               </li>
               <li>
-                <Link to="/returns" className="hover:text-white transition-colors">
-                  Returns & Exchanges
-                </Link>
-              </li>
-              <li>
-                <Link to="/faq" className="hover:text-white transition-colors">
-                  FAQ
+                <Link to="/accessibility" className="hover:text-gray-900 transition-colors">
+                  Accessibility
                 </Link>
               </li>
             </ul>
           </div>
 
-          {/* Newsletter */}
-          <div>
-            <h4 className="font-semibold mb-4">Stay Connected</h4>
-            <p className="text-sm text-gray-400 mb-4">
-              Subscribe to get special offers and updates.
-            </p>
+          {/* Connect */}
+          <div className="col-span-2 md:col-span-4 lg:col-span-1">
+            <h4 className="text-xs tracking-wider font-medium mb-4">CONNECT WITH US</h4>
+            <div className="flex space-x-4 mb-6">
+              <a
+                href="#"
+                className="text-gray-600 hover:text-gray-900 transition-colors"
+                aria-label="Instagram"
+              >
+                <FiInstagram size={20} />
+              </a>
+              <a
+                href="#"
+                className="text-gray-600 hover:text-gray-900 transition-colors"
+                aria-label="Facebook"
+              >
+                <FiFacebook size={20} />
+              </a>
+              <a
+                href="#"
+                className="text-gray-600 hover:text-gray-900 transition-colors"
+                aria-label="Twitter"
+              >
+                <FiTwitter size={20} />
+              </a>
+              <a
+                href="#"
+                className="text-gray-600 hover:text-gray-900 transition-colors"
+                aria-label="YouTube"
+              >
+                <FiYoutube size={20} />
+              </a>
+            </div>
+
+            <h4 className="text-xs tracking-wider font-medium mb-3">SIGN UP FOR EMAILS</h4>
             <form className="flex">
               <input
                 type="email"
-                placeholder="Your email"
-                className="flex-1 px-4 py-2 bg-gray-800 text-white text-sm rounded-l-md focus:outline-none focus:ring-1 focus:ring-gray-600"
+                placeholder="Email Address"
+                className="flex-1 px-4 py-2 text-sm border border-gray-300 border-r-0 focus:outline-none focus:border-gray-900"
               />
               <button
                 type="submit"
-                className="px-4 py-2 bg-white text-gray-900 text-sm font-medium rounded-r-md hover:bg-gray-100 transition-colors"
+                className="px-4 py-2 bg-gray-900 text-white text-xs tracking-wider hover:bg-gray-800 transition-colors"
               >
-                Join
+                JOIN
               </button>
             </form>
-
-            {/* Social icons */}
-            <div className="flex space-x-4 mt-6">
-              <a href="#" className="text-gray-400 hover:text-white transition-colors">
-                <FiInstagram size={20} />
-              </a>
-              <a href="#" className="text-gray-400 hover:text-white transition-colors">
-                <FiFacebook size={20} />
-              </a>
-              <a href="#" className="text-gray-400 hover:text-white transition-colors">
-                <FiTwitter size={20} />
-              </a>
-            </div>
           </div>
         </div>
+      </div>
 
-        {/* Bottom */}
-        <div className="border-t border-gray-800 mt-12 pt-8 text-center text-sm text-gray-400">
-          <p>&copy; {new Date().getFullYear()} MULA. All rights reserved.</p>
+      {/* Bottom Footer */}
+      <div className="border-t border-gray-200">
+        <div className="max-w-7xl mx-auto px-4 py-6">
+          <div className="flex flex-col md:flex-row justify-between items-center gap-4">
+            <p className="text-xs text-gray-500">
+              &copy; {new Date().getFullYear()} MULA. All Rights Reserved.
+            </p>
+            <div className="flex items-center gap-6 text-xs text-gray-500">
+              <span>United States</span>
+              <span>English</span>
+            </div>
+          </div>
         </div>
       </div>
     </footer>
