@@ -178,7 +178,7 @@ const Footer: React.FC = () => {
         <div className="max-w-7xl mx-auto px-4 py-6">
           <div className="flex flex-col md:flex-row justify-between items-center gap-4">
             <p className="text-xs text-gray-500">
-              &copy; {new Date().getFullYear()} MULA. All Rights Reserved.
+              &copy; {new Date().getFullYear()} Cualquier. All Rights Reserved.
             </p>
             <div className="flex items-center gap-6 text-xs text-gray-500">
               <span>United States</span>

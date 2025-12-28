@@ -5,12 +5,10 @@ import { useAuth } from '../../context/AuthContext';
 import { useCart } from '../../context/CartContext';
 
 const NAV_ITEMS = [
+  { label: 'NEW', path: '/category/new-arrivals' },
   { label: 'MEN', path: '/category/men' },
   { label: 'WOMEN', path: '/category/women' },
-  { label: 'KIDS & BABY', path: '/category/kids' },
-  { label: 'HOME', path: '/category/home' },
-  { label: 'GIFTS', path: '/category/gifts' },
-  { label: 'DISCOVER', path: '/category/new-arrivals' },
+  { label: 'COLLECTIONS', path: '/category/collections' },
   { label: 'SALE', path: '/category/sale' },
 ];
 
@@ -32,74 +30,77 @@ const Header: React.FC = () => {
   };
 
   return (
-    <header className="bg-white sticky top-0 z-50">
+    <header className="bg-white sticky top-0 z-50 shadow-sm">
       {/* Main header */}
-      <div className="border-b border-gray-200">
+      <div className="border-b-2 border-brand-500">
         <div className="max-w-7xl mx-auto px-4">
-          <div className="flex items-center justify-between h-16 lg:h-20">
+          <div className="flex items-center justify-between h-20 lg:h-24">
             {/* Mobile menu button */}
             <button
-              className="lg:hidden p-2 -ml-2"
+              className="lg:hidden p-2 -ml-2 text-brand-700 hover:text-brand-500 transition-colors"
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
               aria-label="Toggle menu"
             >
-              {isMobileMenuOpen ? <FiX size={24} /> : <FiMenu size={24} />}
+              {isMobileMenuOpen ? <FiX size={26} strokeWidth={2.5} /> : <FiMenu size={26} strokeWidth={2.5} />}
             </button>
 
             {/* Logo */}
-            <Link to="/" className="flex items-center">
-              <span className="text-xl lg:text-2xl tracking-[0.3em] font-light text-gray-900">
-                MULA
-              </span>
+            <Link to="/" className="flex items-center lg:mr-12">
+              <img
+                src="/images/Cualquier_logo.png"
+                alt="Cualquier"
+                className="h-12 lg:h-16 w-auto hover:scale-105 transition-transform duration-300"
+              />
             </Link>
 
             {/* Desktop Navigation */}
-            <nav className="hidden lg:flex items-center space-x-6 xl:space-x-8">
+            <nav className="hidden lg:flex items-center space-x-8 xl:space-x-10 flex-1">
               {NAV_ITEMS.map((item) => (
                 <Link
                   key={item.label}
                   to={item.path}
-                  className="text-xs xl:text-sm tracking-wider text-gray-700 hover:text-gray-900 transition-colors font-normal"
+                  className="text-sm xl:text-base font-grotesk font-semibold tracking-wide text-brand-800 hover:text-brand-500 transition-colors relative group"
                 >
                   {item.label}
+                  <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-brand-500 transition-all duration-300 group-hover:w-full" />
                 </Link>
               ))}
             </nav>
 
             {/* Right side icons */}
-            <div className="flex items-center space-x-2 lg:space-x-4">
+            <div className="flex items-center space-x-3 lg:space-x-4">
               <button
                 onClick={() => setIsSearchOpen(!isSearchOpen)}
-                className="p-2 hover:opacity-70 transition-opacity"
+                className="p-2 text-brand-700 hover:text-brand-500 transition-colors hover:scale-110 duration-300"
                 aria-label="Search"
               >
-                <FiSearch size={20} strokeWidth={1.5} />
+                <FiSearch size={22} strokeWidth={2} />
               </button>
 
               <Link
                 to={isAuthenticated ? '/account' : '/login'}
-                className="p-2 hover:opacity-70 transition-opacity"
+                className="p-2 text-brand-700 hover:text-brand-500 transition-colors hover:scale-110 duration-300"
                 aria-label="Account"
               >
-                <FiUser size={20} strokeWidth={1.5} />
+                <FiUser size={22} strokeWidth={2} />
               </Link>
 
               <Link
                 to="/wishlist"
-                className="hidden lg:block p-2 hover:opacity-70 transition-opacity"
+                className="hidden lg:block p-2 text-brand-700 hover:text-brand-500 transition-colors hover:scale-110 duration-300"
                 aria-label="Wishlist"
               >
-                <FiHeart size={20} strokeWidth={1.5} />
+                <FiHeart size={22} strokeWidth={2} />
               </Link>
 
               <Link
                 to="/cart"
-                className="p-2 hover:opacity-70 transition-opacity relative"
+                className="p-2 text-brand-700 hover:text-brand-500 transition-colors hover:scale-110 duration-300 relative"
                 aria-label="Shopping bag"
               >
-                <FiShoppingBag size={20} strokeWidth={1.5} />
+                <FiShoppingBag size={22} strokeWidth={2} />
                 {itemCount > 0 && (
-                  <span className="absolute -top-0.5 -right-0.5 bg-gray-900 text-white text-[10px] w-4 h-4 rounded-full flex items-center justify-center font-medium">
+                  <span className="absolute -top-1 -right-1 bg-accent-electric text-brand-900 text-xs w-5 h-5 rounded-full flex items-center justify-center font-bold">
                     {itemCount > 9 ? '9+' : itemCount}
                   </span>
                 )}
@@ -108,7 +109,7 @@ const Header: React.FC = () => {
               {isAuthenticated && user?.role === 'admin' && (
                 <Link
                   to="/admin"
-                  className="hidden xl:inline-block text-xs tracking-wider text-gray-700 hover:text-gray-900 ml-2"
+                  className="hidden xl:inline-block text-xs font-grotesk font-semibold tracking-wider text-brand-700 hover:text-brand-500 ml-2"
                 >
                   ADMIN
                 </Link>
@@ -120,25 +121,25 @@ const Header: React.FC = () => {
 
       {/* Search bar */}
       {isSearchOpen && (
-        <div className="absolute top-full left-0 right-0 bg-white border-b border-gray-200 shadow-lg">
-          <div className="max-w-7xl mx-auto px-4 py-6">
-            <form onSubmit={handleSearch} className="max-w-2xl mx-auto">
+        <div className="absolute top-full left-0 right-0 bg-white border-b-2 border-brand-500 shadow-xl">
+          <div className="max-w-7xl mx-auto px-4 py-8">
+            <form onSubmit={handleSearch} className="max-w-3xl mx-auto">
               <div className="relative">
                 <input
                   type="text"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  placeholder="Search"
-                  className="w-full px-4 py-3 pl-12 border-b border-gray-300 focus:outline-none focus:border-gray-900 bg-transparent text-lg"
+                  placeholder="Search for products..."
+                  className="w-full px-6 py-4 pl-14 border-2 border-brand-300 focus:outline-none focus:border-brand-500 bg-brand-50 text-lg font-grotesk rounded-lg transition-all"
                   autoFocus
                 />
-                <FiSearch className="absolute left-0 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
+                <FiSearch className="absolute left-4 top-1/2 -translate-y-1/2 text-brand-500" size={24} strokeWidth={2.5} />
                 <button
                   type="button"
                   onClick={() => setIsSearchOpen(false)}
-                  className="absolute right-0 top-1/2 -translate-y-1/2 p-2"
+                  className="absolute right-4 top-1/2 -translate-y-1/2 p-2 text-brand-700 hover:text-brand-500"
                 >
-                  <FiX size={20} />
+                  <FiX size={24} strokeWidth={2.5} />
                 </button>
               </div>
             </form>
@@ -148,24 +149,25 @@ const Header: React.FC = () => {
 
       {/* Mobile menu */}
       {isMobileMenuOpen && (
-        <div className="lg:hidden fixed inset-0 top-16 bg-white z-40 overflow-y-auto">
-          <nav className="flex flex-col">
-            {NAV_ITEMS.map((item) => (
+        <div className="lg:hidden fixed inset-0 top-20 bg-brand-900 z-40 overflow-y-auto">
+          <nav className="flex flex-col p-4">
+            {NAV_ITEMS.map((item, index) => (
               <Link
                 key={item.label}
                 to={item.path}
-                className="px-6 py-4 text-sm tracking-wider text-gray-900 border-b border-gray-100 hover:bg-gray-50"
+                className="px-6 py-5 text-base font-grotesk font-semibold tracking-wide text-white border-b border-brand-700 hover:bg-brand-800 hover:pl-8 transition-all duration-300"
                 onClick={() => setIsMobileMenuOpen(false)}
+                style={{ animationDelay: `${index * 50}ms` }}
               >
-                {item.label}
+                {item.label} →
               </Link>
             ))}
-            <div className="border-t border-gray-200 mt-4 pt-4">
+            <div className="border-t-2 border-brand-600 mt-6 pt-6">
               {isAuthenticated ? (
                 <>
                   <Link
                     to="/account"
-                    className="px-6 py-4 text-sm tracking-wider text-gray-700 block hover:bg-gray-50"
+                    className="px-6 py-4 text-sm font-grotesk text-brand-200 block hover:bg-brand-800 hover:text-white transition-all"
                     onClick={() => setIsMobileMenuOpen(false)}
                   >
                     MY ACCOUNT
@@ -173,7 +175,7 @@ const Header: React.FC = () => {
                   {user?.role === 'admin' && (
                     <Link
                       to="/admin"
-                      className="px-6 py-4 text-sm tracking-wider text-gray-700 block hover:bg-gray-50"
+                      className="px-6 py-4 text-sm font-grotesk text-brand-200 block hover:bg-brand-800 hover:text-white transition-all"
                       onClick={() => setIsMobileMenuOpen(false)}
                     >
                       ADMIN DASHBOARD
@@ -183,7 +185,7 @@ const Header: React.FC = () => {
               ) : (
                 <Link
                   to="/login"
-                  className="px-6 py-4 text-sm tracking-wider text-gray-700 block hover:bg-gray-50"
+                  className="px-6 py-4 text-sm font-grotesk text-brand-200 block hover:bg-brand-800 hover:text-white transition-all"
                   onClick={() => setIsMobileMenuOpen(false)}
                 >
                   SIGN IN
