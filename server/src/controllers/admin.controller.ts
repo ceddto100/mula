@@ -1,4 +1,5 @@
 import { Request, Response } from 'express';
+import { Express } from 'express';
 import Product from '../models/Product';
 import Order from '../models/Order';
 import User from '../models/User';
