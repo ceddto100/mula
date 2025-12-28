@@ -1,4 +1,4 @@
-import { Router, raw } from 'express';
+import express, { Router } from 'express';
 import {
   createCheckoutSession,
   handleWebhook,
@@ -11,7 +11,7 @@ const router = Router();
 // Webhook needs raw body for signature verification
 router.post(
   '/webhook',
-  raw({ type: 'application/json' }),
+  express.raw({ type: 'application/json' }),
   handleWebhook
 );
 
