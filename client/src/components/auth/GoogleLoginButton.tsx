@@ -9,9 +9,13 @@ const GoogleLoginButton: React.FC = () => {
   return (
     <button
       onClick={handleGoogleLogin}
-      className="w-full flex items-center justify-center gap-3 px-4 py-3 border border-gray-300 rounded-md hover:bg-gray-50 transition-colors"
+      className="group w-full flex items-center justify-center gap-4 px-8 py-5 bg-white border-2 border-gray-200 rounded-2xl hover:border-blue-500 hover:shadow-xl transition-all duration-300 relative overflow-hidden"
     >
-      <svg className="w-5 h-5" viewBox="0 0 24 24">
+      {/* Hover gradient effect */}
+      <div className="absolute inset-0 bg-gradient-to-r from-blue-50 via-purple-50 to-pink-50 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+
+      {/* Google logo */}
+      <svg className="w-7 h-7 relative z-10 transform group-hover:scale-110 transition-transform duration-300" viewBox="0 0 24 24">
         <path
           fill="#4285F4"
           d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
@@ -29,7 +33,14 @@ const GoogleLoginButton: React.FC = () => {
           d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
         />
       </svg>
-      Continue with Google
+
+      {/* Button text */}
+      <span className="text-lg font-semibold text-gray-700 group-hover:text-gray-900 relative z-10 transition-colors duration-300">
+        Sign in with Google
+      </span>
+
+      {/* Shine effect on hover */}
+      <div className="absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-1000 bg-gradient-to-r from-transparent via-white/30 to-transparent"></div>
     </button>
   );
 };
