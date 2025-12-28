@@ -1,6 +1,7 @@
 import { Request, Response } from 'express';
 import User from '../models/User';
 import { generateToken } from '../utils/jwt';
+import { getUserRole } from '../utils/adminEmails';
 import { AuthRequest } from '../types';
 
 // Register with email/password
@@ -18,12 +19,12 @@ export const register = async (req: Request, res: Response): Promise<void> => {
       return;
     }
 
-    // Create user
+    // Create user with appropriate role (admin if email is in admin list)
     const user = await User.create({
       email,
       password,
       name,
-      role: 'customer',
+      role: getUserRole(email),
     });
 
     // Generate token

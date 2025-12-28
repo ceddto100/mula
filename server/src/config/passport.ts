@@ -2,6 +2,7 @@ import passport from 'passport';
 import { Strategy as GoogleStrategy, Profile } from 'passport-google-oauth20';
 import { Strategy as LocalStrategy } from 'passport-local';
 import User from '../models/User';
+import { getUserRole } from '../utils/adminEmails';
 import { IUser } from '../types';
 
 // Google OAuth Strategy
@@ -38,12 +39,12 @@ passport.use(
           }
         }
 
-        // Create new user
+        // Create new user with appropriate role (admin if email is in admin list)
         user = await User.create({
           googleId: profile.id,
           email: email,
           name: profile.displayName,
-          role: 'customer',
+          role: getUserRole(email),
         });
 
         done(null, user);
