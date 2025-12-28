@@ -1,98 +1,104 @@
-import React, { useState } from 'react';
-import { Link, useNavigate, useSearchParams } from 'react-router-dom';
-import { useAuth } from '../../context/AuthContext';
+import React from 'react';
 import GoogleLoginButton from './GoogleLoginButton';
-import toast from 'react-hot-toast';
 
 const LoginForm: React.FC = () => {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
-  const { login } = useAuth();
-  const navigate = useNavigate();
-  const [searchParams] = useSearchParams();
-
-  const redirect = searchParams.get('redirect') || '/';
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsLoading(true);
-
-    try {
-      await login(email, password);
-      toast.success('Welcome back!');
-      navigate(redirect);
-    } catch (error: any) {
-      toast.error(error.response?.data?.message || 'Login failed');
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
   return (
-    <div className="max-w-md mx-auto">
-      <h1 className="text-2xl font-bold text-center mb-8">Sign In</h1>
+    <div className="min-h-[70vh] flex items-center justify-center relative overflow-hidden">
+      {/* Animated gradient background */}
+      <div className="absolute inset-0 bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50 animate-gradient-shift"></div>
 
-      <GoogleLoginButton />
+      {/* Floating orbs for visual effect */}
+      <div className="absolute top-20 left-20 w-72 h-72 bg-blue-300 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-float"></div>
+      <div className="absolute top-40 right-20 w-72 h-72 bg-purple-300 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-float-delayed"></div>
+      <div className="absolute bottom-20 left-1/2 w-72 h-72 bg-pink-300 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-float-slow"></div>
 
-      <div className="relative my-6">
-        <div className="absolute inset-0 flex items-center">
-          <div className="w-full border-t border-gray-300" />
+      {/* Main content card */}
+      <div className="relative z-10 max-w-md w-full mx-4">
+        <div className="bg-white/80 backdrop-blur-lg rounded-3xl shadow-2xl p-12 border border-white/20 transform transition-all duration-300 hover:scale-105 hover:shadow-3xl">
+          {/* Logo/Icon area */}
+          <div className="text-center mb-8">
+            <div className="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-br from-blue-500 to-purple-600 rounded-2xl mb-6 transform rotate-3 hover:rotate-6 transition-transform duration-300 shadow-lg">
+              <svg className="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+              </svg>
+            </div>
+            <h1 className="text-4xl font-bold bg-gradient-to-r from-gray-900 via-purple-900 to-gray-900 bg-clip-text text-transparent mb-3">
+              Welcome Back
+            </h1>
+            <p className="text-gray-600 text-lg">
+              Sign in to continue your journey
+            </p>
+          </div>
+
+          {/* Google Sign In Button */}
+          <div className="transform transition-all duration-300 hover:translate-y-[-2px]">
+            <GoogleLoginButton />
+          </div>
+
+          {/* Decorative elements */}
+          <div className="mt-8 flex items-center justify-center space-x-2">
+            <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse"></div>
+            <div className="w-2 h-2 bg-purple-500 rounded-full animate-pulse delay-75"></div>
+            <div className="w-2 h-2 bg-pink-500 rounded-full animate-pulse delay-150"></div>
+          </div>
         </div>
-        <div className="relative flex justify-center text-sm">
-          <span className="px-4 bg-white text-gray-500">or continue with email</span>
-        </div>
+
+        {/* Bottom decorative text */}
+        <p className="text-center mt-8 text-gray-600 text-sm">
+          Secure sign-in powered by Google
+        </p>
       </div>
 
-      <form onSubmit={handleSubmit} className="space-y-4">
-        <div>
-          <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
-            Email
-          </label>
-          <input
-            type="email"
-            id="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            required
-            className="w-full px-4 py-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-900"
-            placeholder="Enter your email"
-          />
-        </div>
+      <style>{`
+        @keyframes gradient-shift {
+          0%, 100% { background-position: 0% 50%; }
+          50% { background-position: 100% 50%; }
+        }
 
-        <div>
-          <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">
-            Password
-          </label>
-          <input
-            type="password"
-            id="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            required
-            className="w-full px-4 py-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-900"
-            placeholder="Enter your password"
-          />
-        </div>
+        @keyframes float {
+          0%, 100% { transform: translateY(0px) translateX(0px); }
+          50% { transform: translateY(-20px) translateX(20px); }
+        }
 
-        <button
-          type="submit"
-          disabled={isLoading}
-          className="w-full bg-gray-900 text-white py-3 rounded-md font-medium hover:bg-gray-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-        >
-          {isLoading ? 'Signing in...' : 'Sign In'}
-        </button>
-      </form>
+        @keyframes float-delayed {
+          0%, 100% { transform: translateY(0px) translateX(0px); }
+          50% { transform: translateY(20px) translateX(-20px); }
+        }
 
-      <p className="text-center mt-6 text-sm text-gray-600">
-        Don't have an account?{' '}
-        <Link
-          to={`/register${redirect !== '/' ? `?redirect=${redirect}` : ''}`}
-          className="font-medium text-gray-900 hover:underline"
-        >
-          Create one
-        </Link>
-      </p>
+        @keyframes float-slow {
+          0%, 100% { transform: translateY(0px) translateX(0px); }
+          50% { transform: translateY(-15px) translateX(15px); }
+        }
+
+        .animate-gradient-shift {
+          background-size: 200% 200%;
+          animation: gradient-shift 15s ease infinite;
+        }
+
+        .animate-float {
+          animation: float 7s ease-in-out infinite;
+        }
+
+        .animate-float-delayed {
+          animation: float-delayed 9s ease-in-out infinite;
+        }
+
+        .animate-float-slow {
+          animation: float-slow 11s ease-in-out infinite;
+        }
+
+        .delay-75 {
+          animation-delay: 75ms;
+        }
+
+        .delay-150 {
+          animation-delay: 150ms;
+        }
+
+        .shadow-3xl {
+          box-shadow: 0 35px 60px -15px rgba(0, 0, 0, 0.3);
+        }
+      `}</style>
     </div>
   );
 };
