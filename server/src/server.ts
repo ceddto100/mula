@@ -1,4 +1,4 @@
-import express, { Express, json, urlencoded } from 'express';
+import express, { type Express } from 'express';
 import cors from 'cors';
 import cookieParser from 'cookie-parser';
 import session from 'express-session';
@@ -38,10 +38,10 @@ app.use((req, res, next) => {
   if (req.originalUrl === '/api/payment/webhook') {
     next();
   } else {
-    json()(req, res, next);
+    express.json()(req, res, next);
   }
 });
-app.use(urlencoded({ extended: true }));
+app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser(process.env.COOKIE_SECRET));
 
 // Session for passport
