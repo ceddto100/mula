@@ -89,8 +89,13 @@ export interface IOrder extends Document {
 }
 
 // Express Request Extension
+// Explicitly extends Express Request to ensure all properties are recognized
 export interface AuthRequest extends Request {
   user?: IUser;
+  body: any;
+  params: any;
+  query: any;
+  headers: any;
 }
 
 // API Response Types
