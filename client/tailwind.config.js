@@ -7,22 +7,33 @@ export default {
   theme: {
     extend: {
       colors: {
-        primary: {
-          50: '#f0f9ff',
-          100: '#e0f2fe',
-          200: '#bae6fd',
-          300: '#7dd3fc',
-          400: '#38bdf8',
-          500: '#0ea5e9',
-          600: '#0284c7',
-          700: '#0369a1',
-          800: '#075985',
-          900: '#0c4a6e',
+        brand: {
+          50: '#EBF3F9',
+          100: '#D7E7F3',
+          200: '#AFCFE7',
+          300: '#87B7DB',
+          400: '#5F9FCF',
+          500: '#4A7BA7', // Primary logo blue
+          600: '#3B6285',
+          700: '#2C4A64',
+          800: '#1E3142',
+          900: '#0F1921',
+        },
+        accent: {
+          electric: '#00E5FF',
+          neon: '#00FFA3',
+          sunset: '#FF6B35',
+          purple: '#9D4EDD',
         },
       },
       fontFamily: {
-        sans: ['Inter', 'system-ui', 'sans-serif'],
-        serif: ['Playfair Display', 'Georgia', 'serif'],
+        sans: ['Outfit', 'system-ui', 'sans-serif'],
+        display: ['Bebas Neue', 'Impact', 'sans-serif'],
+        grotesk: ['Space Grotesk', 'system-ui', 'sans-serif'],
+      },
+      clipPath: {
+        arrow: 'polygon(0 0, 90% 0, 100% 50%, 90% 100%, 0 100%)',
+        diagonal: 'polygon(0 0, 100% 0, 100% 85%, 0 100%)',
       },
     },
   },
