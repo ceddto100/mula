@@ -1,7 +1,34 @@
 import { Response } from 'express';
 import Cart from '../models/Cart';
-import Product from '../models/Product';
+import Product, { IProduct, IProductVariant } from '../models/Product';
 import { AuthRequest } from '../types';
+
+// Helper to find variant by size and color
+const findVariantByOptions = (
+  product: IProduct,
+  size: string,
+  color: string
+): IProductVariant | undefined => {
+  return product.variants.find((variant) => {
+    const sizeOption = variant.options.find(
+      (opt) => opt.name.toLowerCase() === 'size'
+    );
+    const colorOption = variant.options.find(
+      (opt) => opt.name.toLowerCase() === 'color'
+    );
+    return (
+      sizeOption?.value === size && colorOption?.value === color
+    );
+  });
+};
+
+// Helper to get total inventory across all variants
+const getTotalInventory = (product: IProduct): number => {
+  return product.variants.reduce(
+    (sum, variant) => sum + variant.inventoryQuantity,
+    0
+  );
+};
 
 // Get user's cart
 export const getCart = async (req: AuthRequest, res: Response): Promise<void> => {
@@ -16,7 +43,7 @@ export const getCart = async (req: AuthRequest, res: Response): Promise<void> =>
 
     let cart = await Cart.findOne({ userId: req.user._id }).populate({
       path: 'items.productId',
-      select: 'name price images stock',
+      select: 'title variants images handle status',
     });
 
     if (!cart) {
@@ -48,7 +75,7 @@ export const addToCart = async (req: AuthRequest, res: Response): Promise<void> 
 
     const { productId, quantity, size, color } = req.body;
 
-    // Verify product exists and is in stock
+    // Verify product exists and is active
     const product = await Product.findById(productId);
     if (!product) {
       res.status(404).json({
@@ -58,12 +85,36 @@ export const addToCart = async (req: AuthRequest, res: Response): Promise<void> 
       return;
     }
 
-    if (product.stock < quantity) {
+    if (product.status !== 'active') {
       res.status(400).json({
         success: false,
-        message: 'Not enough stock available',
+        message: 'Product is not available',
       });
       return;
+    }
+
+    // Find the matching variant by size and color
+    const variant = findVariantByOptions(product, size, color);
+
+    if (!variant) {
+      // If no specific variant found, check total inventory
+      const totalInventory = getTotalInventory(product);
+      if (totalInventory < quantity) {
+        res.status(400).json({
+          success: false,
+          message: 'Not enough stock available',
+        });
+        return;
+      }
+    } else {
+      // Check variant-specific inventory
+      if (variant.inventoryPolicy === 'deny' && variant.inventoryQuantity < quantity) {
+        res.status(400).json({
+          success: false,
+          message: 'Not enough stock available for this variant',
+        });
+        return;
+      }
     }
 
     // Find or create cart
@@ -94,7 +145,7 @@ export const addToCart = async (req: AuthRequest, res: Response): Promise<void> 
     // Populate and return
     cart = await Cart.findById(cart._id).populate({
       path: 'items.productId',
-      select: 'name price images stock',
+      select: 'title variants images handle status',
     });
 
     res.json({
@@ -146,13 +197,33 @@ export const updateCartItem = async (req: AuthRequest, res: Response): Promise<v
     }
 
     // Verify stock
-    const product = await Product.findById(cart.items[itemIndex].productId);
-    if (product && product.stock < quantity) {
-      res.status(400).json({
-        success: false,
-        message: 'Not enough stock available',
-      });
-      return;
+    const cartItem = cart.items[itemIndex];
+    const product = await Product.findById(cartItem.productId);
+
+    if (product) {
+      // Find the matching variant
+      const variant = findVariantByOptions(product, cartItem.size, cartItem.color);
+
+      if (variant) {
+        // Check variant-specific inventory
+        if (variant.inventoryPolicy === 'deny' && variant.inventoryQuantity < quantity) {
+          res.status(400).json({
+            success: false,
+            message: 'Not enough stock available',
+          });
+          return;
+        }
+      } else {
+        // Check total inventory
+        const totalInventory = getTotalInventory(product);
+        if (totalInventory < quantity) {
+          res.status(400).json({
+            success: false,
+            message: 'Not enough stock available',
+          });
+          return;
+        }
+      }
     }
 
     if (quantity <= 0) {
@@ -167,7 +238,7 @@ export const updateCartItem = async (req: AuthRequest, res: Response): Promise<v
     // Populate and return
     const updatedCart = await Cart.findById(cart._id).populate({
       path: 'items.productId',
-      select: 'name price images stock',
+      select: 'title variants images handle status',
     });
 
     res.json({
@@ -214,7 +285,7 @@ export const removeFromCart = async (req: AuthRequest, res: Response): Promise<v
     // Populate and return
     const updatedCart = await Cart.findById(cart._id).populate({
       path: 'items.productId',
-      select: 'name price images stock',
+      select: 'title variants images handle status',
     });
 
     res.json({
