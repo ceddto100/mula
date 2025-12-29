@@ -4,6 +4,7 @@ import { Toaster } from 'react-hot-toast';
 import { AuthProvider } from './context/AuthContext';
 import { CartProvider } from './context/CartContext';
 import ProtectedRoute from './components/auth/ProtectedRoute';
+import ScrollToTop from './components/ScrollToTop';
 
 // Pages
 import Home from './pages/Home';
@@ -25,6 +26,7 @@ const App: React.FC = () => {
     <Router>
       <AuthProvider>
         <CartProvider>
+          <ScrollToTop />
           <Toaster
             position="top-right"
             toastOptions={{
