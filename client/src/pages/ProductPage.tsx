@@ -8,6 +8,16 @@ import { useProduct, useProducts } from '../hooks/useProducts';
 import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
 import { formatPrice } from '../utils/formatters';
+import {
+  getProductCategory,
+  getProductColors,
+  getProductDescription,
+  getProductImageUrls,
+  getProductName,
+  getProductPrice,
+  getProductSizes,
+  getProductStock,
+} from '../utils/productView';
 import toast from 'react-hot-toast';
 
 const ProductPage: React.FC = () => {
@@ -16,16 +26,14 @@ const ProductPage: React.FC = () => {
   const { product, isLoading, error } = useProduct(id || '');
   const { addToCart, isLoading: cartLoading } = useCart();
   const { isAuthenticated } = useAuth();
+  const categoryFilters = product ? { category: getProductCategory(product), limit: 4 } : { limit: 4 };
 
   const [selectedSize, setSelectedSize] = useState<string>('');
   const [selectedColor, setSelectedColor] = useState<string>('');
   const [quantity, setQuantity] = useState(1);
 
   // Related products
-  const { products: relatedProducts } = useProducts({
-    category: product?.category,
-    limit: 4,
-  });
+  const { products: relatedProducts } = useProducts(categoryFilters);
 
   const filteredRelatedProducts = relatedProducts.filter((p) => p._id !== id);
 
@@ -88,6 +96,15 @@ const ProductPage: React.FC = () => {
     );
   }
 
+  const productName = getProductName(product);
+  const productPrice = getProductPrice(product);
+  const productStock = getProductStock(product);
+  const productDescription = getProductDescription(product);
+  const productCategory = getProductCategory(product);
+  const productImages = getProductImageUrls(product);
+  const productSizes = getProductSizes(product);
+  const productColors = getProductColors(product);
+
   return (
     <Layout>
       <div className="max-w-7xl mx-auto px-4 py-8">
@@ -95,29 +112,29 @@ const ProductPage: React.FC = () => {
         <nav className="text-sm text-gray-500 mb-6">
           <Link to="/" className="hover:text-gray-900">Home</Link>
           <span className="mx-2">/</span>
-          <Link to={`/category/${product.category.toLowerCase()}`} className="hover:text-gray-900">
-            {product.category}
+          <Link to={`/category/${productCategory.toLowerCase()}`} className="hover:text-gray-900">
+            {productCategory}
           </Link>
           <span className="mx-2">/</span>
-          <span className="text-gray-900">{product.name}</span>
+          <span className="text-gray-900">{productName}</span>
         </nav>
 
         {/* Product Details */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
           {/* Images */}
-          <ProductImageGallery images={product.images} productName={product.name} />
+          <ProductImageGallery images={productImages} productName={productName} />
 
           {/* Info */}
           <div>
-            <h1 className="text-3xl font-bold mb-2">{product.name}</h1>
-            <p className="text-2xl font-semibold mb-6">{formatPrice(product.price)}</p>
+            <h1 className="text-3xl font-bold mb-2">{productName}</h1>
+            <p className="text-2xl font-semibold mb-6">{formatPrice(productPrice)}</p>
 
-            {product.description && (
-              <p className="text-gray-600 mb-8">{product.description}</p>
+            {productDescription && (
+              <p className="text-gray-600 mb-8">{productDescription}</p>
             )}
 
             {/* Size selection */}
-            {product.sizes.length > 0 && (
+            {productSizes.length > 0 && (
               <div className="mb-6">
                 <div className="flex items-center justify-between mb-3">
                   <span className="font-medium">Size</span>
@@ -126,7 +143,7 @@ const ProductPage: React.FC = () => {
                   </button>
                 </div>
                 <div className="flex flex-wrap gap-2">
-                  {product.sizes.map((size) => (
+                  {productSizes.map((size) => (
                     <button
                       key={size}
                       onClick={() => setSelectedSize(size)}
@@ -144,13 +161,13 @@ const ProductPage: React.FC = () => {
             )}
 
             {/* Color selection */}
-            {product.colors.length > 0 && (
+            {productColors.length > 0 && (
               <div className="mb-6">
                 <span className="font-medium block mb-3">
                   Color: {selectedColor || 'Select a color'}
                 </span>
                 <div className="flex flex-wrap gap-2">
-                  {product.colors.map((color) => (
+                  {productColors.map((color: string) => (
                     <button
                       key={color}
                       onClick={() => setSelectedColor(color)}
@@ -180,15 +197,15 @@ const ProductPage: React.FC = () => {
                 </button>
                 <span className="px-6 py-3 text-center min-w-[60px]">{quantity}</span>
                 <button
-                  onClick={() => setQuantity(Math.min(product.stock, quantity + 1))}
+                  onClick={() => setQuantity(Math.min(productStock, quantity + 1))}
                   className="p-3 hover:bg-gray-100"
-                  disabled={quantity >= product.stock}
+                  disabled={quantity >= productStock}
                 >
                   <FiPlus size={18} />
                 </button>
               </div>
-              {product.stock < 10 && product.stock > 0 && (
-                <p className="text-red-500 text-sm mt-2">Only {product.stock} left in stock</p>
+              {productStock < 10 && productStock > 0 && (
+                <p className="text-red-500 text-sm mt-2">Only {productStock} left in stock</p>
               )}
             </div>
 
@@ -196,10 +213,10 @@ const ProductPage: React.FC = () => {
             <div className="flex gap-4 mb-8">
               <button
                 onClick={handleAddToCart}
-                disabled={product.stock === 0 || cartLoading}
+                disabled={productStock === 0 || cartLoading}
                 className="flex-1 bg-gray-900 text-white py-4 rounded-md font-medium hover:bg-gray-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                {product.stock === 0 ? 'Out of Stock' : cartLoading ? 'Adding...' : 'Add to Cart'}
+                {productStock === 0 ? 'Out of Stock' : cartLoading ? 'Adding...' : 'Add to Cart'}
               </button>
               <button className="p-4 border border-gray-300 rounded-md hover:border-gray-900 transition-colors">
                 <FiHeart size={24} />
@@ -213,7 +230,7 @@ const ProductPage: React.FC = () => {
             <div className="border-t pt-6 space-y-4 text-sm text-gray-600">
               <p>Free shipping on orders over $100</p>
               <p>30-day easy returns</p>
-              <p>Category: {product.category}</p>
+              <p>Category: {productCategory}</p>
             </div>
           </div>
         </div>

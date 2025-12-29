@@ -4,6 +4,7 @@ import { FiMinus, FiPlus, FiTrash2 } from 'react-icons/fi';
 import { CartItem as CartItemType } from '../../types';
 import { formatPrice } from '../../utils/formatters';
 import { useCart } from '../../context/CartContext';
+import { getProductImageUrls, getProductName, getProductPrice, getProductStock } from '../../utils/productView';
 
 interface CartItemProps {
   item: CartItemType;
@@ -12,13 +13,17 @@ interface CartItemProps {
 const CartItem: React.FC<CartItemProps> = ({ item }) => {
   const { updateQuantity, removeItem, isLoading } = useCart();
   const product = item.productId;
+  const productImages = product ? getProductImageUrls(product) : [];
+  const productName = product ? getProductName(product) : '';
+  const productPrice = product ? getProductPrice(product) : 0;
+  const productStock = product ? getProductStock(product) : 0;
 
   if (!product) {
     return null;
   }
 
   const handleQuantityChange = async (newQuantity: number) => {
-    if (newQuantity >= 1 && newQuantity <= product.stock) {
+    if (newQuantity >= 1 && newQuantity <= productStock) {
       await updateQuantity(item._id, newQuantity);
     }
   };
@@ -32,10 +37,10 @@ const CartItem: React.FC<CartItemProps> = ({ item }) => {
       {/* Product image */}
       <Link to={`/product/${product._id}`} className="flex-shrink-0">
         <div className="w-24 h-32 bg-gray-100 rounded-lg overflow-hidden">
-          {product.images[0] ? (
+          {productImages[0] ? (
             <img
-              src={product.images[0]}
-              alt={product.name}
+              src={productImages[0]}
+              alt={productName}
               className="w-full h-full object-cover"
             />
           ) : (
@@ -49,7 +54,7 @@ const CartItem: React.FC<CartItemProps> = ({ item }) => {
       {/* Product details */}
       <div className="flex-1 flex flex-col">
         <Link to={`/product/${product._id}`} className="font-medium hover:text-gray-600">
-          {product.name}
+          {productName}
         </Link>
 
         <div className="text-sm text-gray-500 mt-1">
@@ -71,7 +76,7 @@ const CartItem: React.FC<CartItemProps> = ({ item }) => {
             <span className="px-4 py-2 text-sm font-medium">{item.quantity}</span>
             <button
               onClick={() => handleQuantityChange(item.quantity + 1)}
-              disabled={isLoading || item.quantity >= product.stock}
+              disabled={isLoading || item.quantity >= productStock}
               className="p-2 hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <FiPlus size={16} />
@@ -80,7 +85,7 @@ const CartItem: React.FC<CartItemProps> = ({ item }) => {
 
           {/* Price and remove */}
           <div className="flex items-center gap-4">
-            <span className="font-semibold">{formatPrice(product.price * item.quantity)}</span>
+            <span className="font-semibold">{formatPrice(productPrice * item.quantity)}</span>
             <button
               onClick={handleRemove}
               disabled={isLoading}
