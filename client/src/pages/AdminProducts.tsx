@@ -135,6 +135,10 @@ const AdminProducts: React.FC = () => {
   }, [hasUnsavedChanges]);
 
   const handleEdit = (product: Product) => {
+    // Extract sizes from options array
+    const sizeOption = product.options?.find((option) => /size/i.test(option.name));
+    const sizes = sizeOption?.values || [];
+
     setFormData({
       title: product.title,
       handle: product.handle,
@@ -149,7 +153,7 @@ const AdminProducts: React.FC = () => {
       tags: product.tags || [],
       collections: product.collections || [],
       gender: product.gender,
-      sizes: (product as any).sizes || [],
+      sizes: sizes,
       materials: product.materials || [],
       colorFamily: product.colorFamily || [],
       customColors: (product as any).customColors || [],
@@ -286,6 +290,15 @@ const AdminProducts: React.FC = () => {
     }
     setSubmitting(true);
     try {
+      // Build options array with sizes
+      const options = [...(formData.options || []).filter(opt => !/size/i.test(opt.name))];
+      if (formData.sizes.length > 0) {
+        options.push({
+          name: 'Size',
+          values: formData.sizes,
+        });
+      }
+
       const productData: CreateProductData = {
         title: formData.title,
         handle: formData.handle || undefined,
@@ -294,7 +307,7 @@ const AdminProducts: React.FC = () => {
         descriptionHtml: formData.descriptionHtml || undefined,
         images: formData.images.length > 0 ? formData.images : undefined,
         variants: formData.variants,
-        options: formData.options.length > 0 ? formData.options : undefined,
+        options: options.length > 0 ? options : undefined,
         seoTitle: formData.seoTitle || undefined,
         seoDescription: formData.seoDescription || undefined,
         tags: formData.tags.length > 0 ? formData.tags : undefined,
@@ -303,7 +316,6 @@ const AdminProducts: React.FC = () => {
         materials: formData.materials.length > 0 ? formData.materials : undefined,
         colorFamily: formData.colorFamily.length > 0 ? formData.colorFamily : undefined,
         requiresShipping: formData.requiresShipping,
-        ...(formData.sizes.length > 0 && { sizes: formData.sizes }),
         ...(formData.customColors.length > 0 && { customColors: formData.customColors }),
       };
       if (editingProduct) {
