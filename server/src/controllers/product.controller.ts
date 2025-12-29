@@ -41,7 +41,9 @@ export const getProducts = async (req: Request, res: Response): Promise<void> =>
     }
 
     if (tags) {
-      const tagArray = Array.isArray(tags) ? tags : (tags as string).split(',');
+      const tagArray: string[] = (Array.isArray(tags) ? tags : String(tags).split(',')).map(tag =>
+        tag.toString()
+      );
       filter.tags = { $in: tagArray.map(t => t.toLowerCase().trim()) };
     }
 

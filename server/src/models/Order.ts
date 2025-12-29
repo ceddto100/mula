@@ -33,7 +33,6 @@ const orderSchema = new Schema<IOrder>(
     orderNumber: {
       type: String,
       required: true,
-      unique: true,
     },
     items: [orderItemSchema],
     totalAmount: {
@@ -61,9 +60,8 @@ const orderSchema = new Schema<IOrder>(
 );
 
 // Index for faster queries
-orderSchema.index({ userId: 1 });
-orderSchema.index({ orderNumber: 1 });
-orderSchema.index({ createdAt: -1 });
+orderSchema.index({ orderNumber: 1 }, { unique: true });
+orderSchema.index({ userId: 1, createdAt: -1 });
 
 // Generate unique order number
 orderSchema.statics.generateOrderNumber = async function (): Promise<string> {
