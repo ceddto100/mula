@@ -4,7 +4,12 @@ import {
   createProduct,
   updateProduct,
   deleteProduct,
+  hardDeleteProduct,
   getAdminProducts,
+  getAdminProduct,
+  updateInventory,
+  bulkUpdateStatus,
+  getFilterOptions,
   getAdminOrders,
   updateOrderStatus,
   uploadImage,
@@ -14,7 +19,11 @@ import {
 import { auth } from '../middleware/auth';
 import { adminAuth } from '../middleware/adminAuth';
 import { validateRequest } from '../middleware/validateRequest';
-import { productValidation, mongoIdValidation } from '../utils/validators';
+import {
+  shopifyProductValidation,
+  shopifyProductUpdateValidation,
+  mongoIdValidation,
+} from '../utils/validators';
 import { upload } from '../config/cloudinary';
 
 const router = Router();
@@ -26,11 +35,20 @@ router.use(adminAuth);
 // Dashboard
 router.get('/dashboard', getDashboardStats);
 
-// Products
+// Products (Shopify-style)
 router.get('/products', getAdminProducts);
-router.post('/products', productValidation, validateRequest, createProduct);
-router.put('/products/:id', mongoIdValidation, validateRequest, updateProduct);
+router.get('/products/filters', getFilterOptions);
+router.get('/products/:id', mongoIdValidation, validateRequest, getAdminProduct);
+router.post('/products', shopifyProductValidation, validateRequest, createProduct);
+router.put('/products/:id', mongoIdValidation, shopifyProductUpdateValidation, validateRequest, updateProduct);
 router.delete('/products/:id', mongoIdValidation, validateRequest, deleteProduct);
+router.delete('/products/:id/permanent', mongoIdValidation, validateRequest, hardDeleteProduct);
+
+// Inventory management
+router.put('/products/:id/inventory', mongoIdValidation, validateRequest, updateInventory);
+
+// Bulk operations
+router.post('/products/bulk/status', bulkUpdateStatus);
 
 // Orders
 router.get('/orders', getAdminOrders);
