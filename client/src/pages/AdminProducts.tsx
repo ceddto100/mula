@@ -100,6 +100,7 @@ const AdminProducts: React.FC = () => {
   // Tag/collection inputs
   const [tagInput, setTagInput] = useState('');
   const [collectionInput, setCollectionInput] = useState('');
+  const [materialInput, setMaterialInput] = useState('');
 
   useEffect(() => {
     fetchProducts();
@@ -137,6 +138,7 @@ const AdminProducts: React.FC = () => {
     setHasUnsavedChanges(false);
     setTagInput('');
     setCollectionInput('');
+    setMaterialInput('');
   }, [hasUnsavedChanges]);
 
   const handleEdit = (product: Product) => {
@@ -301,6 +303,18 @@ const AdminProducts: React.FC = () => {
     updateFormField('collections', formData.collections.filter((c) => c !== collection));
   };
 
+  const addMaterial = () => {
+    const material = materialInput.trim();
+    if (material && !formData.materials.includes(material)) {
+      updateFormField('materials', [...formData.materials, material]);
+    }
+    setMaterialInput('');
+  };
+
+  const removeMaterial = (material: string) => {
+    updateFormField('materials', formData.materials.filter((m) => m !== material));
+  };
+
   const toggleSection = (section: keyof typeof expandedSections) => {
     setExpandedSections((prev) => ({ ...prev, [section]: !prev[section] }));
   };
@@ -359,10 +373,22 @@ const AdminProducts: React.FC = () => {
     }
   };
 
-  const SectionHeader: React.FC<{ title: string; section: keyof typeof expandedSections; expanded: boolean }> = ({ title, section, expanded }) => (
-    <button type="button" onClick={() => toggleSection(section)} className="w-full flex items-center justify-between py-3 text-left font-medium text-gray-900">
-      {title}
-      {expanded ? <FiChevronUp size={20} /> : <FiChevronDown size={20} />}
+  const SectionHeader: React.FC<{
+    title: string;
+    section: keyof typeof expandedSections;
+    expanded: boolean;
+    description?: string;
+  }> = ({ title, section, expanded, description }) => (
+    <button
+      type="button"
+      onClick={() => toggleSection(section)}
+      className="w-full flex items-start justify-between gap-3 text-left"
+    >
+      <div>
+        <p className="text-base font-semibold text-gray-900">{title}</p>
+        {description && <p className="text-sm text-gray-500">{description}</p>}
+      </div>
+      <span className="mt-1 text-gray-500">{expanded ? <FiChevronUp size={20} /> : <FiChevronDown size={20} />}</span>
     </button>
   );
 
@@ -444,232 +470,536 @@ const AdminProducts: React.FC = () => {
         {/* Product Form Modal */}
         {showForm && (
           <div className="fixed inset-0 bg-black/50 z-50 flex items-start justify-center p-4 overflow-y-auto">
-            <div className="bg-white rounded-lg w-full max-w-4xl my-8">
-              <div className="p-6 border-b flex justify-between items-center sticky top-0 bg-white z-10">
-                <h3 className="text-lg font-semibold">{editingProduct ? 'Edit Product' : 'Add New Product'}</h3>
+            <div className="bg-white rounded-xl w-full max-w-5xl my-8 shadow-xl">
+              <div className="p-6 border-b flex justify-between items-start sticky top-0 bg-white z-10 rounded-t-xl">
+                <div>
+                  <h3 className="text-lg font-semibold">{editingProduct ? 'Edit Product' : 'Add New Product'}</h3>
+                  <p className="text-sm text-gray-500">Keep details consistent before saving.</p>
+                </div>
                 <button onClick={resetForm} className="text-gray-500 hover:text-gray-700"><FiX size={24} /></button>
               </div>
 
-              <form onSubmit={handleSubmit} className="p-6 space-y-6">
-                {/* Title & Handle */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Title *</label>
-                    <input type="text" value={formData.title} onChange={(e) => updateFormField('title', e.target.value)} className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-gray-900 focus:border-transparent" required />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Handle (URL)</label>
-                    <div className="flex items-center">
-                      <span className="text-gray-500 text-sm mr-1">/products/</span>
-                      <input type="text" value={formData.handle} onChange={(e) => updateFormField('handle', slugify(e.target.value))} className="flex-1 px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-gray-900 focus:border-transparent" placeholder="auto-generated" />
-                    </div>
-                  </div>
-                </div>
-
-                {/* Description */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
-                  <textarea value={formData.descriptionHtml} onChange={(e) => updateFormField('descriptionHtml', e.target.value)} rows={4} className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-gray-900 focus:border-transparent" placeholder="Product description (HTML supported)" />
-                </div>
-
-                {/* Media Section */}
-                <div className="border rounded-lg p-4">
-                  <SectionHeader title="Media" section="media" expanded={expandedSections.media} />
-                  {expandedSections.media && (
-                    <div className="pt-4">
-                      <input type="file" accept="image/*" multiple onChange={handleImageUpload} disabled={uploading} className="mb-4" />
-                      {uploading && <p className="text-sm text-gray-500 mb-2">Uploading...</p>}
-                      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                        {formData.images.map((img, idx) => (
-                          <div key={idx} className="relative group">
-                            <img src={img.url} alt={img.alt || ''} className="w-full h-32 object-cover rounded" />
-                            <button type="button" onClick={() => removeImage(idx)} className="absolute top-2 right-2 bg-red-500 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"><FiX size={14} /></button>
-                            <input type="text" value={img.alt || ''} onChange={(e) => updateImageAlt(idx, e.target.value)} placeholder="Alt text" className="mt-1 w-full px-2 py-1 text-xs border rounded" />
+              <form onSubmit={handleSubmit} className="p-6 space-y-6 bg-gray-50">
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                  <div className="lg:col-span-2 space-y-6">
+                    <div className="border border-gray-200 rounded-xl bg-white p-5 shadow-sm space-y-4">
+                      <div className="space-y-1">
+                        <p className="text-base font-semibold text-gray-900">Product information</p>
+                        <p className="text-sm text-gray-500">Title, handle, and description customers will see.</p>
+                      </div>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-1">Title *</label>
+                          <input
+                            type="text"
+                            value={formData.title}
+                            onChange={(e) => updateFormField('title', e.target.value)}
+                            className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-gray-900 focus:border-transparent bg-gray-50"
+                            required
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-1">Handle (URL)</label>
+                          <div className="flex items-center rounded-md border border-gray-300 bg-gray-50 px-3 py-2 focus-within:ring-2 focus-within:ring-gray-900 focus-within:border-transparent">
+                            <span className="text-gray-500 text-sm mr-1">/products/</span>
+                            <input
+                              type="text"
+                              value={formData.handle}
+                              onChange={(e) => updateFormField('handle', slugify(e.target.value))}
+                              className="flex-1 bg-transparent focus:outline-none"
+                              placeholder="auto-generated"
+                            />
                           </div>
-                        ))}
+                        </div>
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
+                        <textarea
+                          value={formData.descriptionHtml}
+                          onChange={(e) => updateFormField('descriptionHtml', e.target.value)}
+                          rows={4}
+                          className="w-full px-4 py-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-gray-900 focus:border-transparent bg-gray-50"
+                          placeholder="Product description (HTML supported)"
+                        />
                       </div>
                     </div>
-                  )}
-                </div>
 
-                {/* Pricing & Inventory Section */}
-                <div className="border rounded-lg p-4">
-                  <SectionHeader title="Pricing & Inventory" section="pricing" expanded={expandedSections.pricing} />
-                  {expandedSections.pricing && (
-                    <div className="pt-4 space-y-4">
-                      {formData.variants.map((variant, idx) => (
-                        <div key={idx} className="border rounded p-4 space-y-3">
-                          <div className="flex justify-between items-center">
-                            <span className="font-medium text-sm">{variant.title || `Variant ${idx + 1}`}</span>
-                            {formData.variants.length > 1 && <button type="button" onClick={() => removeVariant(idx)} className="text-red-500 hover:text-red-700"><FiTrash2 size={16} /></button>}
+                    <div className="border border-gray-200 rounded-xl bg-white p-5 shadow-sm">
+                      <SectionHeader
+                        title="Media"
+                        description="Upload images to showcase your product."
+                        section="media"
+                        expanded={expandedSections.media}
+                      />
+                      {expandedSections.media && (
+                        <div className="pt-4 space-y-3">
+                          <label className="flex items-center justify-between text-sm text-gray-600">
+                            <span>Images</span>
+                            {uploading && <span className="text-xs text-gray-500">Uploading...</span>}
+                          </label>
+                          <input
+                            type="file"
+                            accept="image/*"
+                            multiple
+                            onChange={handleImageUpload}
+                            disabled={uploading}
+                            className="mb-2 text-sm"
+                          />
+                          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                            {formData.images.map((img, idx) => (
+                              <div key={idx} className="relative group">
+                                <img src={img.url} alt={img.alt || ''} className="w-full h-32 object-cover rounded-lg border" />
+                                <button
+                                  type="button"
+                                  onClick={() => removeImage(idx)}
+                                  className="absolute top-2 right-2 bg-white text-red-600 rounded-full p-1 shadow-sm opacity-0 group-hover:opacity-100 transition-opacity"
+                                >
+                                  <FiX size={14} />
+                                </button>
+                                <input
+                                  type="text"
+                                  value={img.alt || ''}
+                                  onChange={(e) => updateImageAlt(idx, e.target.value)}
+                                  placeholder="Alt text"
+                                  className="mt-2 w-full px-2 py-1 text-xs border rounded"
+                                />
+                              </div>
+                            ))}
                           </div>
-                          <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                        </div>
+                      )}
+                    </div>
+
+                    <div className="border border-gray-200 rounded-xl bg-white p-5 shadow-sm">
+                      <SectionHeader
+                        title="Pricing & Inventory"
+                        description="Set prices, SKUs, and stock for each variant."
+                        section="pricing"
+                        expanded={expandedSections.pricing}
+                      />
+                      {expandedSections.pricing && (
+                        <div className="pt-4 space-y-4">
+                          {formData.variants.map((variant, idx) => (
+                            <div key={idx} className="border rounded-lg p-4 space-y-3 bg-gray-50">
+                              <div className="flex justify-between items-center">
+                                <span className="font-medium text-sm text-gray-900">{variant.title || `Variant ${idx + 1}`}</span>
+                                {formData.variants.length > 1 && (
+                                  <button type="button" onClick={() => removeVariant(idx)} className="text-red-500 hover:text-red-700">
+                                    <FiTrash2 size={16} />
+                                  </button>
+                                )}
+                              </div>
+                              <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                                <div>
+                                  <label className="block text-xs text-gray-600 mb-1">SKU *</label>
+                                  <input
+                                    type="text"
+                                    value={variant.sku}
+                                    onChange={(e) => updateVariant(idx, 'sku', e.target.value)}
+                                    className="w-full px-3 py-2 border rounded text-sm bg-white"
+                                    required
+                                  />
+                                </div>
+                                <div>
+                                  <label className="block text-xs text-gray-600 mb-1">Price *</label>
+                                  <input
+                                    type="number"
+                                    step="0.01"
+                                    min="0"
+                                    value={variant.price}
+                                    onChange={(e) => updateVariant(idx, 'price', parseFloat(e.target.value) || 0)}
+                                    className="w-full px-3 py-2 border rounded text-sm bg-white"
+                                    required
+                                  />
+                                </div>
+                                <div>
+                                  <label className="block text-xs text-gray-600 mb-1">Compare at</label>
+                                  <input
+                                    type="number"
+                                    step="0.01"
+                                    min="0"
+                                    value={variant.compareAtPrice || ''}
+                                    onChange={(e) => updateVariant(idx, 'compareAtPrice', e.target.value ? parseFloat(e.target.value) : null)}
+                                    className="w-full px-3 py-2 border rounded text-sm bg-white"
+                                  />
+                                </div>
+                                <div>
+                                  <label className="block text-xs text-gray-600 mb-1">Quantity</label>
+                                  <input
+                                    type="number"
+                                    min="0"
+                                    value={variant.inventoryQuantity}
+                                    onChange={(e) => updateVariant(idx, 'inventoryQuantity', parseInt(e.target.value) || 0)}
+                                    className="w-full px-3 py-2 border rounded text-sm bg-white"
+                                  />
+                                </div>
+                              </div>
+                              <div className="grid grid-cols-2 gap-3">
+                                <div>
+                                  <label className="block text-xs text-gray-600 mb-1">Barcode</label>
+                                  <input
+                                    type="text"
+                                    value={variant.barcode || ''}
+                                    onChange={(e) => updateVariant(idx, 'barcode', e.target.value || null)}
+                                    className="w-full px-3 py-2 border rounded text-sm bg-white"
+                                  />
+                                </div>
+                                <div>
+                                  <label className="block text-xs text-gray-600 mb-1">Inventory Policy</label>
+                                  <select
+                                    value={variant.inventoryPolicy}
+                                    onChange={(e) => updateVariant(idx, 'inventoryPolicy', e.target.value)}
+                                    className="w-full px-3 py-2 border rounded text-sm bg-white"
+                                  >
+                                    {INVENTORY_POLICIES.map((policy) => (
+                                      <option key={policy.value} value={policy.value}>{policy.label}</option>
+                                    ))}
+                                  </select>
+                                </div>
+                              </div>
+                            </div>
+                          ))}
+                          <button type="button" onClick={addVariant} className="text-sm text-gray-600 hover:text-gray-900 flex items-center gap-1">
+                            <FiPlus size={16} /> Add variant manually
+                          </button>
+                        </div>
+                      )}
+                    </div>
+
+                    <div className="border border-gray-200 rounded-xl bg-white p-5 shadow-sm">
+                      <SectionHeader
+                        title="Options (for variant generation)"
+                        description="Define options like Size and Color to auto-generate variants."
+                        section="options"
+                        expanded={expandedSections.options}
+                      />
+                      {expandedSections.options && (
+                        <div className="pt-4 space-y-4">
+                          {formData.options.map((opt, idx) => (
+                            <div key={idx} className="flex gap-3 items-start">
+                              <div className="flex-1">
+                                <input
+                                  type="text"
+                                  value={opt.name}
+                                  onChange={(e) => updateOption(idx, 'name', e.target.value)}
+                                  placeholder="Option name (e.g., Size)"
+                                  className="w-full px-3 py-2 border rounded text-sm mb-2 bg-gray-50"
+                                />
+                                <input
+                                  type="text"
+                                  value={opt.values.join(', ')}
+                                  onChange={(e) => updateOption(idx, 'values', e.target.value.split(',').map(v => v.trim()).filter(Boolean))}
+                                  placeholder="Values (comma separated, e.g., S, M, L)"
+                                  className="w-full px-3 py-2 border rounded text-sm bg-gray-50"
+                                />
+                              </div>
+                              <button type="button" onClick={() => removeOption(idx)} className="text-red-500 hover:text-red-700 mt-2">
+                                <FiTrash2 size={16} />
+                              </button>
+                            </div>
+                          ))}
+                          <div className="flex flex-wrap gap-2">
+                            <button type="button" onClick={addOption} className="text-sm text-gray-600 hover:text-gray-900 flex items-center gap-1">
+                              <FiPlus size={16} /> Add option
+                            </button>
+                            {formData.options.length > 0 && (
+                              <button
+                                type="button"
+                                onClick={generateVariantsFromOptions}
+                                className="text-sm bg-gray-900 text-white hover:bg-gray-800 px-3 py-1 rounded-md"
+                              >
+                                Generate Variants
+                              </button>
+                            )}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
+                  <div className="space-y-6">
+                    <div className="border border-gray-200 rounded-xl bg-white p-5 shadow-sm">
+                      <SectionHeader
+                        title="Organization"
+                        description="Categorize and enrich product metadata."
+                        section="organization"
+                        expanded={expandedSections.organization}
+                      />
+                      {expandedSections.organization && (
+                        <div className="pt-4 space-y-5">
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div>
-                              <label className="block text-xs text-gray-600 mb-1">SKU *</label>
-                              <input type="text" value={variant.sku} onChange={(e) => updateVariant(idx, 'sku', e.target.value)} className="w-full px-3 py-2 border rounded text-sm" required />
+                              <label className="block text-sm font-medium text-gray-700 mb-1">Product Type</label>
+                              <select
+                                value={formData.productType}
+                                onChange={(e) => updateFormField('productType', e.target.value)}
+                                className="w-full px-4 py-2 border rounded-md bg-gray-50"
+                              >
+                                <option value="">Select type</option>
+                                {PRODUCT_TYPES.map((type) => (
+                                  <option key={type} value={type}>{type}</option>
+                                ))}
+                              </select>
                             </div>
                             <div>
-                              <label className="block text-xs text-gray-600 mb-1">Price *</label>
-                              <input type="number" step="0.01" min="0" value={variant.price} onChange={(e) => updateVariant(idx, 'price', parseFloat(e.target.value) || 0)} className="w-full px-3 py-2 border rounded text-sm" required />
-                            </div>
-                            <div>
-                              <label className="block text-xs text-gray-600 mb-1">Compare at</label>
-                              <input type="number" step="0.01" min="0" value={variant.compareAtPrice || ''} onChange={(e) => updateVariant(idx, 'compareAtPrice', e.target.value ? parseFloat(e.target.value) : null)} className="w-full px-3 py-2 border rounded text-sm" />
-                            </div>
-                            <div>
-                              <label className="block text-xs text-gray-600 mb-1">Quantity</label>
-                              <input type="number" min="0" value={variant.inventoryQuantity} onChange={(e) => updateVariant(idx, 'inventoryQuantity', parseInt(e.target.value) || 0)} className="w-full px-3 py-2 border rounded text-sm" />
+                              <label className="block text-sm font-medium text-gray-700 mb-1">Vendor</label>
+                              <input
+                                type="text"
+                                value={formData.vendor}
+                                onChange={(e) => updateFormField('vendor', e.target.value)}
+                                className="w-full px-4 py-2 border rounded-md bg-gray-50"
+                                placeholder="Brand name"
+                              />
                             </div>
                           </div>
-                          <div className="grid grid-cols-2 gap-3">
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div>
-                              <label className="block text-xs text-gray-600 mb-1">Barcode</label>
-                              <input type="text" value={variant.barcode || ''} onChange={(e) => updateVariant(idx, 'barcode', e.target.value || null)} className="w-full px-3 py-2 border rounded text-sm" />
+                              <label className="block text-sm font-medium text-gray-700 mb-1">Gender</label>
+                              <select
+                                value={formData.gender || ''}
+                                onChange={(e) => updateFormField('gender', e.target.value ? e.target.value as 'men' | 'women' | 'unisex' : null)}
+                                className="w-full px-4 py-2 border rounded-md bg-gray-50"
+                              >
+                                <option value="">Select gender</option>
+                                {GENDERS.map((g) => (
+                                  <option key={g.value} value={g.value}>{g.label}</option>
+                                ))}
+                              </select>
                             </div>
                             <div>
-                              <label className="block text-xs text-gray-600 mb-1">Inventory Policy</label>
-                              <select value={variant.inventoryPolicy} onChange={(e) => updateVariant(idx, 'inventoryPolicy', e.target.value)} className="w-full px-3 py-2 border rounded text-sm">
-                                {INVENTORY_POLICIES.map((policy) => <option key={policy.value} value={policy.value}>{policy.label}</option>)}
+                              <label className="block text-sm font-medium text-gray-700 mb-1">Fit</label>
+                              <select
+                                value={formData.fit || ''}
+                                onChange={(e) => updateFormField('fit', e.target.value ? e.target.value as 'regular' | 'oversized' | 'slim' | 'relaxed' : null)}
+                                className="w-full px-4 py-2 border rounded-md bg-gray-50"
+                              >
+                                <option value="">Select fit</option>
+                                {FITS.map((f) => (
+                                  <option key={f.value} value={f.value}>{f.label}</option>
+                                ))}
                               </select>
                             </div>
                           </div>
-                        </div>
-                      ))}
-                      <button type="button" onClick={addVariant} className="text-sm text-gray-600 hover:text-gray-900 flex items-center gap-1"><FiPlus size={16} /> Add variant manually</button>
-                    </div>
-                  )}
-                </div>
 
-                {/* Options Section */}
-                <div className="border rounded-lg p-4">
-                  <SectionHeader title="Options (for variant generation)" section="options" expanded={expandedSections.options} />
-                  {expandedSections.options && (
-                    <div className="pt-4 space-y-4">
-                      <p className="text-sm text-gray-500 mb-2">Define options like Size and Color to auto-generate variants.</p>
-                      {formData.options.map((opt, idx) => (
-                        <div key={idx} className="flex gap-3 items-start">
-                          <div className="flex-1">
-                            <input type="text" value={opt.name} onChange={(e) => updateOption(idx, 'name', e.target.value)} placeholder="Option name (e.g., Size)" className="w-full px-3 py-2 border rounded text-sm mb-2" />
-                            <input type="text" value={opt.values.join(', ')} onChange={(e) => updateOption(idx, 'values', e.target.value.split(',').map(v => v.trim()).filter(Boolean))} placeholder="Values (comma separated, e.g., S, M, L)" className="w-full px-3 py-2 border rounded text-sm" />
+                          <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-2">Color Family</label>
+                            <div className="flex flex-wrap gap-2">
+                              {COLOR_FAMILIES.map((color) => (
+                                <button
+                                  key={color}
+                                  type="button"
+                                  onClick={() => {
+                                    const updated = formData.colorFamily.includes(color) ? formData.colorFamily.filter((c) => c !== color) : [...formData.colorFamily, color];
+                                    updateFormField('colorFamily', updated);
+                                  }}
+                                  className={`px-3 py-1 border rounded-md text-sm transition ${formData.colorFamily.includes(color) ? 'bg-gray-900 text-white border-gray-900' : 'border-gray-300 hover:border-gray-400'}`}
+                                >
+                                  {color}
+                                </button>
+                              ))}
+                            </div>
                           </div>
-                          <button type="button" onClick={() => removeOption(idx)} className="text-red-500 hover:text-red-700 mt-2"><FiTrash2 size={16} /></button>
-                        </div>
-                      ))}
-                      <div className="flex gap-2">
-                        <button type="button" onClick={addOption} className="text-sm text-gray-600 hover:text-gray-900 flex items-center gap-1"><FiPlus size={16} /> Add option</button>
-                        {formData.options.length > 0 && <button type="button" onClick={generateVariantsFromOptions} className="text-sm bg-gray-200 hover:bg-gray-300 px-3 py-1 rounded">Generate Variants</button>}
-                      </div>
-                    </div>
-                  )}
-                </div>
 
-                {/* Organization Section */}
-                <div className="border rounded-lg p-4">
-                  <SectionHeader title="Organization" section="organization" expanded={expandedSections.organization} />
-                  {expandedSections.organization && (
-                    <div className="pt-4 space-y-4">
-                      <div className="grid grid-cols-2 gap-4">
+                          <div className="space-y-2">
+                            <label className="block text-sm font-medium text-gray-700">Materials</label>
+                            <div className="flex gap-2 flex-wrap">
+                              {formData.materials.map((material) => (
+                                <span key={material} className="bg-emerald-50 text-emerald-800 px-2 py-1 rounded text-sm flex items-center gap-1 border border-emerald-100">
+                                  {material}
+                                  <button type="button" onClick={() => removeMaterial(material)} className="text-emerald-700 hover:text-red-500">
+                                    <FiX size={14} />
+                                  </button>
+                                </span>
+                              ))}
+                            </div>
+                            <div className="flex gap-2">
+                              <input
+                                type="text"
+                                value={materialInput}
+                                onChange={(e) => setMaterialInput(e.target.value)}
+                                onKeyDown={(e) => {
+                                  if (e.key === 'Enter') {
+                                    e.preventDefault();
+                                    addMaterial();
+                                  }
+                                }}
+                                className="flex-1 px-4 py-2 border rounded-md bg-gray-50"
+                                placeholder="Add material and press Enter"
+                              />
+                              <button type="button" onClick={addMaterial} className="px-4 py-2 bg-gray-200 rounded-md hover:bg-gray-300">
+                                Add
+                              </button>
+                            </div>
+                          </div>
+
+                          <div className="space-y-2">
+                            <label className="block text-sm font-medium text-gray-700">Tags</label>
+                            <div className="flex gap-2 mb-2 flex-wrap">
+                              {formData.tags.map((tag) => (
+                                <span key={tag} className="bg-gray-100 px-2 py-1 rounded text-sm flex items-center gap-1 border border-gray-200">
+                                  {tag}
+                                  <button type="button" onClick={() => removeTag(tag)} className="text-gray-500 hover:text-red-500">
+                                    <FiX size={14} />
+                                  </button>
+                                </span>
+                              ))}
+                            </div>
+                            <div className="flex gap-2">
+                              <input
+                                type="text"
+                                value={tagInput}
+                                onChange={(e) => setTagInput(e.target.value)}
+                                onKeyDown={(e) => {
+                                  if (e.key === 'Enter') {
+                                    e.preventDefault();
+                                    addTag();
+                                  }
+                                }}
+                                className="flex-1 px-4 py-2 border rounded-md bg-gray-50"
+                                placeholder="Add tag and press Enter"
+                              />
+                              <button type="button" onClick={addTag} className="px-4 py-2 bg-gray-200 rounded-md hover:bg-gray-300">Add</button>
+                            </div>
+                          </div>
+
+                          <div className="space-y-2">
+                            <label className="block text-sm font-medium text-gray-700">Collections</label>
+                            <div className="flex gap-2 mb-2 flex-wrap">
+                              {formData.collections.map((col) => (
+                                <span key={col} className="bg-blue-50 px-2 py-1 rounded text-sm flex items-center gap-1 border border-blue-100">
+                                  {col}
+                                  <button type="button" onClick={() => removeCollection(col)} className="text-blue-600 hover:text-red-500">
+                                    <FiX size={14} />
+                                  </button>
+                                </span>
+                              ))}
+                            </div>
+                            <div className="flex gap-2">
+                              <input
+                                type="text"
+                                value={collectionInput}
+                                onChange={(e) => setCollectionInput(e.target.value)}
+                                onKeyDown={(e) => {
+                                  if (e.key === 'Enter') {
+                                    e.preventDefault();
+                                    addCollection();
+                                  }
+                                }}
+                                className="flex-1 px-4 py-2 border rounded-md bg-gray-50"
+                                placeholder="Add collection"
+                              />
+                              <button type="button" onClick={addCollection} className="px-4 py-2 bg-gray-200 rounded-md hover:bg-gray-300">
+                                Add
+                              </button>
+                            </div>
+                          </div>
+
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                              <label className="block text-sm font-medium text-gray-700 mb-1">Weight</label>
+                              <div className="flex gap-3">
+                                <input
+                                  type="number"
+                                  min="0"
+                                  value={formData.weight || ''}
+                                  onChange={(e) => updateFormField('weight', parseFloat(e.target.value) || 0)}
+                                  className="w-full px-4 py-2 border rounded-md bg-gray-50"
+                                  placeholder="0.0"
+                                />
+                                <select
+                                  value={formData.weightUnit}
+                                  onChange={(e) => updateFormField('weightUnit', e.target.value as 'kg' | 'g' | 'lb' | 'oz')}
+                                  className="px-3 py-2 border rounded-md bg-gray-50"
+                                >
+                                  <option value="kg">kg</option>
+                                  <option value="g">g</option>
+                                  <option value="lb">lb</option>
+                                  <option value="oz">oz</option>
+                                </select>
+                              </div>
+                            </div>
+                            <div className="flex items-center gap-3 pt-6">
+                              <input
+                                id="requiresShipping"
+                                type="checkbox"
+                                checked={formData.requiresShipping}
+                                onChange={(e) => updateFormField('requiresShipping', e.target.checked)}
+                                className="h-4 w-4 text-gray-900 border-gray-300 rounded"
+                              />
+                              <label htmlFor="requiresShipping" className="text-sm text-gray-700">Requires shipping</label>
+                            </div>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+
+                    <div className="border border-gray-200 rounded-xl bg-white p-5 shadow-sm">
+                      <SectionHeader
+                        title="Search Engine Listing (SEO)"
+                        description="Control how your product appears in search results."
+                        section="seo"
+                        expanded={expandedSections.seo}
+                      />
+                      {expandedSections.seo && (
+                        <div className="pt-4 space-y-4">
+                          <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">SEO Title ({formData.seoTitle.length}/{SEO_CONSTRAINTS.titleMaxLength})</label>
+                            <input
+                              type="text"
+                              value={formData.seoTitle}
+                              onChange={(e) => updateFormField('seoTitle', e.target.value.slice(0, SEO_CONSTRAINTS.titleMaxLength))}
+                              className="w-full px-4 py-2 border rounded-md bg-gray-50"
+                              placeholder={formData.title || 'Page title for search engines'}
+                            />
+                          </div>
+                          <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">Meta Description ({formData.seoDescription.length}/{SEO_CONSTRAINTS.descriptionMaxLength})</label>
+                            <textarea
+                              value={formData.seoDescription}
+                              onChange={(e) => updateFormField('seoDescription', e.target.value.slice(0, SEO_CONSTRAINTS.descriptionMaxLength))}
+                              rows={3}
+                              className="w-full px-4 py-2 border rounded-md bg-gray-50"
+                              placeholder="Brief description for search results"
+                            />
+                          </div>
+                          <div className="bg-gray-50 p-4 rounded border border-dashed border-gray-200">
+                            <p className="text-sm text-gray-500 mb-2">Search engine preview:</p>
+                            <div className="text-blue-600 text-lg">{formData.seoTitle || formData.title || 'Product Title'}</div>
+                            <div className="text-green-700 text-sm">/products/{formData.handle || 'product-handle'}</div>
+                            <div className="text-gray-600 text-sm mt-1">{formData.seoDescription || 'Product description will appear here...'}</div>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+
+                    <div className="border border-gray-200 rounded-xl bg-white p-5 shadow-sm lg:sticky lg:top-4">
+                      <div className="space-y-4">
                         <div>
-                          <label className="block text-sm font-medium text-gray-700 mb-1">Product Type</label>
-                          <select value={formData.productType} onChange={(e) => updateFormField('productType', e.target.value)} className="w-full px-4 py-2 border rounded-md">
-                            <option value="">Select type</option>
-                            {PRODUCT_TYPES.map((type) => <option key={type} value={type}>{type}</option>)}
+                          <label className="block text-sm font-medium text-gray-700 mb-1">Status</label>
+                          <select
+                            value={formData.status}
+                            onChange={(e) => updateFormField('status', e.target.value as 'draft' | 'active' | 'archived')}
+                            className="w-full px-4 py-2 border rounded-md bg-gray-50"
+                          >
+                            {PRODUCT_STATUSES.map((s) => (
+                              <option key={s.value} value={s.value}>{s.label}</option>
+                            ))}
                           </select>
                         </div>
-                        <div>
-                          <label className="block text-sm font-medium text-gray-700 mb-1">Vendor</label>
-                          <input type="text" value={formData.vendor} onChange={(e) => updateFormField('vendor', e.target.value)} className="w-full px-4 py-2 border rounded-md" placeholder="Brand name" />
-                        </div>
-                      </div>
-                      <div className="grid grid-cols-2 gap-4">
-                        <div>
-                          <label className="block text-sm font-medium text-gray-700 mb-1">Gender</label>
-                          <select value={formData.gender || ''} onChange={(e) => updateFormField('gender', e.target.value ? e.target.value as 'men' | 'women' | 'unisex' : null)} className="w-full px-4 py-2 border rounded-md">
-                            <option value="">Select gender</option>
-                            {GENDERS.map((g) => <option key={g.value} value={g.value}>{g.label}</option>)}
-                          </select>
-                        </div>
-                        <div>
-                          <label className="block text-sm font-medium text-gray-700 mb-1">Fit</label>
-                          <select value={formData.fit || ''} onChange={(e) => updateFormField('fit', e.target.value ? e.target.value as 'regular' | 'oversized' | 'slim' | 'relaxed' : null)} className="w-full px-4 py-2 border rounded-md">
-                            <option value="">Select fit</option>
-                            {FITS.map((f) => <option key={f.value} value={f.value}>{f.label}</option>)}
-                          </select>
-                        </div>
-                      </div>
-                      {/* Tags */}
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">Tags</label>
-                        <div className="flex gap-2 mb-2 flex-wrap">
-                          {formData.tags.map((tag) => (
-                            <span key={tag} className="bg-gray-100 px-2 py-1 rounded text-sm flex items-center gap-1">{tag}<button type="button" onClick={() => removeTag(tag)} className="text-gray-500 hover:text-red-500"><FiX size={14} /></button></span>
-                          ))}
-                        </div>
-                        <div className="flex gap-2">
-                          <input type="text" value={tagInput} onChange={(e) => setTagInput(e.target.value)} onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), addTag())} className="flex-1 px-4 py-2 border rounded-md" placeholder="Add tag and press Enter" />
-                          <button type="button" onClick={addTag} className="px-4 py-2 bg-gray-200 rounded-md hover:bg-gray-300">Add</button>
-                        </div>
-                      </div>
-                      {/* Collections */}
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">Collections</label>
-                        <div className="flex gap-2 mb-2 flex-wrap">
-                          {formData.collections.map((col) => (
-                            <span key={col} className="bg-blue-100 px-2 py-1 rounded text-sm flex items-center gap-1">{col}<button type="button" onClick={() => removeCollection(col)} className="text-gray-500 hover:text-red-500"><FiX size={14} /></button></span>
-                          ))}
-                        </div>
-                        <div className="flex gap-2">
-                          <input type="text" value={collectionInput} onChange={(e) => setCollectionInput(e.target.value)} onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), addCollection())} className="flex-1 px-4 py-2 border rounded-md" placeholder="Add collection" />
-                          <button type="button" onClick={addCollection} className="px-4 py-2 bg-gray-200 rounded-md hover:bg-gray-300">Add</button>
-                        </div>
-                      </div>
-                      {/* Color Family */}
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">Color Family</label>
-                        <div className="flex flex-wrap gap-2">
-                          {COLOR_FAMILIES.map((color) => (
-                            <button key={color} type="button" onClick={() => { const updated = formData.colorFamily.includes(color) ? formData.colorFamily.filter(c => c !== color) : [...formData.colorFamily, color]; updateFormField('colorFamily', updated); }} className={`px-3 py-1 border rounded-md text-sm ${formData.colorFamily.includes(color) ? 'bg-gray-900 text-white border-gray-900' : 'border-gray-300'}`}>{color}</button>
-                          ))}
+                        <div className="flex gap-3 justify-end">
+                          <button type="button" onClick={resetForm} className="px-6 py-2 border border-gray-300 rounded-md hover:bg-gray-50">
+                            Cancel
+                          </button>
+                          <button
+                            type="submit"
+                            disabled={submitting}
+                            className="px-6 py-2 bg-gray-900 text-white rounded-md hover:bg-gray-800 disabled:opacity-50"
+                          >
+                            {submitting ? 'Saving...' : editingProduct ? 'Update Product' : 'Create Product'}
+                          </button>
                         </div>
                       </div>
                     </div>
-                  )}
-                </div>
-
-                {/* SEO Section */}
-                <div className="border rounded-lg p-4">
-                  <SectionHeader title="Search Engine Listing (SEO)" section="seo" expanded={expandedSections.seo} />
-                  {expandedSections.seo && (
-                    <div className="pt-4 space-y-4">
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">SEO Title ({formData.seoTitle.length}/{SEO_CONSTRAINTS.titleMaxLength})</label>
-                        <input type="text" value={formData.seoTitle} onChange={(e) => updateFormField('seoTitle', e.target.value.slice(0, SEO_CONSTRAINTS.titleMaxLength))} className="w-full px-4 py-2 border rounded-md" placeholder={formData.title || 'Page title for search engines'} />
-                      </div>
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">Meta Description ({formData.seoDescription.length}/{SEO_CONSTRAINTS.descriptionMaxLength})</label>
-                        <textarea value={formData.seoDescription} onChange={(e) => updateFormField('seoDescription', e.target.value.slice(0, SEO_CONSTRAINTS.descriptionMaxLength))} rows={3} className="w-full px-4 py-2 border rounded-md" placeholder="Brief description for search results" />
-                      </div>
-                      <div className="bg-gray-50 p-4 rounded">
-                        <p className="text-sm text-gray-500 mb-2">Search engine preview:</p>
-                        <div className="text-blue-600 text-lg">{formData.seoTitle || formData.title || 'Product Title'}</div>
-                        <div className="text-green-700 text-sm">/products/{formData.handle || 'product-handle'}</div>
-                        <div className="text-gray-600 text-sm mt-1">{formData.seoDescription || 'Product description will appear here...'}</div>
-                      </div>
-                    </div>
-                  )}
-                </div>
-
-                {/* Status & Submit */}
-                <div className="flex items-center gap-4 pt-4 border-t">
-                  <div className="flex-1">
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Status</label>
-                    <select value={formData.status} onChange={(e) => updateFormField('status', e.target.value as 'draft' | 'active' | 'archived')} className="w-full px-4 py-2 border rounded-md">
-                      {PRODUCT_STATUSES.map((s) => <option key={s.value} value={s.value}>{s.label}</option>)}
-                    </select>
-                  </div>
-                  <div className="flex gap-3 pt-6">
-                    <button type="button" onClick={resetForm} className="px-6 py-2 border border-gray-300 rounded-md hover:bg-gray-50">Cancel</button>
-                    <button type="submit" disabled={submitting} className="px-6 py-2 bg-gray-900 text-white rounded-md hover:bg-gray-800 disabled:opacity-50">{submitting ? 'Saving...' : editingProduct ? 'Update Product' : 'Create Product'}</button>
                   </div>
                 </div>
               </form>
