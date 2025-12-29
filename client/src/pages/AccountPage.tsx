@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { FiUser, FiPackage, FiMapPin, FiLogOut, FiEdit, FiTrash2 } from 'react-icons/fi';
+import { FiUser, FiPackage, FiMapPin, FiLogOut, FiEdit, FiTrash2, FiLayout } from 'react-icons/fi';
 import Layout from '../components/layout/Layout';
 import { useAuth } from '../context/AuthContext';
 import { ordersApi } from '../api/orders.api';
@@ -71,6 +71,8 @@ const AccountPage: React.FC = () => {
     { id: 'addresses', label: 'Addresses', icon: FiMapPin },
   ];
 
+  const isAdmin = user?.role === 'admin';
+
   return (
     <Layout>
       <div className="max-w-6xl mx-auto px-4 py-8">
@@ -94,6 +96,15 @@ const AccountPage: React.FC = () => {
                   {tab.label}
                 </button>
               ))}
+              {isAdmin && (
+                <Link
+                  to="/admin"
+                  className="w-full flex items-center gap-3 px-4 py-3 rounded-md text-left text-gray-700 hover:bg-gray-100 transition-colors"
+                >
+                  <FiLayout size={20} />
+                  Admin Dashboard
+                </Link>
+              )}
               <button
                 onClick={handleLogout}
                 className="w-full flex items-center gap-3 px-4 py-3 rounded-md text-left text-red-600 hover:bg-red-50 transition-colors"
