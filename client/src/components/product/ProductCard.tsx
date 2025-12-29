@@ -3,20 +3,33 @@ import { Link } from 'react-router-dom';
 import { FiArrowRight } from 'react-icons/fi';
 import { Product } from '../../types';
 import { formatPrice } from '../../utils/formatters';
+import {
+  getProductColors,
+  getProductImageUrls,
+  getProductName,
+  getProductPrice,
+  getProductStock,
+} from '../../utils/productView';
 
 interface ProductCardProps {
   product: Product;
 }
 
 const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
+  const imageUrls = getProductImageUrls(product);
+  const productName = getProductName(product);
+  const productPrice = getProductPrice(product);
+  const productStock = getProductStock(product);
+  const productColors = getProductColors(product);
+
   return (
     <Link to={`/product/${product._id}`} className="group">
       <div className="relative aspect-[3/4] overflow-hidden bg-brand-100 mb-4 shadow-md hover:shadow-xl transition-shadow duration-300">
-        {product.images[0] ? (
+        {imageUrls[0] ? (
           <>
             <img
-              src={product.images[0]}
-              alt={product.name}
+              src={imageUrls[0]}
+              alt={productName}
               className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
               loading="lazy"
             />
@@ -34,14 +47,14 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
         )}
 
         {/* Stock Status Badges */}
-        {product.stock === 0 && (
+        {productStock === 0 && (
           <div className="absolute inset-0 bg-brand-900/80 flex items-center justify-center">
             <span className="text-white font-display text-2xl tracking-wider">OUT OF STOCK</span>
           </div>
         )}
-        {product.stock > 0 && product.stock < 5 && (
+        {productStock > 0 && productStock < 5 && (
           <div className="absolute top-3 left-3 bg-accent-sunset text-white text-xs font-grotesk font-bold px-3 py-1.5 tracking-wider">
-            ONLY {product.stock} LEFT
+            ONLY {productStock} LEFT
           </div>
         )}
 
@@ -57,14 +70,14 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
       {/* Product Info */}
       <div className="space-y-2">
         <h3 className="font-grotesk font-semibold text-brand-900 group-hover:text-brand-500 transition-colors text-base leading-tight">
-          {product.name}
+          {productName}
         </h3>
-        <p className="text-brand-900 font-grotesk font-bold text-lg">{formatPrice(product.price)}</p>
+        <p className="text-brand-900 font-grotesk font-bold text-lg">{formatPrice(productPrice)}</p>
 
         {/* Color Swatches */}
-        {product.colors.length > 0 && (
+        {productColors.length > 0 && (
           <div className="flex gap-1.5 mt-3">
-            {product.colors.slice(0, 5).map((color) => (
+            {productColors.slice(0, 5).map((color: string) => (
               <div
                 key={color}
                 className="w-5 h-5 rounded-full border-2 border-brand-300 hover:border-brand-500 transition-colors cursor-pointer"
@@ -72,9 +85,9 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
                 title={color}
               />
             ))}
-            {product.colors.length > 5 && (
+            {productColors.length > 5 && (
               <div className="flex items-center justify-center w-5 h-5 rounded-full bg-brand-200 border-2 border-brand-300">
-                <span className="text-[10px] font-grotesk font-bold text-brand-700">+{product.colors.length - 5}</span>
+                <span className="text-[10px] font-grotesk font-bold text-brand-700">+{productColors.length - 5}</span>
               </div>
             )}
           </div>

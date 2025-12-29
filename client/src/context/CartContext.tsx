@@ -3,6 +3,7 @@ import { Cart } from '../types';
 import { cartApi, AddToCartData } from '../api/cart.api';
 import { useAuth } from './AuthContext';
 import toast from 'react-hot-toast';
+import { getProductPrice } from '../utils/productView';
 
 interface CartContextType {
   cart: Cart | null;
@@ -100,7 +101,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const itemCount = cart?.items.reduce((sum, item) => sum + item.quantity, 0) || 0;
 
   const subtotal = cart?.items.reduce((sum, item) => {
-    const price = item.productId?.price || 0;
+    const price = item.productId ? getProductPrice(item.productId) : 0;
     return sum + price * item.quantity;
   }, 0) || 0;
 
