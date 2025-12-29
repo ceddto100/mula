@@ -6,16 +6,13 @@ import { Product, CreateProductData, ProductVariant, ProductOption, ProductImage
 import { formatPrice } from '../utils/formatters';
 import {
   PRODUCT_TYPES,
-  COLOR_FAMILIES,
   GENDERS,
-  FITS,
+  SIZES,
+  COLORS,
   PRODUCT_STATUSES,
   INVENTORY_POLICIES,
   SEO_CONSTRAINTS,
   slugify,
-  generateVariantCombinations,
-  generateSKU,
-  generateVariantTitle,
 } from '../utils/constants';
 import toast from 'react-hot-toast';
 
@@ -36,7 +33,6 @@ interface ProductFormState {
   title: string;
   handle: string;
   status: 'draft' | 'active' | 'archived';
-  vendor: string;
   productType: string;
   descriptionHtml: string;
   images: ProductImage[];
@@ -47,11 +43,10 @@ interface ProductFormState {
   tags: string[];
   collections: string[];
   gender: 'men' | 'women' | 'unisex' | null;
-  fit: 'regular' | 'oversized' | 'slim' | 'relaxed' | null;
+  sizes: string[];
   materials: string[];
   colorFamily: string[];
-  weight: number;
-  weightUnit: 'kg' | 'g' | 'lb' | 'oz';
+  customColors: string[];
   requiresShipping: boolean;
 }
 
@@ -59,7 +54,6 @@ const initialFormState: ProductFormState = {
   title: '',
   handle: '',
   status: 'draft',
-  vendor: '',
   productType: '',
   descriptionHtml: '',
   images: [],
@@ -70,11 +64,10 @@ const initialFormState: ProductFormState = {
   tags: [],
   collections: [],
   gender: null,
-  fit: null,
+  sizes: [],
   materials: [],
   colorFamily: [],
-  weight: 0,
-  weightUnit: 'kg',
+  customColors: [],
   requiresShipping: true,
 };
 
@@ -146,7 +139,6 @@ const AdminProducts: React.FC = () => {
       title: product.title,
       handle: product.handle,
       status: product.status,
-      vendor: product.vendor || '',
       productType: product.productType || '',
       descriptionHtml: product.descriptionHtml || '',
       images: product.images || [],
@@ -157,11 +149,10 @@ const AdminProducts: React.FC = () => {
       tags: product.tags || [],
       collections: product.collections || [],
       gender: product.gender,
-      fit: product.fit,
+      sizes: (product as any).sizes || [],
       materials: product.materials || [],
       colorFamily: product.colorFamily || [],
-      weight: product.weight || 0,
-      weightUnit: product.weightUnit || 'kg',
+      customColors: (product as any).customColors || [],
       requiresShipping: product.requiresShipping ?? true,
     });
     setEditingProduct(product);
@@ -241,43 +232,6 @@ const AdminProducts: React.FC = () => {
     updateFormField('variants', formData.variants.filter((_, i) => i !== index));
   };
 
-  // Option handling
-  const addOption = () => {
-    updateFormField('options', [...formData.options, { name: '', values: [] }]);
-  };
-
-  const updateOption = (index: number, field: 'name' | 'values', value: string | string[]) => {
-    const updated = [...formData.options];
-    updated[index] = { ...updated[index], [field]: value };
-    updateFormField('options', updated);
-  };
-
-  const removeOption = (index: number) => {
-    updateFormField('options', formData.options.filter((_, i) => i !== index));
-  };
-
-  const generateVariantsFromOptions = () => {
-    if (formData.options.length === 0 || formData.options.some(o => !o.name || o.values.length === 0)) {
-      toast.error('Please define all options with values first');
-      return;
-    }
-    const combinations = generateVariantCombinations(formData.options);
-    const basePrice = formData.variants[0]?.price || 0;
-    const skuPrefix = slugify(formData.title).toUpperCase().slice(0, 6) || 'SKU';
-    const newVariants: ProductVariant[] = combinations.map((optionCombo, idx) => ({
-      sku: generateSKU(skuPrefix, optionCombo, idx),
-      title: generateVariantTitle(optionCombo),
-      price: basePrice,
-      compareAtPrice: null,
-      inventoryQuantity: 0,
-      inventoryPolicy: 'deny',
-      options: optionCombo,
-      barcode: null,
-    }));
-    updateFormField('variants', newVariants);
-    toast.success(`Generated ${newVariants.length} variants`);
-  };
-
   // Tags & Collections
   const addTag = () => {
     const tag = tagInput.trim().toLowerCase();
@@ -336,7 +290,6 @@ const AdminProducts: React.FC = () => {
         title: formData.title,
         handle: formData.handle || undefined,
         status: formData.status,
-        vendor: formData.vendor || undefined,
         productType: formData.productType || undefined,
         descriptionHtml: formData.descriptionHtml || undefined,
         images: formData.images.length > 0 ? formData.images : undefined,
@@ -347,12 +300,11 @@ const AdminProducts: React.FC = () => {
         tags: formData.tags.length > 0 ? formData.tags : undefined,
         collections: formData.collections.length > 0 ? formData.collections : undefined,
         gender: formData.gender,
-        fit: formData.fit,
         materials: formData.materials.length > 0 ? formData.materials : undefined,
         colorFamily: formData.colorFamily.length > 0 ? formData.colorFamily : undefined,
-        weight: formData.weight || undefined,
-        weightUnit: formData.weightUnit,
         requiresShipping: formData.requiresShipping,
+        ...(formData.sizes.length > 0 && { sizes: formData.sizes }),
+        ...(formData.customColors.length > 0 && { customColors: formData.customColors }),
       };
       if (editingProduct) {
         const updated = await adminApi.updateProduct(editingProduct._id, productData);
@@ -404,67 +356,138 @@ const AdminProducts: React.FC = () => {
 
         {/* Product List */}
         <div className="bg-white rounded-lg shadow-sm overflow-hidden">
-          <table className="w-full">
-            <thead className="bg-gray-50">
-              <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Product</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Type</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Price</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Inventory</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
-                <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">Actions</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y">
-              {isLoading ? (
-                [...Array(5)].map((_, i) => (
-                  <tr key={i}><td colSpan={6} className="px-6 py-4"><div className="h-12 bg-gray-200 animate-pulse rounded" /></td></tr>
-                ))
-              ) : products.length === 0 ? (
-                <tr><td colSpan={6} className="px-6 py-12 text-center text-gray-500">No products found</td></tr>
-              ) : (
-                products.map((product) => (
-                  <tr key={product._id}>
-                    <td className="px-6 py-4">
-                      <div className="flex items-center gap-3">
-                        <div className="w-12 h-12 bg-gray-100 rounded overflow-hidden flex-shrink-0">
-                          {product.images[0]?.url ? (
-                            <img src={product.images[0].url} alt={product.images[0].alt || product.title} className="w-full h-full object-cover" />
-                          ) : (
-                            <div className="w-full h-full flex items-center justify-center text-gray-400"><FiImage size={20} /></div>
-                          )}
+          {/* Desktop Table View */}
+          <div className="hidden md:block overflow-x-auto">
+            <table className="w-full">
+              <thead className="bg-gray-50">
+                <tr>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Product</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Type</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Price</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Inventory</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
+                  <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">Actions</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y">
+                {isLoading ? (
+                  [...Array(5)].map((_, i) => (
+                    <tr key={i}><td colSpan={6} className="px-6 py-4"><div className="h-12 bg-gray-200 animate-pulse rounded" /></td></tr>
+                  ))
+                ) : products.length === 0 ? (
+                  <tr><td colSpan={6} className="px-6 py-12 text-center text-gray-500">No products found</td></tr>
+                ) : (
+                  products.map((product) => (
+                    <tr key={product._id}>
+                      <td className="px-6 py-4">
+                        <div className="flex items-center gap-3">
+                          <div className="w-12 h-12 bg-gray-100 rounded overflow-hidden flex-shrink-0">
+                            {product.images[0]?.url ? (
+                              <img src={product.images[0].url} alt={product.images[0].alt || product.title} className="w-full h-full object-cover" />
+                            ) : (
+                              <div className="w-full h-full flex items-center justify-center text-gray-400"><FiImage size={20} /></div>
+                            )}
+                          </div>
+                          <div>
+                            <span className="font-medium block">{product.title}</span>
+                            <span className="text-sm text-gray-500">/{product.handle}</span>
+                          </div>
                         </div>
-                        <div>
-                          <span className="font-medium block">{product.title}</span>
-                          <span className="text-sm text-gray-500">/{product.handle}</span>
-                        </div>
+                      </td>
+                      <td className="px-6 py-4 text-gray-600">{product.productType || '-'}</td>
+                      <td className="px-6 py-4">
+                        {product.priceRange ? (
+                          product.priceRange.min === product.priceRange.max ? formatPrice(product.priceRange.min) : `${formatPrice(product.priceRange.min)} - ${formatPrice(product.priceRange.max)}`
+                        ) : formatPrice(product.variants[0]?.price || 0)}
+                      </td>
+                      <td className="px-6 py-4">
+                        <span className={product.totalInventory !== undefined && product.totalInventory < 10 ? 'text-red-600' : ''}>
+                          {product.totalInventory ?? product.variants.reduce((sum, v) => sum + v.inventoryQuantity, 0)}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4">
+                        <span className={`inline-block px-2 py-1 text-xs rounded-full ${product.status === 'active' ? 'bg-green-100 text-green-800' : product.status === 'draft' ? 'bg-gray-100 text-gray-800' : 'bg-red-100 text-red-800'}`}>
+                          {product.status.charAt(0).toUpperCase() + product.status.slice(1)}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4 text-right">
+                        <button onClick={() => handleEdit(product)} className="text-gray-600 hover:text-gray-900 mr-4">Edit</button>
+                        <button onClick={() => handleDelete(product._id)} className="text-red-500 hover:text-red-700"><FiTrash2 size={18} /></button>
+                      </td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
+          </div>
+
+          {/* Mobile Card View */}
+          <div className="md:hidden divide-y">
+            {isLoading ? (
+              [...Array(5)].map((_, i) => (
+                <div key={i} className="p-4"><div className="h-24 bg-gray-200 animate-pulse rounded" /></div>
+              ))
+            ) : products.length === 0 ? (
+              <div className="p-6 text-center text-gray-500">No products found</div>
+            ) : (
+              products.map((product) => (
+                <div key={product._id} className="p-4 space-y-3">
+                  <div className="flex items-start gap-3">
+                    <div className="w-16 h-16 bg-gray-100 rounded overflow-hidden flex-shrink-0">
+                      {product.images[0]?.url ? (
+                        <img src={product.images[0].url} alt={product.images[0].alt || product.title} className="w-full h-full object-cover" />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center text-gray-400"><FiImage size={20} /></div>
+                      )}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <h3 className="font-medium text-sm truncate">{product.title}</h3>
+                      <p className="text-xs text-gray-500 truncate">/{product.handle}</p>
+                      <div className="flex items-center gap-2 mt-1">
+                        <span className={`inline-block px-2 py-1 text-xs rounded-full ${product.status === 'active' ? 'bg-green-100 text-green-800' : product.status === 'draft' ? 'bg-gray-100 text-gray-800' : 'bg-red-100 text-red-800'}`}>
+                          {product.status.charAt(0).toUpperCase() + product.status.slice(1)}
+                        </span>
                       </div>
-                    </td>
-                    <td className="px-6 py-4 text-gray-600">{product.productType || '-'}</td>
-                    <td className="px-6 py-4">
-                      {product.priceRange ? (
-                        product.priceRange.min === product.priceRange.max ? formatPrice(product.priceRange.min) : `${formatPrice(product.priceRange.min)} - ${formatPrice(product.priceRange.max)}`
-                      ) : formatPrice(product.variants[0]?.price || 0)}
-                    </td>
-                    <td className="px-6 py-4">
-                      <span className={product.totalInventory !== undefined && product.totalInventory < 10 ? 'text-red-600' : ''}>
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-3 gap-2 text-sm">
+                    <div>
+                      <p className="text-xs text-gray-500">Price</p>
+                      <p className="font-medium">
+                        {product.priceRange ? (
+                          product.priceRange.min === product.priceRange.max ? formatPrice(product.priceRange.min) : `${formatPrice(product.priceRange.min)}-${formatPrice(product.priceRange.max)}`
+                        ) : formatPrice(product.variants[0]?.price || 0)}
+                      </p>
+                    </div>
+                    <div>
+                      <p className="text-xs text-gray-500">Inventory</p>
+                      <p className={`font-medium ${product.totalInventory !== undefined && product.totalInventory < 10 ? 'text-red-600' : ''}`}>
                         {product.totalInventory ?? product.variants.reduce((sum, v) => sum + v.inventoryQuantity, 0)}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4">
-                      <span className={`inline-block px-2 py-1 text-xs rounded-full ${product.status === 'active' ? 'bg-green-100 text-green-800' : product.status === 'draft' ? 'bg-gray-100 text-gray-800' : 'bg-red-100 text-red-800'}`}>
-                        {product.status.charAt(0).toUpperCase() + product.status.slice(1)}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4 text-right">
-                      <button onClick={() => handleEdit(product)} className="text-gray-600 hover:text-gray-900 mr-4">Edit</button>
-                      <button onClick={() => handleDelete(product._id)} className="text-red-500 hover:text-red-700"><FiTrash2 size={18} /></button>
-                    </td>
-                  </tr>
-                ))
-              )}
-            </tbody>
-          </table>
+                      </p>
+                    </div>
+                    <div>
+                      <p className="text-xs text-gray-500">Type</p>
+                      <p className="font-medium truncate">{product.productType || '-'}</p>
+                    </div>
+                  </div>
+                  <div className="flex gap-2 pt-2 border-t">
+                    <button
+                      onClick={() => handleEdit(product)}
+                      className="flex-1 px-4 py-2 bg-gray-900 text-white rounded-md text-sm hover:bg-gray-800"
+                    >
+                      Edit
+                    </button>
+                    <button
+                      onClick={() => handleDelete(product._id)}
+                      className="px-4 py-2 bg-red-50 text-red-600 rounded-md text-sm hover:bg-red-100"
+                    >
+                      <FiTrash2 size={18} />
+                    </button>
+                  </div>
+                </div>
+              ))
+            )}
+          </div>
         </div>
 
         {/* Product Form Modal */}
@@ -666,55 +689,6 @@ const AdminProducts: React.FC = () => {
                       )}
                     </div>
 
-                    <div className="border border-gray-200 rounded-xl bg-white p-5 shadow-sm">
-                      <SectionHeader
-                        title="Options (for variant generation)"
-                        description="Define options like Size and Color to auto-generate variants."
-                        section="options"
-                        expanded={expandedSections.options}
-                      />
-                      {expandedSections.options && (
-                        <div className="pt-4 space-y-4">
-                          {formData.options.map((opt, idx) => (
-                            <div key={idx} className="flex gap-3 items-start">
-                              <div className="flex-1">
-                                <input
-                                  type="text"
-                                  value={opt.name}
-                                  onChange={(e) => updateOption(idx, 'name', e.target.value)}
-                                  placeholder="Option name (e.g., Size)"
-                                  className="w-full px-3 py-2 border rounded text-sm mb-2 bg-gray-50"
-                                />
-                                <input
-                                  type="text"
-                                  value={opt.values.join(', ')}
-                                  onChange={(e) => updateOption(idx, 'values', e.target.value.split(',').map(v => v.trim()).filter(Boolean))}
-                                  placeholder="Values (comma separated, e.g., S, M, L)"
-                                  className="w-full px-3 py-2 border rounded text-sm bg-gray-50"
-                                />
-                              </div>
-                              <button type="button" onClick={() => removeOption(idx)} className="text-red-500 hover:text-red-700 mt-2">
-                                <FiTrash2 size={16} />
-                              </button>
-                            </div>
-                          ))}
-                          <div className="flex flex-wrap gap-2">
-                            <button type="button" onClick={addOption} className="text-sm text-gray-600 hover:text-gray-900 flex items-center gap-1">
-                              <FiPlus size={16} /> Add option
-                            </button>
-                            {formData.options.length > 0 && (
-                              <button
-                                type="button"
-                                onClick={generateVariantsFromOptions}
-                                className="text-sm bg-gray-900 text-white hover:bg-gray-800 px-3 py-1 rounded-md"
-                              >
-                                Generate Variants
-                              </button>
-                            )}
-                          </div>
-                        </div>
-                      )}
-                    </div>
                   </div>
 
                   <div className="space-y-6">
@@ -742,18 +716,6 @@ const AdminProducts: React.FC = () => {
                               </select>
                             </div>
                             <div>
-                              <label className="block text-sm font-medium text-gray-700 mb-1">Vendor</label>
-                              <input
-                                type="text"
-                                value={formData.vendor}
-                                onChange={(e) => updateFormField('vendor', e.target.value)}
-                                className="w-full px-4 py-2 border rounded-md bg-gray-50"
-                                placeholder="Brand name"
-                              />
-                            </div>
-                          </div>
-                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <div>
                               <label className="block text-sm font-medium text-gray-700 mb-1">Gender</label>
                               <select
                                 value={formData.gender || ''}
@@ -766,37 +728,90 @@ const AdminProducts: React.FC = () => {
                                 ))}
                               </select>
                             </div>
-                            <div>
-                              <label className="block text-sm font-medium text-gray-700 mb-1">Fit</label>
-                              <select
-                                value={formData.fit || ''}
-                                onChange={(e) => updateFormField('fit', e.target.value ? e.target.value as 'regular' | 'oversized' | 'slim' | 'relaxed' : null)}
-                                className="w-full px-4 py-2 border rounded-md bg-gray-50"
-                              >
-                                <option value="">Select fit</option>
-                                {FITS.map((f) => (
-                                  <option key={f.value} value={f.value}>{f.label}</option>
-                                ))}
-                              </select>
+                          </div>
+
+                          <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-2">Available Sizes</label>
+                            <div className="flex flex-wrap gap-2">
+                              {SIZES.map((size) => (
+                                <button
+                                  key={size}
+                                  type="button"
+                                  onClick={() => {
+                                    const updated = formData.sizes.includes(size) ? formData.sizes.filter((s) => s !== size) : [...formData.sizes, size];
+                                    updateFormField('sizes', updated);
+                                  }}
+                                  className={`px-4 py-2 border rounded-md text-sm font-medium transition ${formData.sizes.includes(size) ? 'bg-gray-900 text-white border-gray-900' : 'border-gray-300 hover:border-gray-400'}`}
+                                >
+                                  {size}
+                                </button>
+                              ))}
                             </div>
                           </div>
 
                           <div>
                             <label className="block text-sm font-medium text-gray-700 mb-2">Color Family</label>
-                            <div className="flex flex-wrap gap-2">
-                              {COLOR_FAMILIES.map((color) => (
+                            <div className="flex flex-wrap gap-3">
+                              {COLORS.map((color) => (
                                 <button
-                                  key={color}
+                                  key={color.name}
                                   type="button"
                                   onClick={() => {
-                                    const updated = formData.colorFamily.includes(color) ? formData.colorFamily.filter((c) => c !== color) : [...formData.colorFamily, color];
+                                    const updated = formData.colorFamily.includes(color.name) ? formData.colorFamily.filter((c) => c !== color.name) : [...formData.colorFamily, color.name];
                                     updateFormField('colorFamily', updated);
                                   }}
-                                  className={`px-3 py-1 border rounded-md text-sm transition ${formData.colorFamily.includes(color) ? 'bg-gray-900 text-white border-gray-900' : 'border-gray-300 hover:border-gray-400'}`}
+                                  className={`flex items-center gap-2 px-3 py-2 border rounded-md transition ${formData.colorFamily.includes(color.name) ? 'border-gray-900 ring-2 ring-gray-900' : 'border-gray-300 hover:border-gray-400'}`}
+                                  title={color.name}
                                 >
-                                  {color}
+                                  <div
+                                    className="w-6 h-6 rounded-full border-2 border-gray-300"
+                                    style={{ backgroundColor: color.value }}
+                                  />
+                                  <span className="text-sm">{color.name}</span>
                                 </button>
                               ))}
+                            </div>
+                          </div>
+
+                          <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-2">Custom Colors</label>
+                            <div className="flex flex-wrap gap-2 mb-3">
+                              {formData.customColors.map((customColor, idx) => (
+                                <div key={idx} className="flex items-center gap-2 px-3 py-2 border rounded-md bg-gray-50">
+                                  <div
+                                    className="w-6 h-6 rounded-full border-2 border-gray-300"
+                                    style={{ backgroundColor: customColor }}
+                                  />
+                                  <span className="text-sm font-mono">{customColor}</span>
+                                  <button
+                                    type="button"
+                                    onClick={() => updateFormField('customColors', formData.customColors.filter((_, i) => i !== idx))}
+                                    className="text-red-500 hover:text-red-700"
+                                  >
+                                    <FiX size={16} />
+                                  </button>
+                                </div>
+                              ))}
+                            </div>
+                            <div className="flex gap-2 items-center">
+                              <input
+                                type="color"
+                                id="customColorPicker"
+                                className="h-10 w-20 border rounded cursor-pointer"
+                              />
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  const colorPicker = document.getElementById('customColorPicker') as HTMLInputElement;
+                                  const newColor = colorPicker.value;
+                                  if (!formData.customColors.includes(newColor)) {
+                                    updateFormField('customColors', [...formData.customColors, newColor]);
+                                  }
+                                }}
+                                className="px-4 py-2 bg-gray-200 rounded-md hover:bg-gray-300 text-sm"
+                              >
+                                Add Custom Color
+                              </button>
                             </div>
                           </div>
 
@@ -891,42 +906,6 @@ const AdminProducts: React.FC = () => {
                               <button type="button" onClick={addCollection} className="px-4 py-2 bg-gray-200 rounded-md hover:bg-gray-300">
                                 Add
                               </button>
-                            </div>
-                          </div>
-
-                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <div>
-                              <label className="block text-sm font-medium text-gray-700 mb-1">Weight</label>
-                              <div className="flex gap-3">
-                                <input
-                                  type="number"
-                                  min="0"
-                                  value={formData.weight || ''}
-                                  onChange={(e) => updateFormField('weight', parseFloat(e.target.value) || 0)}
-                                  className="w-full px-4 py-2 border rounded-md bg-gray-50"
-                                  placeholder="0.0"
-                                />
-                                <select
-                                  value={formData.weightUnit}
-                                  onChange={(e) => updateFormField('weightUnit', e.target.value as 'kg' | 'g' | 'lb' | 'oz')}
-                                  className="px-3 py-2 border rounded-md bg-gray-50"
-                                >
-                                  <option value="kg">kg</option>
-                                  <option value="g">g</option>
-                                  <option value="lb">lb</option>
-                                  <option value="oz">oz</option>
-                                </select>
-                              </div>
-                            </div>
-                            <div className="flex items-center gap-3 pt-6">
-                              <input
-                                id="requiresShipping"
-                                type="checkbox"
-                                checked={formData.requiresShipping}
-                                onChange={(e) => updateFormField('requiresShipping', e.target.checked)}
-                                className="h-4 w-4 text-gray-900 border-gray-300 rounded"
-                              />
-                              <label htmlFor="requiresShipping" className="text-sm text-gray-700">Requires shipping</label>
                             </div>
                           </div>
                         </div>
