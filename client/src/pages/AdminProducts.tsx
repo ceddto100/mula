@@ -6,7 +6,6 @@ import { Product, CreateProductData, ProductVariant, ProductOption, ProductImage
 import { formatPrice } from '../utils/formatters';
 import {
   PRODUCT_TYPES,
-  COLOR_FAMILIES,
   GENDERS,
   SIZES,
   COLORS,
@@ -14,9 +13,6 @@ import {
   INVENTORY_POLICIES,
   SEO_CONSTRAINTS,
   slugify,
-  generateVariantCombinations,
-  generateSKU,
-  generateVariantTitle,
 } from '../utils/constants';
 import toast from 'react-hot-toast';
 
@@ -234,43 +230,6 @@ const AdminProducts: React.FC = () => {
       return;
     }
     updateFormField('variants', formData.variants.filter((_, i) => i !== index));
-  };
-
-  // Option handling
-  const addOption = () => {
-    updateFormField('options', [...formData.options, { name: '', values: [] }]);
-  };
-
-  const updateOption = (index: number, field: 'name' | 'values', value: string | string[]) => {
-    const updated = [...formData.options];
-    updated[index] = { ...updated[index], [field]: value };
-    updateFormField('options', updated);
-  };
-
-  const removeOption = (index: number) => {
-    updateFormField('options', formData.options.filter((_, i) => i !== index));
-  };
-
-  const generateVariantsFromOptions = () => {
-    if (formData.options.length === 0 || formData.options.some(o => !o.name || o.values.length === 0)) {
-      toast.error('Please define all options with values first');
-      return;
-    }
-    const combinations = generateVariantCombinations(formData.options);
-    const basePrice = formData.variants[0]?.price || 0;
-    const skuPrefix = slugify(formData.title).toUpperCase().slice(0, 6) || 'SKU';
-    const newVariants: ProductVariant[] = combinations.map((optionCombo, idx) => ({
-      sku: generateSKU(skuPrefix, optionCombo, idx),
-      title: generateVariantTitle(optionCombo),
-      price: basePrice,
-      compareAtPrice: null,
-      inventoryQuantity: 0,
-      inventoryPolicy: 'deny',
-      options: optionCombo,
-      barcode: null,
-    }));
-    updateFormField('variants', newVariants);
-    toast.success(`Generated ${newVariants.length} variants`);
   };
 
   // Tags & Collections
