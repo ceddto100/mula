@@ -38,9 +38,6 @@ const cartSchema = new Schema<ICart>(
   }
 );
 
-// Index for faster lookups
-cartSchema.index({ userId: 1 });
-
 const Cart = mongoose.model<ICart>('Cart', cartSchema);
 
 export default Cart;
