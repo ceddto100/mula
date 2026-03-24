@@ -69,10 +69,13 @@ input[type="number"] {
   @apply bg-gray-200 animate-pulse rounded;
 }
 
-/* Contemporary brand typography */
+/* Brand typography */
 .font-display {
-  font-family: 'Bebas Neue', Impact, sans-serif;
-  letter-spacing: 0.05em;
+  font-family: 'Cormorant Garamond', Georgia, serif;
+}
+
+.font-script {
+  font-family: 'Great Vibes', cursive;
 }
 
 .font-grotesk {
