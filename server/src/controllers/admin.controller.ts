@@ -107,34 +107,9 @@ export const updateHomePageImages = async (req: Request, res: Response): Promise
   try {
     const homePageImages = await getOrCreateHomePageImages();
 
-    const allowedFields = [
-      'heroImage',
-      'menImage',
-      'womenImage',
-      'collectionImage',
-      'accessoryImage',
-      'saleImage',
-    ] as const;
-
-    const payload = Object.fromEntries(
-      Object.entries(req.body).filter(([key]) => allowedFields.includes(key as typeof allowedFields[number]))
-    );
-
-    const invalidEntries = Object.entries(payload).filter(([, value]) => (
-      typeof value !== 'string' || value.trim().length === 0
-    ));
-
-    if (invalidEntries.length > 0) {
-      res.status(400).json({
-        success: false,
-        message: 'All home page image values must be non-empty strings',
-      });
-      return;
-    }
-
     const updated = await HomePageImages.findByIdAndUpdate(
       homePageImages._id,
-      payload,
+      { ...req.body },
       { new: true, runValidators: true }
     );
 

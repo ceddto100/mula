@@ -7,19 +7,18 @@ import { adminApi } from '../api/admin.api';
 import { DashboardStats, HomePageImages } from '../types';
 import { formatPrice, formatDate } from '../utils/formatters';
 
-const imageFieldConfig: Array<{ key: keyof HomePageImages; label: string; recommendedSize: string }> = [
-  { key: 'heroImage', label: 'Hero Section Image', recommendedSize: '16x9' },
-  { key: 'menImage', label: "Men's Image", recommendedSize: '16x9' },
-  { key: 'womenImage', label: "Women's Image", recommendedSize: '9x16' },
-  { key: 'collectionImage', label: 'Collection Image', recommendedSize: '1x1' },
-  { key: 'accessoryImage', label: 'Accessory Image', recommendedSize: '1x1' },
-  { key: 'saleImage', label: 'Sale Image', recommendedSize: '1x1' },
+const imageFieldConfig: Array<{ key: keyof HomePageImages; label: string }> = [
+  { key: 'heroImage', label: 'Hero Section Image' },
+  { key: 'menImage', label: "Men's Image" },
+  { key: 'womenImage', label: "Women's Image" },
+  { key: 'collectionImage', label: 'Collection Image' },
+  { key: 'accessoryImage', label: 'Accessory Image' },
+  { key: 'saleImage', label: 'Sale Image' },
 ];
 
 const AdminDashboard: React.FC = () => {
   const [stats, setStats] = useState<DashboardStats | null>(null);
   const [homePageImages, setHomePageImages] = useState<HomePageImages | null>(null);
-  const [originalHomePageImages, setOriginalHomePageImages] = useState<HomePageImages | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [uploadingField, setUploadingField] = useState<keyof HomePageImages | null>(null);
   const [savingImages, setSavingImages] = useState(false);
@@ -33,7 +32,6 @@ const AdminDashboard: React.FC = () => {
         ]);
         setStats(statsData);
         setHomePageImages(imageData);
-        setOriginalHomePageImages(imageData);
       } catch (error) {
         console.error('Failed to fetch dashboard data:', error);
         toast.error('Failed to load dashboard data');
@@ -45,32 +43,12 @@ const AdminDashboard: React.FC = () => {
     fetchDashboardData();
   }, []);
 
-
-  const isDirty = Boolean(
-    homePageImages
-    && originalHomePageImages
-    && imageFieldConfig.some((item) => homePageImages[item.key] !== originalHomePageImages[item.key])
-  );
-
   const handleImageUpload = async (
     field: keyof HomePageImages,
     event: React.ChangeEvent<HTMLInputElement>
   ) => {
     const file = event.target.files?.[0];
     if (!file || !homePageImages) return;
-
-    if (!file.type.startsWith('image/')) {
-      toast.error('Please upload an image file');
-      event.target.value = '';
-      return;
-    }
-
-    const maxSizeInBytes = 5 * 1024 * 1024;
-    if (file.size > maxSizeInBytes) {
-      toast.error('Please upload an image under 5MB');
-      event.target.value = '';
-      return;
-    }
 
     try {
       setUploadingField(field);
@@ -100,7 +78,6 @@ const AdminDashboard: React.FC = () => {
         saleImage: homePageImages.saleImage,
       });
       setHomePageImages(updated);
-      setOriginalHomePageImages(updated);
       toast.success('Home page images updated');
     } catch (error) {
       console.error('Failed to save home page images:', error);
@@ -108,13 +85,6 @@ const AdminDashboard: React.FC = () => {
     } finally {
       setSavingImages(false);
     }
-  };
-
-
-  const resetHomePageImages = () => {
-    if (!originalHomePageImages) return;
-    setHomePageImages(originalHomePageImages);
-    toast.success('Changes reset');
   };
 
   if (isLoading) {
@@ -146,35 +116,20 @@ const AdminDashboard: React.FC = () => {
               <p className="text-sm text-gray-500">
                 Upload images for hero, men, women, collection, accessory, and sale sections.
               </p>
-              <p className={`text-xs mt-2 ${isDirty ? 'text-amber-600' : 'text-emerald-600'}`}>
-                {isDirty ? 'You have unsaved image changes.' : 'All image changes are saved.'}
-              </p>
             </div>
-            <div className="flex items-center gap-2">
-              <button
-                onClick={resetHomePageImages}
-                disabled={!isDirty || savingImages}
-                className="px-4 py-2 bg-gray-100 text-gray-700 rounded-md font-medium disabled:opacity-60"
-              >
-                Reset
-              </button>
-              <button
-                onClick={saveHomePageImages}
-                disabled={savingImages || !homePageImages || !isDirty}
-                className="px-4 py-2 bg-gray-900 text-white rounded-md font-medium disabled:opacity-60"
-              >
-                {savingImages ? 'Saving...' : 'Save Home Images'}
-              </button>
-            </div>
+            <button
+              onClick={saveHomePageImages}
+              disabled={savingImages || !homePageImages}
+              className="px-4 py-2 bg-gray-900 text-white rounded-md font-medium disabled:opacity-60"
+            >
+              {savingImages ? 'Saving...' : 'Save Home Images'}
+            </button>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
             {imageFieldConfig.map((item) => (
               <div key={item.key} className="border rounded-lg p-4 space-y-3">
-                <div>
-                  <div className="text-sm font-medium text-gray-700">{item.label}</div>
-                  <div className="text-xs text-gray-500">Recommended: {item.recommendedSize}</div>
-                </div>
+                <div className="text-sm font-medium text-gray-700">{item.label}</div>
                 <div className="aspect-[4/3] bg-gray-100 rounded-md overflow-hidden">
                   {homePageImages?.[item.key] ? (
                     <img
@@ -187,18 +142,6 @@ const AdminDashboard: React.FC = () => {
                       No image uploaded
                     </div>
                   )}
-                </div>
-                <div className="flex items-center justify-between gap-2">
-                  {homePageImages?.[item.key] ? (
-                    <a
-                      href={homePageImages[item.key]}
-                      target="_blank"
-                      rel="noreferrer"
-                      className="text-xs text-blue-600 hover:underline"
-                    >
-                      Open current image
-                    </a>
-                  ) : <span />}
                 </div>
                 <label className="inline-flex items-center gap-2 px-3 py-2 bg-gray-100 rounded-md text-sm cursor-pointer hover:bg-gray-200">
                   <FiUpload size={14} />
