@@ -1,29 +1,91 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { FiPackage, FiShoppingCart, FiUsers, FiDollarSign, FiAlertTriangle } from 'react-icons/fi';
+import { FiPackage, FiShoppingCart, FiUsers, FiDollarSign, FiAlertTriangle, FiUpload } from 'react-icons/fi';
+import toast from 'react-hot-toast';
 import AdminLayout from '../components/admin/AdminLayout';
 import { adminApi } from '../api/admin.api';
-import { DashboardStats } from '../types';
+import { DashboardStats, HomePageImages } from '../types';
 import { formatPrice, formatDate } from '../utils/formatters';
+
+const imageFieldConfig: Array<{ key: keyof HomePageImages; label: string }> = [
+  { key: 'heroImage', label: 'Hero Section Image' },
+  { key: 'menImage', label: "Men's Image" },
+  { key: 'womenImage', label: "Women's Image" },
+  { key: 'collectionImage', label: 'Collection Image' },
+  { key: 'accessoryImage', label: 'Accessory Image' },
+  { key: 'saleImage', label: 'Sale Image' },
+];
 
 const AdminDashboard: React.FC = () => {
   const [stats, setStats] = useState<DashboardStats | null>(null);
+  const [homePageImages, setHomePageImages] = useState<HomePageImages | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [uploadingField, setUploadingField] = useState<keyof HomePageImages | null>(null);
+  const [savingImages, setSavingImages] = useState(false);
 
   useEffect(() => {
-    const fetchStats = async () => {
+    const fetchDashboardData = async () => {
       try {
-        const data = await adminApi.getDashboardStats();
-        setStats(data);
+        const [statsData, imageData] = await Promise.all([
+          adminApi.getDashboardStats(),
+          adminApi.getHomePageImages(),
+        ]);
+        setStats(statsData);
+        setHomePageImages(imageData);
       } catch (error) {
-        console.error('Failed to fetch dashboard stats:', error);
+        console.error('Failed to fetch dashboard data:', error);
+        toast.error('Failed to load dashboard data');
       } finally {
         setIsLoading(false);
       }
     };
 
-    fetchStats();
+    fetchDashboardData();
   }, []);
+
+  const handleImageUpload = async (
+    field: keyof HomePageImages,
+    event: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    const file = event.target.files?.[0];
+    if (!file || !homePageImages) return;
+
+    try {
+      setUploadingField(field);
+      const imageUrl = await adminApi.uploadImage(file);
+      setHomePageImages((prev) => (prev ? { ...prev, [field]: imageUrl } : prev));
+      toast.success(`${imageFieldConfig.find((item) => item.key === field)?.label} uploaded`);
+    } catch (error) {
+      console.error(`Failed to upload ${field}:`, error);
+      toast.error('Image upload failed');
+    } finally {
+      setUploadingField(null);
+      event.target.value = '';
+    }
+  };
+
+  const saveHomePageImages = async () => {
+    if (!homePageImages) return;
+
+    try {
+      setSavingImages(true);
+      const updated = await adminApi.updateHomePageImages({
+        heroImage: homePageImages.heroImage,
+        menImage: homePageImages.menImage,
+        womenImage: homePageImages.womenImage,
+        collectionImage: homePageImages.collectionImage,
+        accessoryImage: homePageImages.accessoryImage,
+        saleImage: homePageImages.saleImage,
+      });
+      setHomePageImages(updated);
+      toast.success('Home page images updated');
+    } catch (error) {
+      console.error('Failed to save home page images:', error);
+      toast.error('Failed to save home page images');
+    } finally {
+      setSavingImages(false);
+    }
+  };
 
   if (isLoading) {
     return (
@@ -46,6 +108,56 @@ const AdminDashboard: React.FC = () => {
     <AdminLayout>
       <div className="space-y-6">
         <h2 className="text-2xl font-bold">Dashboard Overview</h2>
+
+        <div className="bg-white rounded-lg shadow-sm p-6 space-y-6">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+            <div>
+              <h3 className="text-lg font-semibold">Home Page Image Manager</h3>
+              <p className="text-sm text-gray-500">
+                Upload images for hero, men, women, collection, accessory, and sale sections.
+              </p>
+            </div>
+            <button
+              onClick={saveHomePageImages}
+              disabled={savingImages || !homePageImages}
+              className="px-4 py-2 bg-gray-900 text-white rounded-md font-medium disabled:opacity-60"
+            >
+              {savingImages ? 'Saving...' : 'Save Home Images'}
+            </button>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+            {imageFieldConfig.map((item) => (
+              <div key={item.key} className="border rounded-lg p-4 space-y-3">
+                <div className="text-sm font-medium text-gray-700">{item.label}</div>
+                <div className="aspect-[4/3] bg-gray-100 rounded-md overflow-hidden">
+                  {homePageImages?.[item.key] ? (
+                    <img
+                      src={homePageImages[item.key]}
+                      alt={item.label}
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center text-xs text-gray-500">
+                      No image uploaded
+                    </div>
+                  )}
+                </div>
+                <label className="inline-flex items-center gap-2 px-3 py-2 bg-gray-100 rounded-md text-sm cursor-pointer hover:bg-gray-200">
+                  <FiUpload size={14} />
+                  {uploadingField === item.key ? 'Uploading...' : 'Upload Image'}
+                  <input
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    onChange={(event) => handleImageUpload(item.key, event)}
+                    disabled={uploadingField === item.key}
+                  />
+                </label>
+              </div>
+            ))}
+          </div>
+        </div>
 
         {/* Stats Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">

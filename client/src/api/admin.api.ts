@@ -8,6 +8,7 @@ import {
   CreateProductData,
   UpdateProductData,
   ProductFilterOptions,
+  HomePageImages,
 } from '../types';
 
 // Product list response
@@ -21,6 +22,17 @@ export const adminApi = {
   // Dashboard
   getDashboardStats: async (): Promise<DashboardStats> => {
     const response = await api.get<ApiResponse<DashboardStats>>('/api/admin/dashboard');
+    return response.data.data!;
+  },
+
+
+  getHomePageImages: async (): Promise<HomePageImages> => {
+    const response = await api.get<ApiResponse<HomePageImages>>('/api/admin/homepage-images');
+    return response.data.data!;
+  },
+
+  updateHomePageImages: async (data: Partial<HomePageImages>): Promise<HomePageImages> => {
+    const response = await api.put<ApiResponse<HomePageImages>>('/api/admin/homepage-images', data);
     return response.data.data!;
   },
 
