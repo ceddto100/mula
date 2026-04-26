@@ -20,6 +20,9 @@ import AuthCallback from './pages/AuthCallback';
 import AdminDashboard from './pages/AdminDashboard';
 import AdminProducts from './pages/AdminProducts';
 import AdminOrders from './pages/AdminOrders';
+import SearchPage from './pages/SearchPage';
+import WishlistPage from './pages/WishlistPage';
+import InfoPage from './pages/InfoPage';
 
 const App: React.FC = () => {
   return (
@@ -46,6 +49,20 @@ const App: React.FC = () => {
             <Route path="/login" element={<LoginPage />} />
             <Route path="/register" element={<RegisterPage />} />
             <Route path="/auth/callback" element={<AuthCallback />} />
+            <Route path="/search" element={<SearchPage />} />
+            <Route path="/wishlist" element={<WishlistPage />} />
+            <Route path="/shipping" element={<InfoPage />} />
+            <Route path="/returns" element={<InfoPage />} />
+            <Route path="/faq" element={<InfoPage />} />
+            <Route path="/size-guide" element={<InfoPage />} />
+            <Route path="/contact" element={<InfoPage />} />
+            <Route path="/about" element={<InfoPage />} />
+            <Route path="/careers" element={<InfoPage />} />
+            <Route path="/stores" element={<InfoPage />} />
+            <Route path="/sustainability" element={<InfoPage />} />
+            <Route path="/privacy" element={<InfoPage />} />
+            <Route path="/terms" element={<InfoPage />} />
+            <Route path="/accessibility" element={<InfoPage />} />
 
             {/* Protected routes */}
             <Route

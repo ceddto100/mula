@@ -20,15 +20,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const refreshUser = useCallback(async () => {
     try {
-      const token = localStorage.getItem('token');
-      if (!token) {
-        setUser(null);
-        return;
-      }
       const userData = await authApi.getMe();
       setUser(userData);
     } catch (error) {
-      localStorage.removeItem('token');
       setUser(null);
     }
   }, []);
@@ -43,13 +37,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const login = async (email: string, password: string) => {
     const response = await authApi.login({ email, password });
-    localStorage.setItem('token', response.token);
     setUser(response.user);
   };
 
   const register = async (email: string, password: string, name: string) => {
     const response = await authApi.register({ email, password, name });
-    localStorage.setItem('token', response.token);
     setUser(response.user);
   };
 
@@ -59,7 +51,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     } catch (error) {
       // Ignore logout errors
     }
-    localStorage.removeItem('token');
     setUser(null);
   };
 

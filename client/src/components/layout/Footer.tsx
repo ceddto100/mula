@@ -1,8 +1,23 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { FiInstagram, FiFacebook, FiTwitter, FiYoutube } from 'react-icons/fi';
+import toast from 'react-hot-toast';
 
 const Footer: React.FC = () => {
+  const [email, setEmail] = useState('');
+
+  const handleNewsletterSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!email.trim()) {
+      toast.error('Please enter an email address.');
+      return;
+    }
+    const existing = JSON.parse(localStorage.getItem('newsletter_signups') || '[]');
+    localStorage.setItem('newsletter_signups', JSON.stringify([...new Set([...existing, email.trim()])]));
+    toast.success('Thanks for subscribing!');
+    setEmail('');
+  };
+
   return (
     <footer className="bg-white border-t border-gray-200">
       {/* Main Footer */}
@@ -156,10 +171,12 @@ const Footer: React.FC = () => {
             </div>
 
             <h4 className="text-xs tracking-wider font-medium mb-3">SIGN UP FOR EMAILS</h4>
-            <form className="flex">
+            <form className="flex" onSubmit={handleNewsletterSubmit}>
               <input
                 type="email"
                 placeholder="Email Address"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
                 className="flex-1 px-4 py-2 text-sm border border-gray-300 border-r-0 focus:outline-none focus:border-gray-900"
               />
               <button

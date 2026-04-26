@@ -4,6 +4,7 @@ import { cartApi, AddToCartData } from '../api/cart.api';
 import { useAuth } from './AuthContext';
 import toast from 'react-hot-toast';
 import { getProductPrice } from '../utils/productView';
+import { trackEvent } from '../utils/analytics';
 
 interface CartContextType {
   cart: Cart | null;
@@ -49,6 +50,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setIsLoading(true);
       const updatedCart = await cartApi.addToCart(data);
       setCart(updatedCart);
+      trackEvent('add_to_cart', { product_id: data.productId, quantity: data.quantity });
       toast.success('Added to cart!');
     } catch (error: any) {
       toast.error(error.response?.data?.message || 'Failed to add to cart');
@@ -76,6 +78,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setIsLoading(true);
       const updatedCart = await cartApi.removeFromCart(itemId);
       setCart(updatedCart);
+      trackEvent('remove_from_cart', { item_id: itemId });
       toast.success('Item removed from cart');
     } catch (error: any) {
       toast.error(error.response?.data?.message || 'Failed to remove item');

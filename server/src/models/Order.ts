@@ -7,7 +7,12 @@ const orderItemSchema = new Schema({
     ref: 'Product',
     required: true,
   },
+  variantId: {
+    type: Schema.Types.ObjectId,
+    required: false,
+  },
   name: { type: String, required: true },
+  sku: { type: String },
   price: { type: Number, required: true },
   quantity: { type: Number, required: true, min: 1 },
   size: { type: String, required: true },
