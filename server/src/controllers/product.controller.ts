@@ -1,7 +1,36 @@
 import { Request, Response } from 'express';
 import Product from '../models/Product';
+import HomePageImages from '../models/HomePageImages';
 import { ProductFilter } from '../types';
 import { getPriceRange, getTotalInventory, isInStock } from '../utils/product.utils';
+
+
+
+// Get home page image configuration
+export const getHomePageImages = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const config = await HomePageImages.findOne();
+
+    if (!config) {
+      const defaultConfig = await HomePageImages.create({});
+      res.json({
+        success: true,
+        data: defaultConfig,
+      });
+      return;
+    }
+
+    res.json({
+      success: true,
+      data: config,
+    });
+  } catch (error: any) {
+    res.status(500).json({
+      success: false,
+      message: error.message || 'Error fetching home page images',
+    });
+  }
+};
 
 // Get all active products with filtering and pagination
 export const getProducts = async (req: Request, res: Response): Promise<void> => {
