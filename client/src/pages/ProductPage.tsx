@@ -44,7 +44,7 @@ const ProductPage: React.FC = () => {
   // Related products
   const { products: relatedProducts } = useProducts(categoryFilters);
 
-  const filteredRelatedProducts = relatedProducts.filter((p) => p._id !== id);
+  const filteredRelatedProducts = relatedProducts.filter((p) => p._id !== product?._id);
 
   const handleAddToCart = async () => {
     if (!product) return;

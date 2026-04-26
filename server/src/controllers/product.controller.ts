@@ -60,6 +60,7 @@ export const getProducts = async (req: Request, res: Response): Promise<void> =>
       page = 1,
       limit = 12,
       productType,
+      category,
       vendor,
       minPrice,
       maxPrice,
@@ -76,8 +77,8 @@ export const getProducts = async (req: Request, res: Response): Promise<void> =>
     // Build filter - only active products for public
     const filter: any = { status: 'active' };
 
-    if (productType) {
-      filter.productType = productType;
+    if (productType || category) {
+      filter.productType = (productType || category) as string;
     }
 
     if (vendor) {
