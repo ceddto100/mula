@@ -84,6 +84,13 @@ const ProductPage: React.FC = () => {
     toast.success(added ? 'Added to wishlist' : 'Removed from wishlist');
   };
 
+  const productName = product ? getProductName(product) : 'Product';
+  const productDescription = product ? getProductDescription(product) : '';
+  useSeo(
+    product ? `${productName} | Cualquier` : 'Product | Cualquier',
+    productDescription || (product ? `Shop ${productName} from Cualquier.` : 'Browse product details from Cualquier.'),
+  );
+
   if (isLoading) {
     return (
       <Layout>
@@ -114,15 +121,12 @@ const ProductPage: React.FC = () => {
     );
   }
 
-  const productName = getProductName(product);
   const productPrice = getProductPrice(product);
   const productStock = getProductStock(product);
-  const productDescription = getProductDescription(product);
   const productCategory = getProductCategory(product);
   const productImages = getProductImageUrls(product);
   const productSizes = getProductSizes(product);
   const productColors = getProductColors(product);
-  useSeo(`${productName} | Cualquier`, productDescription || `Shop ${productName} from Cualquier.`);
 
   return (
     <Layout>
