@@ -160,6 +160,61 @@ export interface HomePageImages {
   saleImage: string;
 }
 
+export interface HeroContent {
+  badge: string;
+  headline1: string;
+  headline2: string;
+  subheading: string;
+  ctaPrimary: string;
+  ctaSecondary: string;
+  scrollLabel: string;
+}
+
+export interface CategoryCardContent {
+  badge?: string;
+  title: string;
+  description?: string;
+  linkText: string;
+}
+
+export interface ShopByStyleContent {
+  sectionTitle: string;
+  men: CategoryCardContent;
+  women: CategoryCardContent;
+  accessories: CategoryCardContent;
+  sale: CategoryCardContent;
+  collections: CategoryCardContent;
+}
+
+export interface FreshDropsContent {
+  badge: string;
+  sectionTitle: string;
+  viewAllLink: string;
+}
+
+export interface BrandStatementContent {
+  headlineLine1: string;
+  headlineLine2: string;
+  description: string;
+  ctaButton: string;
+}
+
+export interface NewsletterContent {
+  title: string;
+  description: string;
+  emailPlaceholder: string;
+  submitButton: string;
+}
+
+export interface HomePageContent {
+  _id?: string;
+  hero: HeroContent;
+  shopByStyle: ShopByStyleContent;
+  freshDrops: FreshDropsContent;
+  brandStatement: BrandStatementContent;
+  newsletter: NewsletterContent;
+}
+
 // Cart Types
 export interface CartItem {
   _id: string;

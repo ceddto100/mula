@@ -4,6 +4,7 @@ import Product from '../models/Product';
 import Order from '../models/Order';
 import User from '../models/User';
 import HomePageImages from '../models/HomePageImages';
+import HomePageContent from '../models/HomePageContent';
 import { AuthRequest, CreateProductInput, UpdateProductInput } from '../types';
 import { cloudinary } from '../config/cloudinary';
 import {
@@ -121,6 +122,45 @@ export const updateHomePageImages = async (req: Request, res: Response): Promise
     res.status(500).json({
       success: false,
       message: error.message || 'Error updating home page images',
+    });
+  }
+};
+
+const getOrCreateHomePageContent = async () => {
+  const existing = await HomePageContent.findOne();
+  if (existing) {
+    return existing;
+  }
+  return HomePageContent.create({});
+};
+
+export const getAdminHomePageContent = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const content = await getOrCreateHomePageContent();
+    res.json({ success: true, data: content });
+  } catch (error: any) {
+    res.status(500).json({
+      success: false,
+      message: error.message || 'Error fetching home page content',
+    });
+  }
+};
+
+export const updateHomePageContent = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const content = await getOrCreateHomePageContent();
+
+    const updated = await HomePageContent.findByIdAndUpdate(
+      content._id,
+      { $set: req.body },
+      { new: true, runValidators: true }
+    );
+
+    res.json({ success: true, data: updated });
+  } catch (error: any) {
+    res.status(500).json({
+      success: false,
+      message: error.message || 'Error updating home page content',
     });
   }
 };

@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { FiPackage, FiShoppingCart, FiUsers, FiDollarSign, FiAlertTriangle, FiUpload } from 'react-icons/fi';
 import toast from 'react-hot-toast';
 import AdminLayout from '../components/admin/AdminLayout';
+import HomePageContentEditor from '../components/admin/HomePageContentEditor';
 import { adminApi } from '../api/admin.api';
 import { DashboardStats, HomePageImages } from '../types';
 import { formatPrice, formatDate } from '../utils/formatters';
@@ -158,6 +159,8 @@ const AdminDashboard: React.FC = () => {
             ))}
           </div>
         </div>
+
+        <HomePageContentEditor />
 
         {/* Stats Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">

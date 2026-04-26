@@ -15,6 +15,7 @@ import {
   searchProducts,
   getFilterOptions,
   getHomePageImages,
+  getHomePageContent,
 } from '../controllers/product.controller';
 import { validateRequest } from '../middleware/validateRequest';
 import { handleValidation, productQueryValidation } from '../utils/validators';
@@ -31,6 +32,7 @@ router.get('/search', searchProducts);
 // Filter options
 router.get('/filters', getFilterOptions);
 router.get('/homepage-images', getHomePageImages);
+router.get('/homepage-content', getHomePageContent);
 
 // Taxonomy
 router.get('/categories', getCategories);
