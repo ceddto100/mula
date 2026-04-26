@@ -23,9 +23,11 @@ import { wishlistStore } from '../utils/wishlist';
 import { useSeo } from '../hooks/useSeo';
 
 const ProductPage: React.FC = () => {
-  const { id } = useParams<{ id: string }>();
+  const { id, handle } = useParams<{ id?: string; handle?: string }>();
+  const productIdentifier = id || handle || '';
+  const isHandleRoute = Boolean(handle && !id);
   const navigate = useNavigate();
-  const { product, isLoading, error } = useProduct(id || '');
+  const { product, isLoading, error } = useProduct(productIdentifier, isHandleRoute);
   const { addToCart, isLoading: cartLoading } = useCart();
   const { isAuthenticated } = useAuth();
   const categoryFilters = product ? { category: getProductCategory(product), limit: 4 } : { limit: 4 };
@@ -33,11 +35,11 @@ const ProductPage: React.FC = () => {
   const [selectedSize, setSelectedSize] = useState<string>('');
   const [selectedColor, setSelectedColor] = useState<string>('');
   const [quantity, setQuantity] = useState(1);
-  const [isWishlisted, setIsWishlisted] = useState<boolean>(id ? wishlistStore.has(id) : false);
+  const [isWishlisted, setIsWishlisted] = useState<boolean>(false);
 
   useEffect(() => {
-    setIsWishlisted(id ? wishlistStore.has(id) : false);
-  }, [id]);
+    setIsWishlisted(product?._id ? wishlistStore.has(product._id) : false);
+  }, [product?._id]);
 
   // Related products
   const { products: relatedProducts } = useProducts(categoryFilters);
@@ -45,9 +47,11 @@ const ProductPage: React.FC = () => {
   const filteredRelatedProducts = relatedProducts.filter((p) => p._id !== id);
 
   const handleAddToCart = async () => {
+    if (!product) return;
+
     if (!isAuthenticated) {
       toast.error('Please login to add items to cart');
-      navigate(`/login?redirect=/product/${id}`);
+      navigate(`/login?redirect=/products/${productIdentifier}`);
       return;
     }
 
@@ -63,7 +67,7 @@ const ProductPage: React.FC = () => {
 
     try {
       await addToCart({
-        productId: id!,
+        productId: product._id,
         quantity,
         size: selectedSize,
         color: selectedColor,
@@ -74,8 +78,8 @@ const ProductPage: React.FC = () => {
   };
 
   const handleWishlistToggle = () => {
-    if (!id) return;
-    const added = wishlistStore.toggle(id);
+    if (!product?._id) return;
+    const added = wishlistStore.toggle(product._id);
     setIsWishlisted(added);
     toast.success(added ? 'Added to wishlist' : 'Removed from wishlist');
   };
