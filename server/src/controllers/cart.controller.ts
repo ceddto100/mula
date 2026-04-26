@@ -128,6 +128,7 @@ export const addToCart = async (req: AuthRequest, res: Response): Promise<void> 
     const existingItemIndex = cart.items.findIndex(
       (item) =>
         item.productId.toString() === productId &&
+        (!variant?._id || item.variantId?.toString() === variant._id.toString()) &&
         item.size === size &&
         item.color === color
     );
@@ -137,7 +138,13 @@ export const addToCart = async (req: AuthRequest, res: Response): Promise<void> 
       cart.items[existingItemIndex].quantity += quantity;
     } else {
       // Add new item
-      cart.items.push({ productId, quantity, size, color });
+      cart.items.push({
+        productId,
+        variantId: variant?._id,
+        quantity,
+        size,
+        color,
+      });
     }
 
     await cart.save();

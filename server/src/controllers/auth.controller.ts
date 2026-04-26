@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
 import User from '../models/User';
-import { generateToken } from '../utils/jwt';
+import { clearAuthCookie, generateToken, setAuthCookie } from '../utils/jwt';
 import { getUserRole } from '../utils/adminEmails';
 import { AuthRequest } from '../types';
 
@@ -27,8 +27,8 @@ export const register = async (req: Request, res: Response): Promise<void> => {
       role: getUserRole(email),
     });
 
-    // Generate token
     const token = generateToken(user);
+    setAuthCookie(res, token);
 
     res.status(201).json({
       success: true,
@@ -39,7 +39,6 @@ export const register = async (req: Request, res: Response): Promise<void> => {
           name: user.name,
           role: user.role,
         },
-        token,
       },
     });
   } catch (error: any) {
@@ -85,8 +84,8 @@ export const login = async (req: Request, res: Response): Promise<void> => {
       return;
     }
 
-    // Generate token
     const token = generateToken(user);
+    setAuthCookie(res, token);
 
     res.json({
       success: true,
@@ -97,7 +96,6 @@ export const login = async (req: Request, res: Response): Promise<void> => {
           name: user.name,
           role: user.role,
         },
-        token,
       },
     });
   } catch (error: any) {
@@ -116,11 +114,9 @@ export const googleCallback = async (req: AuthRequest, res: Response): Promise<v
       return;
     }
 
-    // Generate token
     const token = generateToken(req.user);
-
-    // Redirect to frontend with token
-    res.redirect(`${process.env.CLIENT_URL}/auth/callback?token=${token}`);
+    setAuthCookie(res, token);
+    res.redirect(`${process.env.CLIENT_URL}/auth/callback`);
   } catch (error) {
     res.redirect(`${process.env.CLIENT_URL}/auth/callback?error=auth_failed`);
   }
@@ -164,6 +160,7 @@ export const logout = async (req: Request, res: Response): Promise<void> => {
       console.error('Logout error:', err);
     }
   });
+  clearAuthCookie(res);
 
   res.json({
     success: true,

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { FiMinus, FiPlus, FiHeart, FiShare2 } from 'react-icons/fi';
 import Layout from '../components/layout/Layout';
@@ -19,6 +19,8 @@ import {
   getProductStock,
 } from '../utils/productView';
 import toast from 'react-hot-toast';
+import { wishlistStore } from '../utils/wishlist';
+import { useSeo } from '../hooks/useSeo';
 
 const ProductPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -31,6 +33,11 @@ const ProductPage: React.FC = () => {
   const [selectedSize, setSelectedSize] = useState<string>('');
   const [selectedColor, setSelectedColor] = useState<string>('');
   const [quantity, setQuantity] = useState(1);
+  const [isWishlisted, setIsWishlisted] = useState<boolean>(id ? wishlistStore.has(id) : false);
+
+  useEffect(() => {
+    setIsWishlisted(id ? wishlistStore.has(id) : false);
+  }, [id]);
 
   // Related products
   const { products: relatedProducts } = useProducts(categoryFilters);
@@ -64,6 +71,13 @@ const ProductPage: React.FC = () => {
     } catch (error) {
       // Error is handled in context
     }
+  };
+
+  const handleWishlistToggle = () => {
+    if (!id) return;
+    const added = wishlistStore.toggle(id);
+    setIsWishlisted(added);
+    toast.success(added ? 'Added to wishlist' : 'Removed from wishlist');
   };
 
   if (isLoading) {
@@ -104,6 +118,7 @@ const ProductPage: React.FC = () => {
   const productImages = getProductImageUrls(product);
   const productSizes = getProductSizes(product);
   const productColors = getProductColors(product);
+  useSeo(`${productName} | Cualquier`, productDescription || `Shop ${productName} from Cualquier.`);
 
   return (
     <Layout>
@@ -218,7 +233,12 @@ const ProductPage: React.FC = () => {
               >
                 {productStock === 0 ? 'Out of Stock' : cartLoading ? 'Adding...' : 'Add to Cart'}
               </button>
-              <button className="p-4 border border-gray-300 rounded-md hover:border-gray-900 transition-colors">
+              <button
+                onClick={handleWishlistToggle}
+                className={`p-4 border rounded-md transition-colors ${
+                  isWishlisted ? 'border-brand-900 bg-brand-900 text-white' : 'border-gray-300 hover:border-gray-900'
+                }`}
+              >
                 <FiHeart size={24} />
               </button>
               <button className="p-4 border border-gray-300 rounded-md hover:border-gray-900 transition-colors">

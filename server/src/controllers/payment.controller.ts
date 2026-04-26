@@ -5,6 +5,17 @@ import Cart from '../models/Cart';
 import Product from '../models/Product';
 import { AuthRequest, IOrderItem } from '../types';
 
+const findVariantBySelection = (product: any, item: any) => {
+  if (item.variantId) {
+    return product.variants.find((variant: any) => variant._id.toString() === item.variantId.toString());
+  }
+  return product.variants.find((variant: any) => {
+    const size = variant.options?.find((opt: any) => opt.name.toLowerCase() === 'size')?.value;
+    const color = variant.options?.find((opt: any) => opt.name.toLowerCase() === 'color')?.value;
+    return size === item.size && color === item.color;
+  });
+};
+
 // Create Stripe checkout session
 export const createCheckoutSession = async (req: AuthRequest, res: Response): Promise<void> => {
   try {
@@ -21,7 +32,7 @@ export const createCheckoutSession = async (req: AuthRequest, res: Response): Pr
     // Get user's cart
     const cart = await Cart.findOne({ userId: req.user._id }).populate({
       path: 'items.productId',
-      select: 'name price images stock',
+      select: 'title variants images',
     });
 
     if (!cart || cart.items.length === 0) {
@@ -39,43 +50,59 @@ export const createCheckoutSession = async (req: AuthRequest, res: Response): Pr
 
     for (const item of cart.items) {
       const product = item.productId as any;
+      const selectedVariant = findVariantBySelection(product, item);
 
-      if (!product || product.stock < item.quantity) {
+      if (!product || !selectedVariant) {
         res.status(400).json({
           success: false,
-          message: `Product ${product?.name || 'unknown'} is out of stock`,
+          message: `Product ${product?.title || 'unknown'} variant is unavailable`,
         });
         return;
       }
 
-      const itemTotal = product.price * item.quantity;
+      if (
+        selectedVariant.inventoryPolicy === 'deny' &&
+        selectedVariant.inventoryQuantity < item.quantity
+      ) {
+        res.status(400).json({
+          success: false,
+          message: `Product ${product?.title || 'unknown'} is out of stock`,
+        });
+        return;
+      }
+
+      const unitPrice = Number(selectedVariant.price || 0);
+      const itemTotal = unitPrice * item.quantity;
       totalAmount += itemTotal;
 
       lineItems.push({
         price_data: {
           currency: 'usd',
           product_data: {
-            name: product.name,
-            images: product.images?.slice(0, 1) || [],
+            name: `${product.title}${selectedVariant.title ? ` - ${selectedVariant.title}` : ''}`,
+            images: product.images?.slice(0, 1).map((img: any) => img.url) || [],
             metadata: {
               productId: product._id.toString(),
+              variantId: selectedVariant._id?.toString() || '',
               size: item.size,
               color: item.color,
             },
           },
-          unit_amount: Math.round(product.price * 100), // Stripe expects cents
+          unit_amount: Math.round(unitPrice * 100), // Stripe expects cents
         },
         quantity: item.quantity,
       });
 
       orderItems.push({
         productId: product._id,
-        name: product.name,
-        price: product.price,
+        variantId: selectedVariant._id,
+        sku: selectedVariant.sku,
+        name: product.title,
+        price: unitPrice,
         quantity: item.quantity,
         size: item.size,
         color: item.color,
-        image: product.images?.[0] || '',
+        image: product.images?.[0]?.url || '',
       });
     }
 
@@ -208,11 +235,15 @@ async function handleSuccessfulPayment(session: any): Promise<void> {
     order.stripePaymentIntentId = session.payment_intent;
     await order.save();
 
-    // Update product stock
+    // Update product variant inventory
     for (const item of order.items) {
-      await Product.findByIdAndUpdate(item.productId, {
-        $inc: { stock: -item.quantity },
-      });
+      if (!item.variantId) {
+        continue;
+      }
+      await Product.updateOne(
+        { _id: item.productId, 'variants._id': item.variantId },
+        { $inc: { 'variants.$.inventoryQuantity': -item.quantity } }
+      );
     }
 
     // Clear user's cart
