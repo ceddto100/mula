@@ -40,14 +40,76 @@ connectDB();
  * - For cookie-based auth (sessions), credentials must be true
  * - origin must be an exact string (not "*") when credentials is true
  */
-const CLIENT_URL = process.env.CLIENT_URL || "http://localhost:5173";
+const clientOrigins = (process.env.CLIENT_URL || "http://localhost:5173")
+  .split(",")
+  .map((origin) => origin.trim())
+  .filter(Boolean);
 app.use(
   cors({
-    origin: CLIENT_URL,
+    origin: (origin, callback) => {
+      if (!origin || clientOrigins.includes(origin)) {
+        return callback(null, true);
+      }
+      return callback(new Error("CORS origin not allowed"));
+    },
     credentials: true,
     methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization"],
   })
+);
+
+app.use((req, res, next) => {
+  res.setHeader("X-Content-Type-Options", "nosniff");
+  res.setHeader("X-Frame-Options", "DENY");
+  res.setHeader("Referrer-Policy", "no-referrer");
+  res.setHeader("Permissions-Policy", "geolocation=(), microphone=(), camera=()");
+  res.setHeader("Strict-Transport-Security", "max-age=63072000; includeSubDomains; preload");
+  next();
+});
+
+type RateLimitBucket = { count: number; resetAt: number };
+const globalRateLimit = new Map<string, RateLimitBucket>();
+const authRateLimit = new Map<string, RateLimitBucket>();
+
+const buildLimiter =
+  (store: Map<string, RateLimitBucket>, windowMs: number, max: number) =>
+  (req: express.Request, res: express.Response, next: express.NextFunction) => {
+    const key = req.ip || "unknown";
+    const now = Date.now();
+    const bucket = store.get(key);
+
+    if (!bucket || bucket.resetAt < now) {
+      store.set(key, { count: 1, resetAt: now + windowMs });
+      return next();
+    }
+
+    if (bucket.count >= max) {
+      res.status(429).json({
+        success: false,
+        message: "Too many requests. Please try again later.",
+      });
+      return;
+    }
+
+    bucket.count += 1;
+    next();
+  };
+
+app.use(
+  buildLimiter(
+    globalRateLimit,
+    Number(process.env.RATE_LIMIT_WINDOW_MS || 15 * 60 * 1000),
+    Number(process.env.RATE_LIMIT_MAX_REQUESTS || 300)
+  )
+);
+
+app.use(
+  "/api/auth",
+  buildLimiter(
+    authRateLimit,
+    Number(process.env.AUTH_RATE_LIMIT_WINDOW_MS || 15 * 60 * 1000),
+    Number(process.env.AUTH_RATE_LIMIT_MAX_REQUESTS || 20)
+  )
 );
 
 /**
@@ -136,7 +198,7 @@ app.use(errorHandler);
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
   console.log(`Environment: ${process.env.NODE_ENV || "development"}`);
-  console.log(`CORS origin: ${CLIENT_URL}`);
+  console.log(`CORS origins: ${clientOrigins.join(", ")}`);
 });
 
 export default app;

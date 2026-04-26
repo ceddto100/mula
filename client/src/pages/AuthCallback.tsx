@@ -10,7 +10,6 @@ const AuthCallback: React.FC = () => {
 
   useEffect(() => {
     const handleCallback = async () => {
-      const token = searchParams.get('token');
       const error = searchParams.get('error');
 
       if (error) {
@@ -19,13 +18,12 @@ const AuthCallback: React.FC = () => {
         return;
       }
 
-      if (token) {
-        localStorage.setItem('token', token);
+      try {
         await refreshUser();
         toast.success('Welcome!');
         navigate('/');
-      } else {
-        toast.error('No token received');
+      } catch {
+        toast.error('Could not complete authentication.');
         navigate('/login');
       }
     };

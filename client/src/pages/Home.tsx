@@ -4,10 +4,12 @@ import { FiArrowRight, FiArrowUpRight } from 'react-icons/fi';
 import Layout from '../components/layout/Layout';
 import ProductGrid from '../components/product/ProductGrid';
 import { useFeaturedProducts } from '../hooks/useProducts';
+import { useSeo } from '../hooks/useSeo';
 
 const Home: React.FC = () => {
   const { products: featuredProducts, isLoading } = useFeaturedProducts(8);
   const observerRef = useRef<IntersectionObserver | null>(null);
+  useSeo('Cualquier — Contemporary Urban Fashion', 'Street-inspired fashion drops and curated collections.');
 
   useEffect(() => {
     observerRef.current = new IntersectionObserver(

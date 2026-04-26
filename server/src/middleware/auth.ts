@@ -1,5 +1,5 @@
 import { Response, NextFunction } from 'express';
-import { verifyToken } from '../utils/jwt';
+import { getAuthCookieName, verifyToken } from '../utils/jwt';
 import User from '../models/User';
 import { AuthRequest } from '../types';
 
@@ -11,16 +11,19 @@ export const auth = async (
   try {
     // Get token from header
     const authHeader = req.headers.authorization;
+    const cookieToken = req.cookies?.[getAuthCookieName()];
+    const bearerToken = authHeader?.startsWith('Bearer ')
+      ? authHeader.split(' ')[1]
+      : null;
+    const token = bearerToken || cookieToken;
 
-    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+    if (!token) {
       res.status(401).json({
         success: false,
         message: 'Access denied. No token provided.',
       });
       return;
     }
-
-    const token = authHeader.split(' ')[1];
 
     // Verify token
     const decoded = verifyToken(token);
@@ -63,12 +66,15 @@ export const optionalAuth = async (
 ): Promise<void> => {
   try {
     const authHeader = req.headers.authorization;
+    const cookieToken = req.cookies?.[getAuthCookieName()];
+    const bearerToken = authHeader?.startsWith('Bearer ')
+      ? authHeader.split(' ')[1]
+      : null;
+    const token = bearerToken || cookieToken;
 
-    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+    if (!token) {
       return next();
     }
-
-    const token = authHeader.split(' ')[1];
     const decoded = verifyToken(token);
 
     if (decoded) {
