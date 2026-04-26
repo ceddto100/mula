@@ -137,10 +137,10 @@ const Home: React.FC = () => {
       </section>
 
       {/* Bold Category Grid - Asymmetric Layout */}
-      <section className="relative py-24 bg-white animate-on-scroll opacity-0 translate-y-12 transition-all duration-1000">
+      <section className="relative py-24 bg-transparent animate-on-scroll opacity-0 translate-y-12 transition-all duration-1000">
         <div className="max-w-7xl mx-auto px-4">
           <div className="mb-16 text-center">
-            <h2 className="text-6xl md:text-7xl font-display text-brand-900 mb-4">SHOP BY STYLE</h2>
+            <h2 className="text-6xl md:text-7xl font-display text-white mb-4 drop-shadow-[0_2px_12px_rgba(0,0,0,0.6)]">SHOP BY STYLE</h2>
             <div className="w-24 h-1 bg-accent-electric mx-auto" />
           </div>
 
@@ -253,18 +253,18 @@ const Home: React.FC = () => {
       </section>
 
       {/* Featured Products with Bold Header */}
-      <section className="py-24 bg-brand-50 animate-on-scroll opacity-0 translate-y-12 transition-all duration-1000">
+      <section className="py-24 bg-transparent animate-on-scroll opacity-0 translate-y-12 transition-all duration-1000">
         <div className="max-w-7xl mx-auto px-4">
           <div className="mb-16 flex flex-col lg:flex-row lg:items-end lg:justify-between gap-6">
             <div>
               <div className="inline-block bg-accent-electric text-brand-900 px-4 py-1 text-sm font-grotesk font-bold mb-4">
                 NEW ARRIVALS
               </div>
-              <h2 className="text-6xl md:text-7xl font-display text-brand-900">FRESH DROPS</h2>
+              <h2 className="text-6xl md:text-7xl font-display text-white drop-shadow-[0_2px_12px_rgba(0,0,0,0.6)]">FRESH DROPS</h2>
             </div>
             <Link
               to="/category/new-arrivals"
-              className="group inline-flex items-center gap-3 text-brand-900 font-grotesk font-bold text-lg border-b-2 border-brand-900 pb-2 hover:border-accent-electric hover:text-accent-electric transition-all"
+              className="group inline-flex items-center gap-3 text-white font-grotesk font-bold text-lg border-b-2 border-white pb-2 hover:border-accent-electric hover:text-accent-electric transition-all"
             >
               VIEW ALL
               <FiArrowRight className="group-hover:translate-x-2 transition-transform" size={24} />
@@ -276,8 +276,8 @@ const Home: React.FC = () => {
       </section>
 
       {/* Bold Brand Statement Section */}
-      <section className="relative py-32 bg-brand-900 overflow-hidden animate-on-scroll opacity-0 translate-y-12 transition-all duration-1000">
-        <div className="absolute inset-0 bg-gradient-to-r from-brand-900 via-brand-700 to-brand-900 animate-gradient" />
+      <section className="relative py-32 bg-transparent overflow-hidden animate-on-scroll opacity-0 translate-y-12 transition-all duration-1000">
+        <div className="absolute inset-0 bg-gradient-to-r from-brand-900/40 via-brand-700/30 to-brand-900/40 animate-gradient" />
 
         {/* Large Background Text */}
         <div className="absolute inset-0 flex items-center justify-center opacity-10 overflow-hidden">
@@ -305,7 +305,7 @@ const Home: React.FC = () => {
       </section>
 
       {/* Newsletter - Bold CTA */}
-      <section className="py-20 bg-white animate-on-scroll opacity-0 translate-y-12 transition-all duration-1000">
+      <section className="py-20 bg-transparent animate-on-scroll opacity-0 translate-y-12 transition-all duration-1000">
         <div className="max-w-4xl mx-auto px-4">
           <div className="bg-gradient-to-br from-brand-500 to-brand-700 p-12 lg:p-16 relative overflow-hidden">
             {/* Arrow Pattern */}
