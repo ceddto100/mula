@@ -1,6 +1,7 @@
 import { Request, Response } from 'express';
 import Product from '../models/Product';
 import HomePageImages from '../models/HomePageImages';
+import HomePageContent from '../models/HomePageContent';
 import { ProductFilter } from '../types';
 import { getPriceRange, getTotalInventory, isInStock } from '../utils/product.utils';
 
@@ -28,6 +29,26 @@ export const getHomePageImages = async (req: Request, res: Response): Promise<vo
     res.status(500).json({
       success: false,
       message: error.message || 'Error fetching home page images',
+    });
+  }
+};
+
+// Get home page text content
+export const getHomePageContent = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const config = await HomePageContent.findOne();
+
+    if (!config) {
+      const defaultConfig = await HomePageContent.create({});
+      res.json({ success: true, data: defaultConfig });
+      return;
+    }
+
+    res.json({ success: true, data: config });
+  } catch (error: any) {
+    res.status(500).json({
+      success: false,
+      message: error.message || 'Error fetching home page content',
     });
   }
 };

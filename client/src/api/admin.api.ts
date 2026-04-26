@@ -9,6 +9,7 @@ import {
   UpdateProductData,
   ProductFilterOptions,
   HomePageImages,
+  HomePageContent,
 } from '../types';
 
 // Product list response
@@ -33,6 +34,16 @@ export const adminApi = {
 
   updateHomePageImages: async (data: Partial<HomePageImages>): Promise<HomePageImages> => {
     const response = await api.put<ApiResponse<HomePageImages>>('/api/admin/homepage-images', data);
+    return response.data.data!;
+  },
+
+  getHomePageContent: async (): Promise<HomePageContent> => {
+    const response = await api.get<ApiResponse<HomePageContent>>('/api/admin/homepage-content');
+    return response.data.data!;
+  },
+
+  updateHomePageContent: async (data: Partial<HomePageContent>): Promise<HomePageContent> => {
+    const response = await api.put<ApiResponse<HomePageContent>>('/api/admin/homepage-content', data);
     return response.data.data!;
   },
 

@@ -17,6 +17,8 @@ import {
   deleteImage,
   getAdminHomePageImages,
   updateHomePageImages,
+  getAdminHomePageContent,
+  updateHomePageContent,
 } from '../controllers/admin.controller';
 import { auth } from '../middleware/auth';
 import { adminAuth } from '../middleware/adminAuth';
@@ -38,6 +40,8 @@ router.use(adminAuth);
 router.get('/dashboard', getDashboardStats);
 router.get('/homepage-images', getAdminHomePageImages);
 router.put('/homepage-images', updateHomePageImages);
+router.get('/homepage-content', getAdminHomePageContent);
+router.put('/homepage-content', updateHomePageContent);
 
 // Products (Shopify-style)
 router.get('/products', getAdminProducts);

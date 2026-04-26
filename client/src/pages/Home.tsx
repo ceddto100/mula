@@ -6,7 +6,7 @@ import ProductGrid from '../components/product/ProductGrid';
 import { useFeaturedProducts } from '../hooks/useProducts';
 import { useSeo } from '../hooks/useSeo';
 import { productsApi } from '../api/products.api';
-import { HomePageImages } from '../types';
+import { HomePageImages, HomePageContent } from '../types';
 
 const defaultHomePageImages: HomePageImages = {
   heroImage: 'https://images.unsplash.com/photo-1490481651871-ab68de25d43d?auto=format&fit=crop&q=80&w=2070',
@@ -17,10 +17,50 @@ const defaultHomePageImages: HomePageImages = {
   saleImage: 'https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?auto=format&fit=crop&q=80&w=600',
 };
 
+export const defaultHomePageContent: HomePageContent = {
+  hero: {
+    badge: 'NEW COLLECTION 2025',
+    headline1: 'URBAN',
+    headline2: 'EVOLUTION',
+    subheading:
+      'Street-inspired designs meet contemporary fashion. Bold statements for the modern individual.',
+    ctaPrimary: 'SHOP NOW',
+    ctaSecondary: 'EXPLORE',
+    scrollLabel: 'SCROLL',
+  },
+  shopByStyle: {
+    sectionTitle: 'SHOP BY STYLE',
+    men: { badge: 'TRENDING', title: "MEN'S", description: 'Bold. Confident. Urban.', linkText: 'DISCOVER' },
+    women: { badge: '', title: "WOMEN'S", description: 'Fierce & Elegant', linkText: 'SHOP' },
+    accessories: { badge: '', title: 'ACCESSORIES', description: '', linkText: 'VIEW' },
+    sale: { badge: '', title: 'SALE', description: 'UP TO 50% OFF', linkText: 'SHOP DEALS' },
+    collections: { badge: '', title: 'COLLECTIONS', description: 'Curated Style Sets', linkText: 'EXPLORE' },
+  },
+  freshDrops: {
+    badge: 'NEW ARRIVALS',
+    sectionTitle: 'FRESH DROPS',
+    viewAllLink: 'VIEW ALL',
+  },
+  brandStatement: {
+    headlineLine1: 'DEFINE YOUR',
+    headlineLine2: 'STYLE',
+    description:
+      "Cualquier isn't just fashion—it's a statement. We create pieces that blend urban edge with contemporary design, giving you the confidence to stand out.",
+    ctaButton: 'OUR STORY',
+  },
+  newsletter: {
+    title: 'STAY CONNECTED',
+    description: 'Get exclusive access to new drops, special offers, and style inspiration.',
+    emailPlaceholder: 'Enter your email',
+    submitButton: 'SUBSCRIBE →',
+  },
+};
+
 const Home: React.FC = () => {
   const { products: featuredProducts, isLoading } = useFeaturedProducts(8);
   const observerRef = useRef<IntersectionObserver | null>(null);
   const [homePageImages, setHomePageImages] = useState<HomePageImages>(defaultHomePageImages);
+  const [content, setContent] = useState<HomePageContent>(defaultHomePageContent);
   useSeo('Cualquier — Contemporary Urban Fashion', 'Street-inspired fashion drops and curated collections.');
 
   useEffect(() => {
@@ -33,7 +73,17 @@ const Home: React.FC = () => {
       }
     };
 
+    const fetchHomePageContent = async () => {
+      try {
+        const data = await productsApi.getHomePageContent();
+        setContent(data);
+      } catch (error) {
+        console.error('Failed to fetch home page content:', error);
+      }
+    };
+
     fetchHomePageImages();
+    fetchHomePageContent();
 
     observerRef.current = new IntersectionObserver(
       (entries) => {
@@ -80,26 +130,25 @@ const Home: React.FC = () => {
           <div className="lg:w-1/2">
             <div className="mb-6 overflow-hidden">
               <div className="inline-block bg-accent-electric text-brand-900 px-6 py-2 font-grotesk font-bold text-sm tracking-wider animate-slide-up">
-                NEW COLLECTION 2025
+                {content.hero.badge}
               </div>
             </div>
 
             <div className="overflow-hidden mb-4">
               <h1 className="text-7xl md:text-8xl lg:text-9xl font-display text-white leading-none animate-slide-up-delayed">
-                URBAN
+                {content.hero.headline1}
               </h1>
             </div>
 
             <div className="overflow-hidden mb-8">
               <h2 className="text-6xl md:text-7xl lg:text-8xl font-display text-accent-electric leading-none animate-slide-up-more-delayed">
-                EVOLUTION
+                {content.hero.headline2}
               </h2>
             </div>
 
             <div className="overflow-hidden mb-12">
-              <p className="text-xl md:text-2xl text-brand-100 font-grotesk max-w-lg leading-relaxed animate-fade-in-delayed">
-                Street-inspired designs meet contemporary fashion.
-                Bold statements for the modern individual.
+              <p className="text-xl md:text-2xl text-brand-100 font-grotesk max-w-lg leading-relaxed animate-fade-in-delayed whitespace-pre-line">
+                {content.hero.subheading}
               </p>
             </div>
 
@@ -109,7 +158,7 @@ const Home: React.FC = () => {
                 className="group relative px-10 py-5 bg-white text-brand-900 font-grotesk font-bold text-lg tracking-wide overflow-hidden transform hover:scale-105 transition-all duration-300"
               >
                 <span className="relative z-10 flex items-center gap-2">
-                  SHOP NOW
+                  {content.hero.ctaPrimary}
                   <FiArrowRight className="group-hover:translate-x-2 transition-transform" size={24} />
                 </span>
               </Link>
@@ -119,7 +168,7 @@ const Home: React.FC = () => {
                 className="group px-10 py-5 border-2 border-white text-white font-grotesk font-bold text-lg tracking-wide hover:bg-white hover:text-brand-900 transition-all duration-300 transform hover:scale-105"
               >
                 <span className="flex items-center gap-2">
-                  EXPLORE
+                  {content.hero.ctaSecondary}
                   <FiArrowUpRight className="group-hover:rotate-45 transition-transform" size={24} />
                 </span>
               </Link>
@@ -130,7 +179,7 @@ const Home: React.FC = () => {
         {/* Scroll Indicator */}
         <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 text-white animate-bounce">
           <div className="flex flex-col items-center gap-2">
-            <span className="text-xs font-grotesk tracking-widest">SCROLL</span>
+            <span className="text-xs font-grotesk tracking-widest">{content.hero.scrollLabel}</span>
             <div className="w-0.5 h-12 bg-white/50" />
           </div>
         </div>
@@ -140,7 +189,7 @@ const Home: React.FC = () => {
       <section className="relative py-24 bg-transparent animate-on-scroll opacity-0 translate-y-12 transition-all duration-1000">
         <div className="max-w-7xl mx-auto px-4">
           <div className="mb-16 text-center">
-            <h2 className="text-6xl md:text-7xl font-display text-white mb-4 drop-shadow-[0_2px_12px_rgba(0,0,0,0.6)]">SHOP BY STYLE</h2>
+            <h2 className="text-6xl md:text-7xl font-display text-white mb-4 drop-shadow-[0_2px_12px_rgba(0,0,0,0.6)]">{content.shopByStyle.sectionTitle}</h2>
             <div className="w-24 h-1 bg-accent-electric mx-auto" />
           </div>
 
@@ -158,13 +207,17 @@ const Home: React.FC = () => {
               />
               <div className="absolute inset-0 bg-gradient-to-t from-brand-900/90 via-brand-900/40 to-transparent" />
               <div className="absolute bottom-0 left-0 p-8 lg:p-12">
-                <div className="inline-block bg-accent-electric text-brand-900 px-4 py-1 text-sm font-grotesk font-bold mb-4">
-                  TRENDING
-                </div>
-                <h3 className="text-5xl lg:text-7xl font-display text-white mb-2">MEN'S</h3>
-                <p className="text-xl text-brand-100 font-grotesk mb-4">Bold. Confident. Urban.</p>
+                {content.shopByStyle.men.badge && (
+                  <div className="inline-block bg-accent-electric text-brand-900 px-4 py-1 text-sm font-grotesk font-bold mb-4">
+                    {content.shopByStyle.men.badge}
+                  </div>
+                )}
+                <h3 className="text-5xl lg:text-7xl font-display text-white mb-2">{content.shopByStyle.men.title}</h3>
+                {content.shopByStyle.men.description && (
+                  <p className="text-xl text-brand-100 font-grotesk mb-4">{content.shopByStyle.men.description}</p>
+                )}
                 <span className="inline-flex items-center gap-2 text-accent-electric font-grotesk font-semibold text-lg group-hover:gap-4 transition-all">
-                  DISCOVER <FiArrowRight size={24} />
+                  {content.shopByStyle.men.linkText} <FiArrowRight size={24} />
                 </span>
               </div>
             </Link>
@@ -181,10 +234,12 @@ const Home: React.FC = () => {
               />
               <div className="absolute inset-0 bg-gradient-to-t from-brand-900/90 via-brand-900/30 to-transparent" />
               <div className="absolute bottom-0 left-0 p-8">
-                <h3 className="text-5xl lg:text-6xl font-display text-white mb-2">WOMEN'S</h3>
-                <p className="text-lg text-brand-100 font-grotesk mb-4">Fierce & Elegant</p>
+                <h3 className="text-5xl lg:text-6xl font-display text-white mb-2">{content.shopByStyle.women.title}</h3>
+                {content.shopByStyle.women.description && (
+                  <p className="text-lg text-brand-100 font-grotesk mb-4">{content.shopByStyle.women.description}</p>
+                )}
                 <span className="inline-flex items-center gap-2 text-accent-neon font-grotesk font-semibold group-hover:gap-4 transition-all">
-                  SHOP <FiArrowRight size={20} />
+                  {content.shopByStyle.women.linkText} <FiArrowRight size={20} />
                 </span>
               </div>
             </Link>
@@ -201,9 +256,9 @@ const Home: React.FC = () => {
               />
               <div className="absolute inset-0 bg-brand-900/60 group-hover:bg-brand-900/40 transition-all" />
               <div className="absolute bottom-0 left-0 p-6">
-                <h3 className="text-3xl lg:text-4xl font-display text-white mb-2">ACCESSORIES</h3>
+                <h3 className="text-3xl lg:text-4xl font-display text-white mb-2">{content.shopByStyle.accessories.title}</h3>
                 <span className="inline-flex items-center gap-2 text-accent-electric font-grotesk font-semibold group-hover:gap-4 transition-all">
-                  VIEW <FiArrowRight />
+                  {content.shopByStyle.accessories.linkText} <FiArrowRight />
                 </span>
               </div>
             </Link>
@@ -221,11 +276,13 @@ const Home: React.FC = () => {
               <div className="absolute inset-0 bg-gradient-to-br from-accent-electric/80 to-brand-500/85" />
               <div className="absolute inset-0 flex flex-col items-center justify-center p-6 text-center">
                 <div className="text-brand-900 font-display text-6xl lg:text-7xl mb-2 group-hover:scale-110 transition-transform">
-                  SALE
+                  {content.shopByStyle.sale.title}
                 </div>
-                <p className="text-brand-900 font-grotesk font-bold text-xl mb-4">UP TO 50% OFF</p>
+                {content.shopByStyle.sale.description && (
+                  <p className="text-brand-900 font-grotesk font-bold text-xl mb-4">{content.shopByStyle.sale.description}</p>
+                )}
                 <span className="inline-flex items-center gap-2 text-brand-900 font-grotesk font-bold text-lg group-hover:gap-4 transition-all">
-                  SHOP DEALS <FiArrowRight size={24} />
+                  {content.shopByStyle.sale.linkText} <FiArrowRight size={24} />
                 </span>
               </div>
             </Link>
@@ -241,10 +298,12 @@ const Home: React.FC = () => {
                 className="absolute inset-0 w-full h-full object-cover opacity-50 group-hover:opacity-70 group-hover:scale-110 transition-all duration-700"
               />
               <div className="absolute inset-0 flex flex-col items-center justify-center p-6 text-center">
-                <h3 className="text-4xl lg:text-5xl font-display text-white mb-4">COLLECTIONS</h3>
-                <p className="text-brand-100 font-grotesk text-lg mb-4">Curated Style Sets</p>
+                <h3 className="text-4xl lg:text-5xl font-display text-white mb-4">{content.shopByStyle.collections.title}</h3>
+                {content.shopByStyle.collections.description && (
+                  <p className="text-brand-100 font-grotesk text-lg mb-4">{content.shopByStyle.collections.description}</p>
+                )}
                 <span className="inline-flex items-center gap-2 text-accent-electric font-grotesk font-bold group-hover:gap-4 transition-all">
-                  EXPLORE <FiArrowRight size={20} />
+                  {content.shopByStyle.collections.linkText} <FiArrowRight size={20} />
                 </span>
               </div>
             </Link>
@@ -258,15 +317,15 @@ const Home: React.FC = () => {
           <div className="mb-16 flex flex-col lg:flex-row lg:items-end lg:justify-between gap-6">
             <div>
               <div className="inline-block bg-accent-electric text-brand-900 px-4 py-1 text-sm font-grotesk font-bold mb-4">
-                NEW ARRIVALS
+                {content.freshDrops.badge}
               </div>
-              <h2 className="text-6xl md:text-7xl font-display text-white drop-shadow-[0_2px_12px_rgba(0,0,0,0.6)]">FRESH DROPS</h2>
+              <h2 className="text-6xl md:text-7xl font-display text-white drop-shadow-[0_2px_12px_rgba(0,0,0,0.6)]">{content.freshDrops.sectionTitle}</h2>
             </div>
             <Link
               to="/category/new-arrivals"
               className="group inline-flex items-center gap-3 text-white font-grotesk font-bold text-lg border-b-2 border-white pb-2 hover:border-accent-electric hover:text-accent-electric transition-all"
             >
-              VIEW ALL
+              {content.freshDrops.viewAllLink}
               <FiArrowRight className="group-hover:translate-x-2 transition-transform" size={24} />
             </Link>
           </div>
@@ -286,19 +345,18 @@ const Home: React.FC = () => {
 
         <div className="relative z-10 max-w-5xl mx-auto px-4 text-center">
           <h2 className="text-6xl md:text-8xl font-display text-white mb-8 leading-tight">
-            DEFINE YOUR
+            {content.brandStatement.headlineLine1}
             <br />
-            <span className="text-accent-electric">STYLE</span>
+            <span className="text-accent-electric">{content.brandStatement.headlineLine2}</span>
           </h2>
-          <p className="text-xl md:text-2xl text-brand-100 font-grotesk max-w-3xl mx-auto mb-12 leading-relaxed">
-            Cualquier isn't just fashion—it's a statement. We create pieces that blend
-            urban edge with contemporary design, giving you the confidence to stand out.
+          <p className="text-xl md:text-2xl text-brand-100 font-grotesk max-w-3xl mx-auto mb-12 leading-relaxed whitespace-pre-line">
+            {content.brandStatement.description}
           </p>
           <Link
             to="/about"
             className="inline-flex items-center gap-3 bg-accent-electric text-brand-900 px-10 py-5 font-grotesk font-bold text-lg tracking-wide hover:bg-white transition-all duration-300 transform hover:scale-105"
           >
-            OUR STORY
+            {content.brandStatement.ctaButton}
             <FiArrowUpRight size={24} />
           </Link>
         </div>
@@ -313,22 +371,22 @@ const Home: React.FC = () => {
             <div className="absolute bottom-0 left-0 text-white opacity-10 text-9xl rotate-180">→</div>
 
             <div className="relative z-10 text-center text-white">
-              <h2 className="text-5xl md:text-6xl font-display mb-6">STAY CONNECTED</h2>
-              <p className="text-xl font-grotesk mb-8 opacity-90">
-                Get exclusive access to new drops, special offers, and style inspiration.
+              <h2 className="text-5xl md:text-6xl font-display mb-6">{content.newsletter.title}</h2>
+              <p className="text-xl font-grotesk mb-8 opacity-90 whitespace-pre-line">
+                {content.newsletter.description}
               </p>
 
               <form className="flex flex-col sm:flex-row gap-4 max-w-2xl mx-auto">
                 <input
                   type="email"
-                  placeholder="Enter your email"
+                  placeholder={content.newsletter.emailPlaceholder}
                   className="flex-1 px-6 py-4 bg-white text-brand-900 font-grotesk text-lg focus:outline-none focus:ring-4 focus:ring-accent-electric transition-all"
                 />
                 <button
                   type="submit"
                   className="px-10 py-4 bg-accent-electric text-brand-900 font-grotesk font-bold text-lg tracking-wide hover:bg-white transition-all duration-300 transform hover:scale-105"
                 >
-                  SUBSCRIBE →
+                  {content.newsletter.submitButton}
                 </button>
               </form>
             </div>
