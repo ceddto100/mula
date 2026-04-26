@@ -33,7 +33,7 @@ export const productsApi = {
     const response = await api.get<ApiResponse<{
       products: Product[];
       pagination: PaginatedResponse<Product>['pagination'];
-    }>>(`/api/products?${params.toString()}`);
+    }>>(`/api/products${params.toString() ? `?${params.toString()}` : ''}`);
     return response.data.data!;
   },
 

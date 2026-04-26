@@ -69,7 +69,7 @@ export const adminApi = {
     if (options?.sort) params.append('sort', options.sort);
 
     const response = await api.get<ApiResponse<ProductListResponse>>(
-      `/api/admin/products?${params.toString()}`
+      `/api/admin/products${params.toString() ? `?${params.toString()}` : ''}`
     );
     return response.data.data!;
   },
@@ -153,7 +153,7 @@ export const adminApi = {
     const response = await api.get<ApiResponse<{
       orders: Order[];
       pagination: PaginatedResponse<Order>['pagination'];
-    }>>(`/api/admin/orders?${params.toString()}`);
+    }>>(`/api/admin/orders${params.toString() ? `?${params.toString()}` : ''}`);
     return response.data.data!;
   },
 
