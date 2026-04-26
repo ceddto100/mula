@@ -1,5 +1,5 @@
 import api from './axios.config';
-import { ApiResponse, Product, PaginatedResponse } from '../types';
+import { ApiResponse, Product, PaginatedResponse, HomePageImages } from '../types';
 
 export interface ProductFilters {
   page?: number;
@@ -60,6 +60,11 @@ export const productsApi = {
 
   getCategories: async (): Promise<string[]> => {
     const response = await api.get<ApiResponse<string[]>>('/api/products/categories');
+    return response.data.data!;
+  },
+
+  getHomePageImages: async (): Promise<HomePageImages> => {
+    const response = await api.get<ApiResponse<HomePageImages>>('/api/products/homepage-images');
     return response.data.data!;
   },
 };

@@ -149,6 +149,17 @@ export interface CreateProductData {
 
 export type UpdateProductData = Partial<CreateProductData>;
 
+
+export interface HomePageImages {
+  _id?: string;
+  heroImage: string;
+  menImage: string;
+  womenImage: string;
+  collectionImage: string;
+  accessoryImage: string;
+  saleImage: string;
+}
+
 // Cart Types
 export interface CartItem {
   _id: string;

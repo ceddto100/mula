@@ -1,17 +1,40 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { FiArrowRight, FiArrowUpRight } from 'react-icons/fi';
 import Layout from '../components/layout/Layout';
 import ProductGrid from '../components/product/ProductGrid';
 import { useFeaturedProducts } from '../hooks/useProducts';
 import { useSeo } from '../hooks/useSeo';
+import { productsApi } from '../api/products.api';
+import { HomePageImages } from '../types';
+
+const defaultHomePageImages: HomePageImages = {
+  heroImage: 'https://images.unsplash.com/photo-1490481651871-ab68de25d43d?auto=format&fit=crop&q=80&w=2070',
+  menImage: 'https://images.unsplash.com/photo-1617137968427-85924c800a22?auto=format&fit=crop&q=80&w=1200',
+  womenImage: 'https://images.unsplash.com/photo-1581044777550-4cfa60707c03?auto=format&fit=crop&q=80&w=600',
+  collectionImage: 'https://images.unsplash.com/photo-1558769132-cb1aea1f8cf5?auto=format&fit=crop&q=80&w=600',
+  accessoryImage: 'https://images.unsplash.com/photo-1523359346063-d879354c0ea5?auto=format&fit=crop&q=80&w=600',
+  saleImage: 'https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?auto=format&fit=crop&q=80&w=600',
+};
 
 const Home: React.FC = () => {
   const { products: featuredProducts, isLoading } = useFeaturedProducts(8);
   const observerRef = useRef<IntersectionObserver | null>(null);
+  const [homePageImages, setHomePageImages] = useState<HomePageImages>(defaultHomePageImages);
   useSeo('Cualquier — Contemporary Urban Fashion', 'Street-inspired fashion drops and curated collections.');
 
   useEffect(() => {
+    const fetchHomePageImages = async () => {
+      try {
+        const data = await productsApi.getHomePageImages();
+        setHomePageImages(data);
+      } catch (error) {
+        console.error('Failed to fetch home page images:', error);
+      }
+    };
+
+    fetchHomePageImages();
+
     observerRef.current = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
@@ -39,7 +62,7 @@ const Home: React.FC = () => {
           <div className="absolute inset-0 bg-gradient-to-br from-brand-800 via-brand-900 to-brand-950" />
           <div className="absolute top-0 right-0 w-3/5 h-full bg-brand-500 diagonal-bg" />
           <img
-            src="https://images.unsplash.com/photo-1490481651871-ab68de25d43d?auto=format&fit=crop&q=80&w=2070"
+            src={homePageImages.heroImage}
             alt="Fashion"
             className="absolute top-0 right-0 w-3/5 h-full object-cover diagonal-bg opacity-90 mix-blend-multiply"
           />
@@ -129,7 +152,7 @@ const Home: React.FC = () => {
               className="col-span-12 lg:col-span-8 relative group overflow-hidden bg-brand-900 aspect-[16/9] lg:aspect-[16/10]"
             >
               <img
-                src="https://images.unsplash.com/photo-1617137968427-85924c800a22?auto=format&fit=crop&q=80&w=1200"
+                src={homePageImages.menImage}
                 alt="Men's Collection"
                 className="absolute inset-0 w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
               />
@@ -152,7 +175,7 @@ const Home: React.FC = () => {
               className="col-span-12 lg:col-span-4 relative group overflow-hidden bg-accent-purple aspect-[16/9] lg:aspect-[9/16]"
             >
               <img
-                src="https://images.unsplash.com/photo-1581044777550-4cfa60707c03?auto=format&fit=crop&q=80&w=600"
+                src={homePageImages.womenImage}
                 alt="Women's Collection"
                 className="absolute inset-0 w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
               />
@@ -172,7 +195,7 @@ const Home: React.FC = () => {
               className="col-span-6 lg:col-span-4 relative group overflow-hidden bg-accent-sunset aspect-square"
             >
               <img
-                src="https://images.unsplash.com/photo-1523359346063-d879354c0ea5?auto=format&fit=crop&q=80&w=600"
+                src={homePageImages.accessoryImage}
                 alt="Accessories"
                 className="absolute inset-0 w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
               />
@@ -190,7 +213,12 @@ const Home: React.FC = () => {
               to="/category/sale"
               className="col-span-6 lg:col-span-4 relative group overflow-hidden bg-accent-electric aspect-square"
             >
-              <div className="absolute inset-0 bg-gradient-to-br from-accent-electric to-brand-500" />
+              <img
+                src={homePageImages.saleImage}
+                alt="Sale Collection"
+                className="absolute inset-0 w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
+              />
+              <div className="absolute inset-0 bg-gradient-to-br from-accent-electric/80 to-brand-500/85" />
               <div className="absolute inset-0 flex flex-col items-center justify-center p-6 text-center">
                 <div className="text-brand-900 font-display text-6xl lg:text-7xl mb-2 group-hover:scale-110 transition-transform">
                   SALE
@@ -208,7 +236,7 @@ const Home: React.FC = () => {
               className="col-span-12 lg:col-span-4 relative group overflow-hidden bg-brand-700 aspect-[16/9] lg:aspect-square"
             >
               <img
-                src="https://images.unsplash.com/photo-1558769132-cb1aea1f8cf5?auto=format&fit=crop&q=80&w=600"
+                src={homePageImages.collectionImage}
                 alt="Collections"
                 className="absolute inset-0 w-full h-full object-cover opacity-50 group-hover:opacity-70 group-hover:scale-110 transition-all duration-700"
               />

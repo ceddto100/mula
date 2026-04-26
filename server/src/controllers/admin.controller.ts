@@ -3,6 +3,7 @@ import { Express } from 'express';
 import Product from '../models/Product';
 import Order from '../models/Order';
 import User from '../models/User';
+import HomePageImages from '../models/HomePageImages';
 import { AuthRequest, CreateProductInput, UpdateProductInput } from '../types';
 import { cloudinary } from '../config/cloudinary';
 import {
@@ -71,6 +72,80 @@ export const getDashboardStats = async (req: Request, res: Response): Promise<vo
     res.status(500).json({
       success: false,
       message: error.message || 'Error fetching dashboard stats',
+    });
+  }
+};
+
+
+
+const getOrCreateHomePageImages = async () => {
+  const existingConfig = await HomePageImages.findOne();
+  if (existingConfig) {
+    return existingConfig;
+  }
+
+  return HomePageImages.create({});
+};
+
+export const getAdminHomePageImages = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const homePageImages = await getOrCreateHomePageImages();
+
+    res.json({
+      success: true,
+      data: homePageImages,
+    });
+  } catch (error: any) {
+    res.status(500).json({
+      success: false,
+      message: error.message || 'Error fetching home page images',
+    });
+  }
+};
+
+export const updateHomePageImages = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const homePageImages = await getOrCreateHomePageImages();
+
+    const allowedFields = [
+      'heroImage',
+      'menImage',
+      'womenImage',
+      'collectionImage',
+      'accessoryImage',
+      'saleImage',
+    ] as const;
+
+    const payload = Object.fromEntries(
+      Object.entries(req.body).filter(([key]) => allowedFields.includes(key as typeof allowedFields[number]))
+    );
+
+    const invalidEntries = Object.entries(payload).filter(([, value]) => (
+      typeof value !== 'string' || value.trim().length === 0
+    ));
+
+    if (invalidEntries.length > 0) {
+      res.status(400).json({
+        success: false,
+        message: 'All home page image values must be non-empty strings',
+      });
+      return;
+    }
+
+    const updated = await HomePageImages.findByIdAndUpdate(
+      homePageImages._id,
+      payload,
+      { new: true, runValidators: true }
+    );
+
+    res.json({
+      success: true,
+      data: updated,
+    });
+  } catch (error: any) {
+    res.status(500).json({
+      success: false,
+      message: error.message || 'Error updating home page images',
     });
   }
 };
