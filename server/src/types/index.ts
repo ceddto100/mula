@@ -163,6 +163,7 @@ export interface AuthRequest extends Request {
   params: any;
   query: any;
   headers: any;
+  cookies: { [key: string]: string };
 }
 
 // API Response Types
