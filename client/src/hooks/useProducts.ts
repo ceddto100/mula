@@ -34,7 +34,7 @@ export const useProducts = (filters: ProductFilters = {}) => {
   return { products, isLoading, error, pagination };
 };
 
-export const useProduct = (id: string) => {
+export const useProduct = (identifier: string, isHandle = false) => {
   const [product, setProduct] = useState<Product | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -44,7 +44,9 @@ export const useProduct = (id: string) => {
       try {
         setIsLoading(true);
         setError(null);
-        const data = await productsApi.getProduct(id);
+        const data = isHandle
+          ? await productsApi.getProductByHandle(identifier)
+          : await productsApi.getProduct(identifier);
         setProduct(data);
       } catch (err: any) {
         setError(err.message || 'Failed to fetch product');
@@ -53,10 +55,10 @@ export const useProduct = (id: string) => {
       }
     };
 
-    if (id) {
+    if (identifier) {
       fetchProduct();
     }
-  }, [id]);
+  }, [identifier, isHandle]);
 
   return { product, isLoading, error };
 };

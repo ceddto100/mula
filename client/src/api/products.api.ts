@@ -42,6 +42,11 @@ export const productsApi = {
     return response.data.data!;
   },
 
+  getProductByHandle: async (handle: string): Promise<Product> => {
+    const response = await api.get<ApiResponse<Product>>(`/api/products/handle/${handle}`);
+    return response.data.data!;
+  },
+
   getProductsByCategory: async (category: string, page = 1, limit = 12): Promise<{
     products: Product[];
     pagination: PaginatedResponse<Product>['pagination'];
