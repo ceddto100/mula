@@ -13,6 +13,15 @@ import {
   getProductStock,
 } from '../../utils/productView';
 
+const PRODUCT_TRANSFORMS = 'w_1200,h_1200,c_fill,g_auto,f_auto,q_auto';
+
+function getOptimizedImageUrl(url: string): string {
+  if (!url) return url;
+  const match = url.match(/^(https?:\/\/res\.cloudinary\.com\/[^/]+\/image\/upload\/)(.*)/);
+  if (!match) return url;
+  return `${match[1]}${PRODUCT_TRANSFORMS}/${match[2]}`;
+}
+
 interface ProductCardProps {
   product: Product;
 }
@@ -35,7 +44,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
       <div className="relative aspect-[3/4] overflow-hidden bg-brand-800 mb-4 shadow-md hover:shadow-2xl transition-shadow duration-300">
         {imageUrls[0] ? (
           <img
-            src={imageUrls[0]}
+            src={getOptimizedImageUrl(imageUrls[0])}
             alt={productName}
             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
             loading="lazy"

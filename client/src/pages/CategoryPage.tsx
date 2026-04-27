@@ -78,6 +78,15 @@ const SUBCATEGORIES: Record<string, SubPill[]> = {
   ],
 };
 
+const HERO_TRANSFORMS = 'w_2400,h_1200,c_fill,g_auto,f_auto,q_auto';
+
+function getOptimizedHeroUrl(url: string): string {
+  if (!url) return url;
+  const match = url.match(/^(https?:\/\/res\.cloudinary\.com\/[^/]+\/image\/upload\/)(.*)/);
+  if (!match) return url;
+  return `${match[1]}${HERO_TRANSFORMS}/${match[2]}`;
+}
+
 // ─── CategoryHero ─────────────────────────────────────────────────────────────
 interface CategoryHeroProps {
   category: string;
@@ -109,7 +118,7 @@ const CategoryHero: React.FC<CategoryHeroProps> = ({ category, breadcrumbLabel, 
         </video>
       ) : (
         <img
-          src={config.mediaUrl}
+          src={getOptimizedHeroUrl(config.mediaUrl)}
           alt={config.title}
           className="absolute inset-0 w-full h-full object-cover object-center"
         />
