@@ -2,6 +2,7 @@ import { Request, Response } from 'express';
 import Product from '../models/Product';
 import HomePageImages from '../models/HomePageImages';
 import HomePageContent from '../models/HomePageContent';
+import CategoryHeroes from '../models/CategoryHeroes';
 import { ProductFilter } from '../types';
 import { getPriceRange, getTotalInventory, isInStock } from '../utils/product.utils';
 
@@ -49,6 +50,22 @@ export const getHomePageContent = async (req: Request, res: Response): Promise<v
     res.status(500).json({
       success: false,
       message: error.message || 'Error fetching home page content',
+    });
+  }
+};
+
+// Public read of category hero configurations
+export const getCategoryHeroesPublic = async (req: Request, res: Response): Promise<void> => {
+  try {
+    let heroes = await CategoryHeroes.findOne();
+    if (!heroes) {
+      heroes = await CategoryHeroes.create({});
+    }
+    res.json({ success: true, data: heroes });
+  } catch (error: any) {
+    res.status(500).json({
+      success: false,
+      message: error.message || 'Error fetching category heroes',
     });
   }
 };

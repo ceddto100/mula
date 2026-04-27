@@ -4,6 +4,7 @@ import { FiPackage, FiShoppingCart, FiUsers, FiDollarSign, FiAlertTriangle, FiUp
 import toast from 'react-hot-toast';
 import AdminLayout from '../components/admin/AdminLayout';
 import HomePageContentEditor from '../components/admin/HomePageContentEditor';
+import CategoryHeroEditor from '../components/admin/CategoryHeroEditor';
 import { adminApi } from '../api/admin.api';
 import { DashboardStats, HomePageImages } from '../types';
 import { formatPrice, formatDate } from '../utils/formatters';
@@ -159,6 +160,8 @@ const AdminDashboard: React.FC = () => {
             ))}
           </div>
         </div>
+
+        <CategoryHeroEditor />
 
         <HomePageContentEditor />
 

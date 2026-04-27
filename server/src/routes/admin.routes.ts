@@ -19,6 +19,9 @@ import {
   updateHomePageImages,
   getAdminHomePageContent,
   updateHomePageContent,
+  getCategoryHeroes,
+  updateCategoryHeroes,
+  uploadMedia,
 } from '../controllers/admin.controller';
 import { auth } from '../middleware/auth';
 import { adminAuth } from '../middleware/adminAuth';
@@ -28,7 +31,7 @@ import {
   shopifyProductUpdateValidation,
   mongoIdValidation,
 } from '../utils/validators';
-import { upload } from '../config/cloudinary';
+import { upload, uploadHeroMedia } from '../config/cloudinary';
 
 const router = Router();
 
@@ -62,9 +65,14 @@ router.post('/products/bulk/status', bulkUpdateStatus);
 router.get('/orders', getAdminOrders);
 router.put('/orders/:id', mongoIdValidation, validateRequest, updateOrderStatus);
 
-// Image upload
+// Category hero management
+router.get('/category-heroes', getCategoryHeroes);
+router.put('/category-heroes', updateCategoryHeroes);
+
+// Image / media upload
 router.post('/upload', upload.single('image'), uploadImage);
 router.post('/upload-multiple', upload.array('images', 10), uploadImages);
+router.post('/upload-media', uploadHeroMedia.single('media'), uploadMedia);
 router.delete('/image', deleteImage);
 
 export default router;

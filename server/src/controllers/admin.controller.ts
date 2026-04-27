@@ -5,6 +5,7 @@ import Order from '../models/Order';
 import User from '../models/User';
 import HomePageImages from '../models/HomePageImages';
 import HomePageContent from '../models/HomePageContent';
+import CategoryHeroes from '../models/CategoryHeroes';
 import { AuthRequest, CreateProductInput, UpdateProductInput } from '../types';
 import { cloudinary } from '../config/cloudinary';
 import {
@@ -721,6 +722,69 @@ export const deleteImage = async (req: Request, res: Response): Promise<void> =>
     res.status(500).json({
       success: false,
       message: error.message || 'Error deleting image',
+    });
+  }
+};
+
+// ─── Category Heroes ──────────────────────────────────────────────────────────
+
+const getOrCreateCategoryHeroes = async () => {
+  const existing = await CategoryHeroes.findOne();
+  if (existing) return existing;
+  return CategoryHeroes.create({});
+};
+
+export const getCategoryHeroes = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const heroes = await getOrCreateCategoryHeroes();
+    res.json({ success: true, data: heroes });
+  } catch (error: any) {
+    res.status(500).json({
+      success: false,
+      message: error.message || 'Error fetching category heroes',
+    });
+  }
+};
+
+export const updateCategoryHeroes = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const heroes = await getOrCreateCategoryHeroes();
+    const updated = await CategoryHeroes.findByIdAndUpdate(
+      heroes._id,
+      { $set: req.body },
+      { new: true, runValidators: true }
+    );
+    res.json({ success: true, data: updated });
+  } catch (error: any) {
+    res.status(500).json({
+      success: false,
+      message: error.message || 'Error updating category heroes',
+    });
+  }
+};
+
+// Upload image or video for hero sections
+export const uploadMedia = async (req: Request, res: Response): Promise<void> => {
+  try {
+    if (!req.file) {
+      res.status(400).json({ success: false, message: 'No file uploaded' });
+      return;
+    }
+
+    const fileWithPath = req.file as Express.Multer.File & { path: string };
+    const mediaType = req.file.mimetype.startsWith('video/') ? 'video' : 'image';
+
+    res.json({
+      success: true,
+      data: {
+        url: fileWithPath.path,
+        mediaType,
+      },
+    });
+  } catch (error: any) {
+    res.status(500).json({
+      success: false,
+      message: error.message || 'Error uploading media',
     });
   }
 };
