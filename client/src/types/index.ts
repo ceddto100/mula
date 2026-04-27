@@ -225,6 +225,8 @@ export interface NewsletterContent {
 
 export interface BrandThemeContent {
   accentColor: string;
+  heroOverlayColor: string;
+  headingFont: string;
 }
 
 export interface HomePageContent {

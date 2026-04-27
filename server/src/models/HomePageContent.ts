@@ -48,6 +48,8 @@ export interface INewsletterContent {
 
 export interface IBrandThemeContent {
   accentColor: string;
+  heroOverlayColor: string;
+  headingFont: string;
 }
 
 export interface IHomePageContent {
@@ -178,6 +180,8 @@ const newsletterSchema = new Schema<INewsletterContent>(
 const brandThemeSchema = new Schema<IBrandThemeContent>(
   {
     accentColor: { type: String, default: '#00E5FF' },
+    heroOverlayColor: { type: String, default: '#00AFC2' },
+    headingFont: { type: String, default: 'Inter' },
   },
   { _id: false }
 );
