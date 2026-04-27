@@ -108,14 +108,14 @@ const AdminDashboard: React.FC = () => {
 
   return (
     <AdminLayout>
-      <div className="space-y-6">
+      <div className="space-y-6 text-gray-900">
         <h2 className="text-2xl font-bold">Dashboard Overview</h2>
 
         <div className="bg-white rounded-lg shadow-sm p-6 space-y-6">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
             <div>
               <h3 className="text-lg font-semibold">Home Page Image Manager</h3>
-              <p className="text-sm text-gray-500">
+              <p className="text-sm text-gray-700">
                 Upload images for hero, men, women, collection, accessory, and sale sections.
               </p>
             </div>

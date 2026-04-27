@@ -75,7 +75,7 @@ const AccountPage: React.FC = () => {
 
   return (
     <Layout>
-      <div className="max-w-6xl mx-auto px-4 py-8">
+      <div className="max-w-6xl mx-auto px-4 py-8 text-gray-900">
         <h1 className="text-2xl font-bold mb-8">My Account</h1>
 
         <div className="lg:grid lg:grid-cols-4 lg:gap-8">
@@ -132,7 +132,7 @@ const AccountPage: React.FC = () => {
                         type="text"
                         value={name}
                         onChange={(e) => setName(e.target.value)}
-                        className="w-full px-4 py-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-900"
+                        className="w-full px-4 py-3 border border-gray-300 rounded-md text-gray-900 placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-gray-900"
                       />
                     </div>
                     <div>
@@ -143,7 +143,7 @@ const AccountPage: React.FC = () => {
                         type="email"
                         value={user?.email || ''}
                         disabled
-                        className="w-full px-4 py-3 border border-gray-300 rounded-md bg-gray-50"
+                        className="w-full px-4 py-3 border border-gray-300 rounded-md bg-gray-50 text-gray-900"
                       />
                     </div>
                     <div className="flex gap-4">
