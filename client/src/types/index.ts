@@ -223,6 +223,10 @@ export interface NewsletterContent {
   submitButton: string;
 }
 
+export interface BrandThemeContent {
+  accentColor: string;
+}
+
 export interface HomePageContent {
   _id?: string;
   hero: HeroContent;
@@ -230,6 +234,7 @@ export interface HomePageContent {
   freshDrops: FreshDropsContent;
   brandStatement: BrandStatementContent;
   newsletter: NewsletterContent;
+  brandTheme: BrandThemeContent;
 }
 
 // Cart Types

@@ -3,6 +3,7 @@ import toast from 'react-hot-toast';
 import { adminApi } from '../../api/admin.api';
 import { HomePageContent } from '../../types';
 import { defaultHomePageContent } from '../../pages/Home';
+import { applyAccentColor } from '../../utils/brandTheme';
 
 type FieldDef = {
   path: string;
@@ -18,6 +19,12 @@ type SectionDef = {
 };
 
 const sections: SectionDef[] = [
+  {
+    key: 'brandTheme',
+    title: 'Brand Theme',
+    description: 'Controls the shared turquoise accent color used across the site.',
+    fields: [{ path: 'brandTheme.accentColor', label: 'Accent color (hex)' }],
+  },
   {
     key: 'hero',
     title: 'Hero Section',
@@ -121,6 +128,7 @@ const HomePageContentEditor: React.FC = () => {
       try {
         const data = await adminApi.getHomePageContent();
         setContent(data);
+        applyAccentColor(data.brandTheme?.accentColor);
       } catch (error) {
         console.error('Failed to load home page content:', error);
         toast.error('Failed to load home page content');
@@ -133,6 +141,9 @@ const HomePageContentEditor: React.FC = () => {
 
   const onChange = (path: string, value: string) => {
     setContent((prev) => setByPath(prev, path, value));
+    if (path === 'brandTheme.accentColor') {
+      applyAccentColor(value);
+    }
   };
 
   const handleSave = async () => {
@@ -144,8 +155,10 @@ const HomePageContentEditor: React.FC = () => {
         freshDrops: content.freshDrops,
         brandStatement: content.brandStatement,
         newsletter: content.newsletter,
+        brandTheme: content.brandTheme,
       });
       setContent(updated);
+      applyAccentColor(updated.brandTheme?.accentColor);
       toast.success('Home page content updated');
     } catch (error) {
       console.error('Failed to save home page content:', error);
@@ -157,6 +170,7 @@ const HomePageContentEditor: React.FC = () => {
 
   const handleResetDefaults = () => {
     setContent(defaultHomePageContent);
+    applyAccentColor(defaultHomePageContent.brandTheme.accentColor);
     toast('Defaults loaded — click Save to apply.', { icon: '↺' });
   };
 
@@ -224,12 +238,25 @@ const HomePageContentEditor: React.FC = () => {
                           className="w-full px-3 py-2 border border-gray-300 rounded-md text-gray-900 placeholder:text-gray-500 focus:outline-none focus:border-gray-900"
                         />
                       ) : (
-                        <input
-                          type="text"
-                          value={value}
-                          onChange={(e) => onChange(field.path, e.target.value)}
-                          className="w-full px-3 py-2 border border-gray-300 rounded-md text-gray-900 placeholder:text-gray-500 focus:outline-none focus:border-gray-900"
-                        />
+                        <div className="flex gap-2">
+                          <input
+                            type={field.path === 'brandTheme.accentColor' ? 'color' : 'text'}
+                            value={value || '#00E5FF'}
+                            onChange={(e) => onChange(field.path, e.target.value)}
+                            className={`${
+                              field.path === 'brandTheme.accentColor' ? 'w-14 h-10 p-1' : 'w-full px-3 py-2'
+                            } border border-gray-300 rounded-md text-gray-900 placeholder:text-gray-500 focus:outline-none focus:border-gray-900`}
+                          />
+                          {field.path === 'brandTheme.accentColor' && (
+                            <input
+                              type="text"
+                              value={value}
+                              onChange={(e) => onChange(field.path, e.target.value)}
+                              className="w-full px-3 py-2 border border-gray-300 rounded-md text-gray-900 placeholder:text-gray-500 focus:outline-none focus:border-gray-900"
+                              placeholder="#00E5FF"
+                            />
+                          )}
+                        </div>
                       )}
                     </label>
                   );
