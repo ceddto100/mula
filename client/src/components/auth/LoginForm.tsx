@@ -1,105 +1,45 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 import GoogleLoginButton from './GoogleLoginButton';
 
 const LoginForm: React.FC = () => {
   return (
-    <div className="min-h-[70vh] flex items-center justify-center relative overflow-hidden">
-      {/* Animated gradient background */}
-      <div className="absolute inset-0 bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50 animate-gradient-shift"></div>
+    <section className="relative min-h-[70vh] overflow-hidden rounded-2xl border border-brand-700/70 bg-brand-900/60 p-6 shadow-2xl backdrop-blur-sm md:p-10">
+      <div className="pointer-events-none absolute -left-16 top-10 h-52 w-52 rounded-full bg-brand-500/25 blur-3xl" />
+      <div className="pointer-events-none absolute -bottom-20 right-0 h-56 w-56 rounded-full bg-accent-electric/15 blur-3xl" />
 
-      {/* Floating orbs for visual effect */}
-      <div className="absolute top-20 left-20 w-72 h-72 bg-blue-300 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-float"></div>
-      <div className="absolute top-40 right-20 w-72 h-72 bg-purple-300 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-float-delayed"></div>
-      <div className="absolute bottom-20 left-1/2 w-72 h-72 bg-pink-300 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-float-slow"></div>
+      <div className="relative z-10 grid gap-10 lg:grid-cols-[1.1fr_0.9fr] lg:items-center">
+        <div>
+          <p className="mb-3 inline-flex rounded-full border border-brand-400/40 bg-brand-800/80 px-4 py-1 text-xs font-grotesk tracking-[0.2em] text-brand-100">
+            MEMBER ACCESS
+          </p>
+          <h1 className="font-display text-4xl text-white md:text-6xl">SIGN IN</h1>
+          <p className="mt-4 max-w-md text-sm text-brand-100/85 md:text-base">
+            Access your orders, saved items, and account details. Continue your shopping journey with one secure click.
+          </p>
 
-      {/* Main content card */}
-      <div className="relative z-10 max-w-md w-full mx-4">
-        <div className="bg-white/80 backdrop-blur-lg rounded-3xl shadow-2xl p-12 border border-white/20 transform transition-all duration-300 hover:scale-105 hover:shadow-3xl">
-          {/* Logo/Icon area */}
-          <div className="text-center mb-8">
-            <div className="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-br from-blue-500 to-purple-600 rounded-2xl mb-6 transform rotate-3 hover:rotate-6 transition-transform duration-300 shadow-lg">
-              <svg className="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-              </svg>
-            </div>
-            <h1 className="text-4xl font-bold bg-gradient-to-r from-gray-900 via-purple-900 to-gray-900 bg-clip-text text-transparent mb-3">
-              Welcome Back
-            </h1>
-            <p className="text-gray-600 text-lg">
-              Sign in to continue your journey
-            </p>
-          </div>
-
-          {/* Google Sign In Button */}
-          <div className="transform transition-all duration-300 hover:translate-y-[-2px]">
-            <GoogleLoginButton />
-          </div>
-
-          {/* Decorative elements */}
-          <div className="mt-8 flex items-center justify-center space-x-2">
-            <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse"></div>
-            <div className="w-2 h-2 bg-purple-500 rounded-full animate-pulse delay-75"></div>
-            <div className="w-2 h-2 bg-pink-500 rounded-full animate-pulse delay-150"></div>
+          <div className="mt-8 space-y-3 text-sm text-brand-100/90">
+            <p>• Track and reorder your latest purchases</p>
+            <p>• Sync wishlist items across your devices</p>
+            <p>• Checkout faster with saved profile details</p>
           </div>
         </div>
 
-        {/* Bottom decorative text */}
-        <p className="text-center mt-8 text-gray-600 text-sm">
-          Secure sign-in powered by Google
-        </p>
+        <div className="rounded-2xl border border-brand-500/40 bg-white p-6 shadow-xl md:p-8">
+          <h2 className="mb-2 text-2xl font-semibold text-brand-900">Welcome back</h2>
+          <p className="mb-6 text-sm text-gray-600">Sign in with Google to continue.</p>
+
+          <GoogleLoginButton />
+
+          <p className="mt-6 text-center text-sm text-gray-600">
+            New here?{' '}
+            <Link to="/register" className="font-semibold text-brand-700 hover:text-brand-500">
+              Create an account
+            </Link>
+          </p>
+        </div>
       </div>
-
-      <style>{`
-        @keyframes gradient-shift {
-          0%, 100% { background-position: 0% 50%; }
-          50% { background-position: 100% 50%; }
-        }
-
-        @keyframes float {
-          0%, 100% { transform: translateY(0px) translateX(0px); }
-          50% { transform: translateY(-20px) translateX(20px); }
-        }
-
-        @keyframes float-delayed {
-          0%, 100% { transform: translateY(0px) translateX(0px); }
-          50% { transform: translateY(20px) translateX(-20px); }
-        }
-
-        @keyframes float-slow {
-          0%, 100% { transform: translateY(0px) translateX(0px); }
-          50% { transform: translateY(-15px) translateX(15px); }
-        }
-
-        .animate-gradient-shift {
-          background-size: 200% 200%;
-          animation: gradient-shift 15s ease infinite;
-        }
-
-        .animate-float {
-          animation: float 7s ease-in-out infinite;
-        }
-
-        .animate-float-delayed {
-          animation: float-delayed 9s ease-in-out infinite;
-        }
-
-        .animate-float-slow {
-          animation: float-slow 11s ease-in-out infinite;
-        }
-
-        .delay-75 {
-          animation-delay: 75ms;
-        }
-
-        .delay-150 {
-          animation-delay: 150ms;
-        }
-
-        .shadow-3xl {
-          box-shadow: 0 35px 60px -15px rgba(0, 0, 0, 0.3);
-        }
-      `}</style>
-    </div>
+    </section>
   );
 };
 
