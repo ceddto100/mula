@@ -153,7 +153,7 @@ const SubCategoryBar: React.FC<SubCategoryBarProps> = ({ category }) => {
   if (!pills) return null;
 
   return (
-    <div className="bg-brand-900 border-b border-brand-700/60">
+    <div className="bg-brand-900/70 backdrop-blur-sm border-b border-brand-700/60">
       <div className="max-w-7xl mx-auto px-6">
         <div className="flex items-center gap-3 overflow-x-auto py-4 scrollbar-hide">
           {pills.map((pill) => (
@@ -248,8 +248,8 @@ const CategoryPage: React.FC = () => {
       {/* Horizontal subcategory pills */}
       <SubCategoryBar category={normalizedCategory} />
 
-      {/* Product section — dark full-bleed background */}
-      <div className="bg-brand-900 min-h-screen">
+      {/* Product section — transparent so space background shows through */}
+      <div className="min-h-screen">
         <div className="max-w-7xl mx-auto px-4 py-8">
 
           {/* Grid header: count left, controls right */}
