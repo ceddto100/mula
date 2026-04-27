@@ -19,7 +19,11 @@ function getOptimizedImageUrl(url: string): string {
   if (!url) return url;
   const match = url.match(/^(https?:\/\/res\.cloudinary\.com\/[^/]+\/image\/upload\/)(.*)/);
   if (!match) return url;
-  return `${match[1]}${PRODUCT_TRANSFORMS}/${match[2]}`;
+  // If the URL has a version segment (v1234567890), strip any transforms that precede it
+  // so we never end up with conflicting chained transforms from a previous upload preset.
+  const versionMatch = match[2].match(/(v\d+\/.+)$/);
+  const assetPath = versionMatch ? versionMatch[1] : match[2];
+  return `${match[1]}${PRODUCT_TRANSFORMS}/${assetPath}`;
 }
 
 interface ProductCardProps {

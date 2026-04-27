@@ -7,7 +7,7 @@ import HomePageImages from '../models/HomePageImages';
 import HomePageContent from '../models/HomePageContent';
 import CategoryHeroes from '../models/CategoryHeroes';
 import { AuthRequest, CreateProductInput, UpdateProductInput } from '../types';
-import { cloudinary } from '../config/cloudinary';
+import { cloudinary, buildProductImageUrl, buildHeroImageUrl } from '../config/cloudinary';
 import {
   generateUniqueHandle,
   slugify,
@@ -653,14 +653,14 @@ export const uploadImage = async (req: Request, res: Response): Promise<void> =>
       return;
     }
 
-    // File is already uploaded to Cloudinary via multer middleware
-    // req.file contains the Cloudinary response
-    const fileWithPath = req.file as Express.Multer.File & { path: string };
+    // req.file.filename is the Cloudinary public_id; use the SDK to build the delivery URL
+    // so transformations are generated cleanly (not baked into the stored path string).
+    const fileWithMeta = req.file as Express.Multer.File & { filename: string };
 
     res.json({
       success: true,
       data: {
-        url: fileWithPath.path,
+        url: buildProductImageUrl(fileWithMeta.filename),
       },
     });
   } catch (error: any) {
@@ -682,8 +682,8 @@ export const uploadImages = async (req: Request, res: Response): Promise<void> =
       return;
     }
 
-    const files = req.files as (Express.Multer.File & { path: string })[];
-    const urls = files.map((file) => file.path);
+    const files = req.files as (Express.Multer.File & { filename: string })[];
+    const urls = files.map((file) => buildProductImageUrl(file.filename));
 
     res.json({
       success: true,
@@ -771,13 +771,17 @@ export const uploadMedia = async (req: Request, res: Response): Promise<void> =>
       return;
     }
 
-    const fileWithPath = req.file as Express.Multer.File & { path: string };
+    const fileWithMeta = req.file as Express.Multer.File & { path: string; filename: string };
     const mediaType = req.file.mimetype.startsWith('video/') ? 'video' : 'image';
+    // For images use the SDK to build a clean delivery URL; videos don't support the same transforms
+    const url = mediaType === 'image'
+      ? buildHeroImageUrl(fileWithMeta.filename)
+      : fileWithMeta.path;
 
     res.json({
       success: true,
       data: {
-        url: fileWithPath.path,
+        url,
         mediaType,
       },
     });

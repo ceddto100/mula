@@ -8,14 +8,31 @@ cloudinary.config({
   api_secret: process.env.CLOUDINARY_API_SECRET,
 });
 
+// Shared transform options — used both for upload storage and SDK-generated delivery URLs
+const PRODUCT_TRANSFORM = {
+  width: 1200,
+  height: 1200,
+  crop: 'fill' as const,
+  gravity: 'auto',
+  fetch_format: 'auto',
+  quality: 'auto',
+};
+
+const HERO_TRANSFORM = {
+  width: 2400,
+  height: 1200,
+  crop: 'fill' as const,
+  gravity: 'auto',
+  fetch_format: 'auto',
+  quality: 'auto',
+};
+
 const storage = new CloudinaryStorage({
   cloudinary: cloudinary,
   params: {
     folder: 'mula-store',
     allowed_formats: ['jpg', 'jpeg', 'png', 'webp'],
-    transformation: [
-      { width: 1200, height: 1200, crop: 'fill', gravity: 'auto', fetch_format: 'auto', quality: 'auto' },
-    ],
+    transformation: [PRODUCT_TRANSFORM],
   } as any,
 });
 
@@ -34,9 +51,7 @@ const heroMediaStorage = new CloudinaryStorage({
     folder: 'mula-store/category-heroes',
     resource_type: 'auto',
     allowed_formats: ['jpg', 'jpeg', 'png', 'webp', 'mp4', 'mov', 'webm', 'avi'],
-    transformation: [
-      { width: 2400, height: 1200, crop: 'fill', gravity: 'auto', fetch_format: 'auto', quality: 'auto' },
-    ],
+    transformation: [HERO_TRANSFORM],
   } as any,
 });
 
@@ -46,5 +61,21 @@ export const uploadHeroMedia = multer({
     fileSize: 200 * 1024 * 1024, // 200MB to accommodate video
   },
 });
+
+/**
+ * Generate a Cloudinary delivery URL for a product image (1200×1200, c_fill, g_auto, f_auto, q_auto).
+ * Pass the public_id returned by Cloudinary on upload (req.file.filename).
+ */
+export function buildProductImageUrl(publicId: string): string {
+  return cloudinary.url(publicId, { ...PRODUCT_TRANSFORM, secure: true });
+}
+
+/**
+ * Generate a Cloudinary delivery URL for a category hero image (2400×1200, c_fill, g_auto, f_auto, q_auto).
+ * Pass the public_id returned by Cloudinary on upload (req.file.filename).
+ */
+export function buildHeroImageUrl(publicId: string): string {
+  return cloudinary.url(publicId, { ...HERO_TRANSFORM, secure: true });
+}
 
 export { cloudinary };

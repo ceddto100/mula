@@ -84,7 +84,10 @@ function getOptimizedHeroUrl(url: string): string {
   if (!url) return url;
   const match = url.match(/^(https?:\/\/res\.cloudinary\.com\/[^/]+\/image\/upload\/)(.*)/);
   if (!match) return url;
-  return `${match[1]}${HERO_TRANSFORMS}/${match[2]}`;
+  // Strip any transforms that precede the version segment to avoid conflicting chained transforms.
+  const versionMatch = match[2].match(/(v\d+\/.+)$/);
+  const assetPath = versionMatch ? versionMatch[1] : match[2];
+  return `${match[1]}${HERO_TRANSFORMS}/${assetPath}`;
 }
 
 // ─── CategoryHero ─────────────────────────────────────────────────────────────
