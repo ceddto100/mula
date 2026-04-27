@@ -56,8 +56,8 @@ export const defaultHomePageContent: HomePageContent = {
     submitButton: 'SUBSCRIBE →',
   },
   brandTheme: {
-    accentColor: '#00E5FF',
-    heroOverlayColor: '#00AFC2',
+    accentColor: '',
+    heroOverlayColor: '',
     headingFont: 'Inter',
   },
 };
@@ -115,19 +115,25 @@ const Home: React.FC = () => {
 
   return (
     <Layout>
-      {/* Bold Diagonal Hero Section */}
-      <section className="relative min-h-[90vh] bg-brand-900 overflow-hidden">
-        {/* Diagonal Background Split */}
+      {/* Hero Section */}
+      <section className="relative min-h-[90vh] overflow-hidden">
         <div className="absolute inset-0">
-          <div className="absolute inset-0 bg-gradient-to-br from-brand-800 via-brand-900 to-brand-950" />
+          <div className="absolute inset-0 bg-black/30" />
           <div
-            className="absolute top-0 right-0 w-3/5 h-full diagonal-bg"
-            style={{ backgroundColor: content.brandTheme?.heroOverlayColor || '#00AFC2' }}
+            className="absolute top-0 left-0 h-full w-[55%] bg-black/60"
           />
           <img
             src={homePageImages.heroImage}
             alt="Fashion"
             className="absolute top-0 right-0 w-3/5 h-full object-cover diagonal-bg opacity-90 mix-blend-multiply"
+          />
+          <div
+            className="absolute top-0 right-0 w-3/5 h-full diagonal-bg bg-black/35"
+            style={
+              content.brandTheme?.heroOverlayColor
+                ? { backgroundColor: content.brandTheme.heroOverlayColor, opacity: 0.6 }
+                : undefined
+            }
           />
         </div>
 
