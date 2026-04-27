@@ -382,10 +382,19 @@ const Home: React.FC = () => {
       {/* Newsletter - Bold CTA */}
       <section className="py-20 bg-transparent animate-on-scroll opacity-0 translate-y-12 transition-all duration-1000">
         <div className="max-w-4xl mx-auto px-4">
-          <div className="bg-gradient-to-br from-brand-500 to-brand-700 p-12 lg:p-16 relative overflow-hidden">
+          <div
+            className="p-12 lg:p-16 relative overflow-hidden"
+            style={{
+              background:
+                'linear-gradient(135deg, color-mix(in srgb, var(--accent-electric, #00E5FF) 44%, #0f1f38 56%), color-mix(in srgb, var(--accent-electric, #00E5FF) 20%, #081121 80%))',
+            }}
+          >
+            <div className="absolute inset-0 bg-[radial-gradient(circle_at_25%_30%,rgba(255,255,255,0.2),transparent_48%),radial-gradient(circle_at_80%_70%,rgba(255,255,255,0.14),transparent_42%)] opacity-60" />
+
             {/* Arrow Pattern */}
-            <div className="absolute top-0 right-0 text-white opacity-10 text-9xl">→</div>
-            <div className="absolute bottom-0 left-0 text-white opacity-10 text-9xl rotate-180">→</div>
+            <div className="absolute top-2 right-10 text-white/25 text-8xl orbit-float-slow select-none">→</div>
+            <div className="absolute bottom-3 left-8 text-white/20 text-8xl rotate-180 orbit-float-fast select-none">→</div>
+            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-2 h-2 bg-white/80 rounded-full shadow-[0_0_18px_rgba(255,255,255,0.8)] orbit-center-glow" />
 
             <div className="relative z-10 text-center text-white">
               <h2 className="text-5xl md:text-6xl font-display mb-6">{content.newsletter.title}</h2>
@@ -457,6 +466,39 @@ const Home: React.FC = () => {
 
         .delay-700 {
           animation-delay: 700ms;
+        }
+
+        @keyframes orbit-float-slow {
+          0% { transform: translate3d(0, 0, 0) rotate(0deg); }
+          25% { transform: translate3d(-6px, -12px, 0) rotate(-4deg); }
+          50% { transform: translate3d(0, -20px, 0) rotate(0deg); }
+          75% { transform: translate3d(6px, -10px, 0) rotate(4deg); }
+          100% { transform: translate3d(0, 0, 0) rotate(0deg); }
+        }
+
+        @keyframes orbit-float-fast {
+          0% { transform: rotate(180deg) translate3d(0, 0, 0); }
+          25% { transform: rotate(180deg) translate3d(8px, 10px, 0); }
+          50% { transform: rotate(180deg) translate3d(0, 18px, 0); }
+          75% { transform: rotate(180deg) translate3d(-8px, 10px, 0); }
+          100% { transform: rotate(180deg) translate3d(0, 0, 0); }
+        }
+
+        @keyframes orbit-center-glow {
+          0%, 100% { opacity: 0.65; transform: translate(-50%, -50%) scale(1); }
+          50% { opacity: 1; transform: translate(-50%, -50%) scale(1.35); }
+        }
+
+        .orbit-float-slow {
+          animation: orbit-float-slow 6.5s ease-in-out infinite;
+        }
+
+        .orbit-float-fast {
+          animation: orbit-float-fast 4.8s ease-in-out infinite;
+        }
+
+        .orbit-center-glow {
+          animation: orbit-center-glow 3s ease-in-out infinite;
         }
       `}</style>
     </Layout>
