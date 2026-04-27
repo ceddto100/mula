@@ -127,6 +127,12 @@ const Home: React.FC = () => {
             alt="Fashion"
             className="absolute top-0 right-0 w-3/5 h-full object-cover diagonal-bg"
           />
+          {content.brandTheme?.heroOverlayColor ? (
+            <div
+              className="absolute top-0 right-0 w-3/5 h-full diagonal-bg pointer-events-none"
+              style={{ backgroundColor: content.brandTheme.heroOverlayColor, opacity: 0.45 }}
+            />
+          ) : null}
         </div>
 
         {/* Floating Arrow Elements */}
