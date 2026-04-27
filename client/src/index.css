@@ -277,3 +277,10 @@ input[type="number"] {
 .hover\:border-accent-electric:hover {
   border-color: var(--accent-electric) !important;
 }
+
+.admin-theme h1,
+.admin-theme h2,
+.admin-theme h3,
+.admin-theme h4 {
+  font-family: var(--admin-heading-font, 'Inter', system-ui, sans-serif);
+}
