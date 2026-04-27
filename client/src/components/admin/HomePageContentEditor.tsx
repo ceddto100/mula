@@ -3,7 +3,7 @@ import toast from 'react-hot-toast';
 import { adminApi } from '../../api/admin.api';
 import { HomePageContent } from '../../types';
 import { defaultHomePageContent } from '../../pages/Home';
-import { applyAccentColor, applyHeadingFont, saveBrandTheme } from '../../utils/brandTheme';
+import { applyAccentColor, applyHeadingFont } from '../../utils/brandTheme';
 import { HEADING_FONT_OPTIONS, HERO_OVERLAY_COLORS } from '../../utils/adminTheme';
 
 type FieldDef = {
@@ -165,10 +165,6 @@ const HomePageContentEditor: React.FC = () => {
       setContent(updated);
       applyAccentColor(updated.brandTheme?.accentColor);
       applyHeadingFont(updated.brandTheme?.headingFont);
-      saveBrandTheme({
-        accentColor: updated.brandTheme?.accentColor,
-        headingFont: updated.brandTheme?.headingFont,
-      });
       toast.success('Home page content updated');
     } catch (error) {
       console.error('Failed to save home page content:', error);

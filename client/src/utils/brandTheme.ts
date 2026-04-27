@@ -13,15 +13,19 @@ const HEADING_FONT_MAP: Record<string, string> = {
   Raleway: '"Raleway", system-ui, sans-serif',
 };
 
-export const normalizeAccentColor = (value?: string): string => {
-  if (!value) return '#00E5FF';
+export const normalizeAccentColor = (value?: string): string | null => {
+  if (!value) return null;
   const trimmed = value.trim();
-  return HEX_COLOR_REGEX.test(trimmed) ? trimmed : '#00E5FF';
+  return HEX_COLOR_REGEX.test(trimmed) ? trimmed : null;
 };
 
-export const applyAccentColor = (value?: string): string => {
+export const applyAccentColor = (value?: string): string | null => {
   const normalized = normalizeAccentColor(value);
-  document.documentElement.style.setProperty('--accent-electric', normalized);
+  if (normalized) {
+    document.documentElement.style.setProperty('--accent-electric', normalized);
+  } else {
+    document.documentElement.style.removeProperty('--accent-electric');
+  }
   return normalized;
 };
 

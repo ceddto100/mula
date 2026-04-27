@@ -5,7 +5,6 @@
 @tailwind utilities;
 
 :root {
-  --accent-electric: #00E5FF;
   --site-heading-font: 'Bebas Neue', Impact, sans-serif;
 }
 
