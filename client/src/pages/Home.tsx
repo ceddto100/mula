@@ -118,11 +118,10 @@ const Home: React.FC = () => {
         {/* Diagonal Background Split */}
         <div className="absolute inset-0">
           <div className="absolute inset-0 bg-gradient-to-br from-brand-800 via-brand-900 to-brand-950" />
-          <div className="absolute top-0 right-0 w-3/5 h-full bg-brand-500 diagonal-bg" />
           <img
             src={homePageImages.heroImage}
             alt="Fashion"
-            className="absolute top-0 right-0 w-3/5 h-full object-cover diagonal-bg opacity-90 mix-blend-multiply"
+            className="absolute top-0 right-0 w-3/5 h-full object-cover diagonal-bg"
           />
         </div>
 
