@@ -118,13 +118,14 @@ const Home: React.FC = () => {
       {/* Hero Section */}
       <section className="relative min-h-[90vh] overflow-hidden">
         <div className="absolute inset-0">
+          <div className="absolute inset-0 bg-black/30" />
           <div
-            className="absolute inset-0 bg-black/60"
-            style={
-              content.brandTheme?.heroOverlayColor
-                ? { backgroundColor: content.brandTheme.heroOverlayColor, opacity: 0.6 }
-                : undefined
-            }
+            className="absolute top-0 left-0 h-full w-[55%] bg-black/60"
+          />
+          <img
+            src={homePageImages.heroImage}
+            alt="Fashion"
+            className="absolute top-0 right-0 w-3/5 h-full object-cover diagonal-bg"
           />
         </div>
 
