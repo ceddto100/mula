@@ -139,8 +139,8 @@ const InfoPage: React.FC = () => {
   return (
     <Layout>
       <section className="max-w-4xl mx-auto px-4 py-12">
-        <h1 className="text-4xl font-display mb-6">{content.title}</h1>
-        <div className="space-y-4 text-brand-700 leading-relaxed">
+        <h1 className="text-4xl font-display mb-6 text-white">{content.title}</h1>
+        <div className="space-y-4 text-white/90 leading-relaxed">
           {content.body.map((line) => (
             <p key={line}>{line}</p>
           ))}
