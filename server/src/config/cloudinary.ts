@@ -13,7 +13,9 @@ const storage = new CloudinaryStorage({
   params: {
     folder: 'mula-store',
     allowed_formats: ['jpg', 'jpeg', 'png', 'webp'],
-    transformation: [{ width: 1000, height: 1000, crop: 'limit' }],
+    transformation: [
+      { width: 1200, height: 1200, crop: 'fill', gravity: 'auto', fetch_format: 'auto', quality: 'auto' },
+    ],
   } as any,
 });
 
@@ -32,6 +34,9 @@ const heroMediaStorage = new CloudinaryStorage({
     folder: 'mula-store/category-heroes',
     resource_type: 'auto',
     allowed_formats: ['jpg', 'jpeg', 'png', 'webp', 'mp4', 'mov', 'webm', 'avi'],
+    transformation: [
+      { width: 2400, height: 1200, crop: 'fill', gravity: 'auto', fetch_format: 'auto', quality: 'auto' },
+    ],
   } as any,
 });
 
