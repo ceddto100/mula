@@ -34,8 +34,7 @@ const App: React.FC = () => {
         applyAccentColor(content.brandTheme?.accentColor);
         applyHeadingFont(content.brandTheme?.headingFont);
       } catch (error) {
-        applyAccentColor('#00E5FF');
-        applyHeadingFont();
+        console.error('Failed to load brand theme from API:', error);
       }
     };
 
