@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { Toaster } from 'react-hot-toast';
 import { AuthProvider } from './context/AuthContext';
@@ -23,8 +23,23 @@ import AdminOrders from './pages/AdminOrders';
 import SearchPage from './pages/SearchPage';
 import WishlistPage from './pages/WishlistPage';
 import InfoPage from './pages/InfoPage';
+import { productsApi } from './api/products.api';
+import { applyAccentColor } from './utils/brandTheme';
 
 const App: React.FC = () => {
+  useEffect(() => {
+    const loadAccentColor = async () => {
+      try {
+        const content = await productsApi.getHomePageContent();
+        applyAccentColor(content.brandTheme?.accentColor);
+      } catch (error) {
+        applyAccentColor('#00E5FF');
+      }
+    };
+
+    loadAccentColor();
+  }, []);
+
   return (
     <Router>
       <AuthProvider>

@@ -2,6 +2,10 @@
 @tailwind components;
 @tailwind utilities;
 
+:root {
+  --accent-electric: #00E5FF;
+}
+
 /* Base styles */
 body {
   @apply antialiased;
@@ -240,4 +244,33 @@ input[type="number"] {
 .animate-gradient {
   background-size: 200% 200%;
   animation: gradient-shift 8s ease infinite;
+}
+
+/* Dynamic accent color overrides */
+.text-accent-electric {
+  color: var(--accent-electric) !important;
+}
+
+.bg-accent-electric {
+  background-color: var(--accent-electric) !important;
+}
+
+.border-accent-electric {
+  border-color: var(--accent-electric) !important;
+}
+
+.ring-accent-electric {
+  --tw-ring-color: var(--accent-electric) !important;
+}
+
+.hover\:text-accent-electric:hover {
+  color: var(--accent-electric) !important;
+}
+
+.hover\:bg-accent-electric:hover {
+  background-color: var(--accent-electric) !important;
+}
+
+.hover\:border-accent-electric:hover {
+  border-color: var(--accent-electric) !important;
 }

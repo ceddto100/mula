@@ -7,6 +7,7 @@ import { useFeaturedProducts } from '../hooks/useProducts';
 import { useSeo } from '../hooks/useSeo';
 import { productsApi } from '../api/products.api';
 import { HomePageImages, HomePageContent } from '../types';
+import { applyAccentColor } from '../utils/brandTheme';
 
 const defaultHomePageImages: HomePageImages = {
   heroImage: 'https://images.unsplash.com/photo-1490481651871-ab68de25d43d?auto=format&fit=crop&q=80&w=2070',
@@ -53,6 +54,9 @@ export const defaultHomePageContent: HomePageContent = {
     description: 'Get exclusive access to new drops, special offers, and style inspiration.',
     emailPlaceholder: 'Enter your email',
     submitButton: 'SUBSCRIBE →',
+  },
+  brandTheme: {
+    accentColor: '#00E5FF',
   },
 };
 
@@ -102,6 +106,10 @@ const Home: React.FC = () => {
 
     return () => observerRef.current?.disconnect();
   }, []);
+
+  useEffect(() => {
+    applyAccentColor(content.brandTheme?.accentColor);
+  }, [content.brandTheme?.accentColor]);
 
   return (
     <Layout>

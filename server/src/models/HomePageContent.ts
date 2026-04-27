@@ -46,12 +46,17 @@ export interface INewsletterContent {
   submitButton: string;
 }
 
+export interface IBrandThemeContent {
+  accentColor: string;
+}
+
 export interface IHomePageContent {
   hero: IHeroContent;
   shopByStyle: IShopByStyleContent;
   freshDrops: IFreshDropsContent;
   brandStatement: IBrandStatementContent;
   newsletter: INewsletterContent;
+  brandTheme: IBrandThemeContent;
 }
 
 const heroSchema = new Schema<IHeroContent>(
@@ -170,6 +175,13 @@ const newsletterSchema = new Schema<INewsletterContent>(
   { _id: false }
 );
 
+const brandThemeSchema = new Schema<IBrandThemeContent>(
+  {
+    accentColor: { type: String, default: '#00E5FF' },
+  },
+  { _id: false }
+);
+
 const homePageContentSchema = new Schema<IHomePageContent>(
   {
     hero: { type: heroSchema, default: () => ({}) },
@@ -177,6 +189,7 @@ const homePageContentSchema = new Schema<IHomePageContent>(
     freshDrops: { type: freshDropsSchema, default: () => ({}) },
     brandStatement: { type: brandStatementSchema, default: () => ({}) },
     newsletter: { type: newsletterSchema, default: () => ({}) },
+    brandTheme: { type: brandThemeSchema, default: () => ({}) },
   },
   { timestamps: true }
 );
