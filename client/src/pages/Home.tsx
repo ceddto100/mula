@@ -125,15 +125,7 @@ const Home: React.FC = () => {
           <img
             src={homePageImages.heroImage}
             alt="Fashion"
-            className="absolute top-0 right-0 w-3/5 h-full object-cover diagonal-bg opacity-90 mix-blend-multiply"
-          />
-          <div
-            className="absolute top-0 right-0 w-3/5 h-full diagonal-bg bg-black/35"
-            style={
-              content.brandTheme?.heroOverlayColor
-                ? { backgroundColor: content.brandTheme.heroOverlayColor, opacity: 0.6 }
-                : undefined
-            }
+            className="absolute top-0 right-0 w-3/5 h-full object-cover diagonal-bg"
           />
         </div>
 
