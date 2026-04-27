@@ -6,6 +6,7 @@
 
 :root {
   --accent-electric: #00E5FF;
+  --site-heading-font: 'Bebas Neue', Impact, sans-serif;
 }
 
 /* Base styles */
@@ -203,7 +204,7 @@ input[type="number"] {
 
 /* Contemporary brand typography */
 .font-display {
-  font-family: 'Bebas Neue', Impact, sans-serif;
+  font-family: var(--site-heading-font);
   letter-spacing: 0.05em;
 }
 

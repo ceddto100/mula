@@ -23,11 +23,11 @@ const sections: SectionDef[] = [
   {
     key: 'brandTheme',
     title: 'Brand Theme',
-    description: 'Controls site accent color, hero turquoise overlay, and admin heading font.',
+    description: 'Controls site accent color, hero turquoise overlay, and website heading font.',
     fields: [
       { path: 'brandTheme.accentColor', label: 'Accent color (hex)' },
       { path: 'brandTheme.heroOverlayColor', label: 'Hero overlay color (hex)' },
-      { path: 'brandTheme.headingFont', label: 'Admin heading font' },
+      { path: 'brandTheme.headingFont', label: 'Website heading font' },
     ],
   },
   {
