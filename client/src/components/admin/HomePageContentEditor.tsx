@@ -161,11 +161,11 @@ const HomePageContentEditor: React.FC = () => {
   };
 
   return (
-    <div className="bg-white rounded-lg shadow-sm p-6 space-y-6">
+    <div className="bg-white rounded-lg shadow-sm p-6 space-y-6 text-gray-900">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
         <div>
           <h3 className="text-lg font-semibold">Home Page Content Editor</h3>
-          <p className="text-sm text-gray-500">
+          <p className="text-sm text-gray-700">
             Edit every line of copy from the hero down to the newsletter signup.
           </p>
         </div>
@@ -202,7 +202,7 @@ const HomePageContentEditor: React.FC = () => {
               <summary className="cursor-pointer select-none px-4 py-3 font-medium text-gray-800 bg-gray-50 rounded-t-lg">
                 {section.title}
                 {section.description && (
-                  <span className="block text-xs font-normal text-gray-500 mt-0.5">
+                  <span className="block text-xs font-normal text-gray-600 mt-0.5">
                     {section.description}
                   </span>
                 )}
@@ -221,14 +221,14 @@ const HomePageContentEditor: React.FC = () => {
                           value={value}
                           onChange={(e) => onChange(field.path, e.target.value)}
                           rows={3}
-                          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:border-gray-900"
+                          className="w-full px-3 py-2 border border-gray-300 rounded-md text-gray-900 placeholder:text-gray-500 focus:outline-none focus:border-gray-900"
                         />
                       ) : (
                         <input
                           type="text"
                           value={value}
                           onChange={(e) => onChange(field.path, e.target.value)}
-                          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:border-gray-900"
+                          className="w-full px-3 py-2 border border-gray-300 rounded-md text-gray-900 placeholder:text-gray-500 focus:outline-none focus:border-gray-900"
                         />
                       )}
                     </label>

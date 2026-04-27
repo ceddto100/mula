@@ -24,7 +24,7 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
   ];
 
   return (
-    <div className="min-h-screen bg-gray-100">
+    <div className="min-h-screen bg-gray-100 text-gray-900">
       {/* Top header */}
       <header className="bg-white shadow-sm">
         <div className="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
