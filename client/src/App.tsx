@@ -24,7 +24,7 @@ import SearchPage from './pages/SearchPage';
 import WishlistPage from './pages/WishlistPage';
 import InfoPage from './pages/InfoPage';
 import { productsApi } from './api/products.api';
-import { applyAccentColor, applyHeadingFont } from './utils/brandTheme';
+import { applyAccentColor, applyHeadingFont, saveBrandTheme } from './utils/brandTheme';
 
 const App: React.FC = () => {
   useEffect(() => {
@@ -33,9 +33,12 @@ const App: React.FC = () => {
         const content = await productsApi.getHomePageContent();
         applyAccentColor(content.brandTheme?.accentColor);
         applyHeadingFont(content.brandTheme?.headingFont);
+        saveBrandTheme({
+          accentColor: content.brandTheme?.accentColor,
+          headingFont: content.brandTheme?.headingFont,
+        });
       } catch (error) {
-        applyAccentColor('#00E5FF');
-        applyHeadingFont();
+        console.error('Failed to load brand theme from API:', error);
       }
     };
 
