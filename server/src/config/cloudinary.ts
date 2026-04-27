@@ -1,81 +1,88 @@
 import { v2 as cloudinary } from 'cloudinary';
 import { CloudinaryStorage } from 'multer-storage-cloudinary';
 import multer from 'multer';
+import dotenv from 'dotenv';
 
+dotenv.config();
+
+// Credentials stay on the server — never exposed to the frontend
 cloudinary.config({
   cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
   api_key: process.env.CLOUDINARY_API_KEY,
   api_secret: process.env.CLOUDINARY_API_SECRET,
 });
 
-// Shared transform options — used both for upload storage and SDK-generated delivery URLs
-const PRODUCT_TRANSFORM = {
-  width: 1200,
-  height: 1200,
-  crop: 'fill' as const,
-  gravity: 'auto',
-  fetch_format: 'auto',
-  quality: 'auto',
-};
-
-const HERO_TRANSFORM = {
-  width: 2400,
-  height: 1200,
-  crop: 'fill' as const,
-  gravity: 'auto',
-  fetch_format: 'auto',
-  quality: 'auto',
-};
-
+// ─── Product image upload storage ────────────────────────────────────────────
+// Two-step transform: resize to fit within 1200×1200, then apply format/quality
 const storage = new CloudinaryStorage({
   cloudinary: cloudinary,
   params: {
     folder: 'mula-store',
+    use_filename: true,
+    unique_filename: true,
+    overwrite: true,
     allowed_formats: ['jpg', 'jpeg', 'png', 'webp'],
-    transformation: [PRODUCT_TRANSFORM],
+    transformation: [
+      { width: 1200, height: 1200, crop: 'limit' },
+      { fetch_format: 'auto', quality: 'auto' },
+    ],
   } as any,
 });
 
 export const upload = multer({
   storage,
   limits: {
-    // Allow larger product images to be uploaded through the admin UI
-    fileSize: 20 * 1024 * 1024, // 20MB per file limit
+    fileSize: 20 * 1024 * 1024, // 20MB per file
   },
 });
 
-// Separate storage for category hero media — supports images AND videos via resource_type: auto
+// ─── Category hero media upload storage ──────────────────────────────────────
+// Supports images AND videos via resource_type: auto
 const heroMediaStorage = new CloudinaryStorage({
   cloudinary: cloudinary,
   params: {
     folder: 'mula-store/category-heroes',
     resource_type: 'auto',
+    use_filename: true,
+    unique_filename: true,
+    overwrite: true,
     allowed_formats: ['jpg', 'jpeg', 'png', 'webp', 'mp4', 'mov', 'webm', 'avi'],
-    transformation: [HERO_TRANSFORM],
+    transformation: [
+      { width: 2400, height: 1200, crop: 'limit' },
+      { fetch_format: 'auto', quality: 'auto' },
+    ],
   } as any,
 });
 
 export const uploadHeroMedia = multer({
   storage: heroMediaStorage,
   limits: {
-    fileSize: 200 * 1024 * 1024, // 200MB to accommodate video
+    fileSize: 200 * 1024 * 1024, // 200MB for video
   },
 });
 
-/**
- * Generate a Cloudinary delivery URL for a product image (1200×1200, c_fill, g_auto, f_auto, q_auto).
- * Pass the public_id returned by Cloudinary on upload (req.file.filename).
- */
+// ─── SDK-generated delivery URLs (matches the Node.js quickstart pattern) ────
+
+/** 1200×1200 square delivery URL — for ProductCard grid images */
 export function buildProductImageUrl(publicId: string): string {
-  return cloudinary.url(publicId, { ...PRODUCT_TRANSFORM, secure: true });
+  return cloudinary.url(publicId, {
+    transformation: [
+      { width: 1200, height: 1200, crop: 'fill', gravity: 'auto' },
+      { fetch_format: 'auto', quality: 'auto' },
+    ],
+    secure: true,
+  });
 }
 
-/**
- * Generate a Cloudinary delivery URL for a category hero image (2400×1200, c_fill, g_auto, f_auto, q_auto).
- * Pass the public_id returned by Cloudinary on upload (req.file.filename).
- */
+/** 2400×1200 wide delivery URL — for CategoryHero banner images */
 export function buildHeroImageUrl(publicId: string): string {
-  return cloudinary.url(publicId, { ...HERO_TRANSFORM, secure: true });
+  return cloudinary.url(publicId, {
+    transformation: [
+      { width: 2400, height: 1200, crop: 'fill', gravity: 'auto' },
+      { fetch_format: 'auto', quality: 'auto' },
+    ],
+    secure: true,
+  });
 }
 
 export { cloudinary };
