@@ -89,6 +89,10 @@ const AdminDashboard: React.FC = () => {
     }
   };
 
+  const handleImageUrlChange = (field: keyof HomePageImages, value: string) => {
+    setHomePageImages((prev) => (prev ? { ...prev, [field]: value } : prev));
+  };
+
   if (isLoading) {
     return (
       <AdminLayout>
@@ -156,6 +160,16 @@ const AdminDashboard: React.FC = () => {
                     disabled={uploadingField === item.key}
                   />
                 </label>
+                <div>
+                  <label className="block text-xs text-gray-600 mb-1">Cloudinary URL</label>
+                  <input
+                    type="url"
+                    value={homePageImages?.[item.key] || ''}
+                    onChange={(event) => handleImageUrlChange(item.key, event.target.value)}
+                    placeholder="https://res.cloudinary.com/..."
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm"
+                  />
+                </div>
               </div>
             ))}
           </div>

@@ -94,6 +94,7 @@ const AdminProducts: React.FC = () => {
   const [tagInput, setTagInput] = useState('');
   const [collectionInput, setCollectionInput] = useState('');
   const [materialInput, setMaterialInput] = useState('');
+  const [mediaUrlInput, setMediaUrlInput] = useState('');
 
   useEffect(() => {
     fetchProducts();
@@ -132,6 +133,7 @@ const AdminProducts: React.FC = () => {
     setTagInput('');
     setCollectionInput('');
     setMaterialInput('');
+    setMediaUrlInput('');
   }, [hasUnsavedChanges]);
 
   const handleEdit = (product: Product) => {
@@ -213,6 +215,28 @@ const AdminProducts: React.FC = () => {
 
   const removeImage = (index: number) => {
     updateFormField('images', formData.images.filter((_, i) => i !== index));
+  };
+
+  const addImageFromUrl = () => {
+    const url = mediaUrlInput.trim();
+    if (!url) {
+      toast.error('Please enter a Cloudinary URL');
+      return;
+    }
+    if (!url.includes('cloudinary.com')) {
+      toast.error('Please enter a valid Cloudinary URL');
+      return;
+    }
+
+    const newImage: ProductImage = {
+      url,
+      alt: '',
+      position: formData.images.length,
+    };
+
+    updateFormField('images', [...formData.images, newImage]);
+    setMediaUrlInput('');
+    toast.success('Cloudinary URL added');
   };
 
   // Variant handling
@@ -580,6 +604,25 @@ const AdminProducts: React.FC = () => {
                             disabled={uploading}
                             className="mb-2 text-sm"
                           />
+                          <div className="space-y-2">
+                            <label className="block text-xs text-gray-600">Cloudinary URL</label>
+                            <div className="flex gap-2">
+                              <input
+                                type="url"
+                                value={mediaUrlInput}
+                                onChange={(e) => setMediaUrlInput(e.target.value)}
+                                placeholder="https://res.cloudinary.com/..."
+                                className="flex-1 px-3 py-2 border rounded-md text-sm"
+                              />
+                              <button
+                                type="button"
+                                onClick={addImageFromUrl}
+                                className="px-3 py-2 bg-gray-900 text-white rounded-md text-sm hover:bg-gray-800"
+                              >
+                                Add URL
+                              </button>
+                            </div>
+                          </div>
                           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                             {formData.images.map((img, idx) => (
                               <div key={idx} className="relative group">
