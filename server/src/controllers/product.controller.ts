@@ -77,8 +77,13 @@ export const getProducts = async (req: Request, res: Response): Promise<void> =>
     // Build filter - only active products for public
     const filter: any = { status: 'active' };
 
-    if (productType || category) {
-      filter.productType = (productType || category) as string;
+    if (productType) {
+      filter.productType = productType as string;
+    }
+
+    if (category) {
+      const normalizedCategory = String(category).toLowerCase().trim();
+      filter.tags = { $in: [normalizedCategory] };
     }
 
     if (vendor) {
@@ -95,7 +100,13 @@ export const getProducts = async (req: Request, res: Response): Promise<void> =>
       const tagArray: string[] = (Array.isArray(tags) ? tags : String(tags).split(',')).map(tag =>
         tag.toString()
       );
-      filter.tags = { $in: tagArray.map(t => t.toLowerCase().trim()) };
+      const normalizedTags = tagArray.map(t => t.toLowerCase().trim());
+
+      if (filter.tags?.$in) {
+        filter.tags = { $all: [...filter.tags.$in, ...normalizedTags] };
+      } else {
+        filter.tags = { $in: normalizedTags };
+      }
     }
 
     if (colorFamily) {
@@ -624,7 +635,7 @@ export const getFilterOptions = async (req: Request, res: Response): Promise<voi
   }
 };
 
-// Legacy compatibility: Get products by category (maps to productType)
+// Get products by category tag
 export const getProductsByCategory = async (req: Request, res: Response): Promise<void> => {
   try {
     const { category } = req.params;
@@ -632,8 +643,10 @@ export const getProductsByCategory = async (req: Request, res: Response): Promis
 
     const skip = (Number(page) - 1) * Number(limit);
 
+    const normalizedCategory = category.toLowerCase().trim();
+
     const filter = {
-      productType: { $regex: new RegExp(category, 'i') },
+      tags: { $in: [normalizedCategory] },
       status: 'active',
     };
 

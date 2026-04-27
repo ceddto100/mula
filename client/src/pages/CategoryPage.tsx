@@ -20,8 +20,10 @@ const CategoryPage: React.FC = () => {
   const page = Number(searchParams.get('page')) || 1;
   const sort = searchParams.get('sort') || '-createdAt';
 
+  const normalizedCategory = category?.toLowerCase().trim();
+
   const { products, isLoading, pagination } = useProducts({
-    category: category !== 'all' ? category : undefined,
+    category: normalizedCategory && normalizedCategory !== 'all' ? normalizedCategory : undefined,
     page,
     limit: 12,
     sort,
