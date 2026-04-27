@@ -1,7 +1,9 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { FiPackage, FiShoppingCart, FiGrid, FiLogOut, FiArrowLeft } from 'react-icons/fi';
 import { useAuth } from '../../context/AuthContext';
+import { adminApi } from '../../api/admin.api';
+import { getHeadingFontFamily } from '../../utils/adminTheme';
 
 interface AdminLayoutProps {
   children: React.ReactNode;
@@ -11,6 +13,20 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
   const location = useLocation();
   const navigate = useNavigate();
   const { user, logout } = useAuth();
+  const [headingFontFamily, setHeadingFontFamily] = useState(getHeadingFontFamily('Inter'));
+
+  useEffect(() => {
+    const loadAdminTheme = async () => {
+      try {
+        const content = await adminApi.getHomePageContent();
+        setHeadingFontFamily(getHeadingFontFamily(content.brandTheme?.headingFont));
+      } catch (error) {
+        console.error('Failed to load admin heading font:', error);
+      }
+    };
+
+    loadAdminTheme();
+  }, []);
 
   const handleLogout = async () => {
     await logout();
@@ -24,7 +40,10 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
   ];
 
   return (
-    <div className="min-h-screen bg-gray-100 text-gray-900">
+    <div
+      className="min-h-screen bg-gray-100 text-gray-900 admin-theme"
+      style={{ '--admin-heading-font': headingFontFamily } as React.CSSProperties}
+    >
       {/* Top header */}
       <header className="bg-white shadow-sm">
         <div className="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">

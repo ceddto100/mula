@@ -57,6 +57,8 @@ export const defaultHomePageContent: HomePageContent = {
   },
   brandTheme: {
     accentColor: '#00E5FF',
+    heroOverlayColor: '#00AFC2',
+    headingFont: 'Inter',
   },
 };
 
@@ -118,7 +120,10 @@ const Home: React.FC = () => {
         {/* Diagonal Background Split */}
         <div className="absolute inset-0">
           <div className="absolute inset-0 bg-gradient-to-br from-brand-800 via-brand-900 to-brand-950" />
-          <div className="absolute top-0 right-0 w-3/5 h-full bg-brand-500 diagonal-bg" />
+          <div
+            className="absolute top-0 right-0 w-3/5 h-full diagonal-bg"
+            style={{ backgroundColor: content.brandTheme?.heroOverlayColor || '#00AFC2' }}
+          />
           <img
             src={homePageImages.heroImage}
             alt="Fashion"
