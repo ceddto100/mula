@@ -155,7 +155,7 @@ const Home: React.FC = () => {
             <div className="flex flex-col sm:flex-row gap-4 animate-fade-in-more-delayed">
               <Link
                 to="/category/new-arrivals"
-                className="group relative px-10 py-5 bg-white text-brand-900 font-grotesk font-bold text-lg tracking-wide overflow-hidden transform hover:scale-105 transition-all duration-300"
+                className="group relative px-10 py-5 bg-white text-brand-900 font-grotesk font-bold text-lg tracking-wide overflow-hidden rounded-full transform hover:scale-105 transition-all duration-300"
               >
                 <span className="relative z-10 flex items-center gap-2">
                   {content.hero.ctaPrimary}
@@ -165,7 +165,7 @@ const Home: React.FC = () => {
 
               <Link
                 to="/category/collections"
-                className="group px-10 py-5 border-2 border-white text-white font-grotesk font-bold text-lg tracking-wide hover:bg-white hover:text-brand-900 transition-all duration-300 transform hover:scale-105"
+                className="group px-10 py-5 border-2 border-white text-white font-grotesk font-bold text-lg tracking-wide rounded-full hover:bg-white hover:text-brand-900 transition-all duration-300 transform hover:scale-105"
               >
                 <span className="flex items-center gap-2">
                   {content.hero.ctaSecondary}
@@ -198,7 +198,7 @@ const Home: React.FC = () => {
             {/* Large Featured - Men */}
             <Link
               to="/category/men"
-              className="col-span-12 lg:col-span-8 relative group overflow-hidden bg-brand-900 aspect-[16/9] lg:aspect-[16/10]"
+              className="col-span-12 lg:col-span-8 relative group overflow-hidden rounded-3xl bg-brand-900 aspect-[16/9] lg:aspect-[16/10]"
             >
               <img
                 src={homePageImages.menImage}
@@ -225,7 +225,7 @@ const Home: React.FC = () => {
             {/* Women - Vertical */}
             <Link
               to="/category/women"
-              className="col-span-12 lg:col-span-4 relative group overflow-hidden bg-accent-purple aspect-[16/9] lg:aspect-[9/16]"
+              className="col-span-12 lg:col-span-4 relative group overflow-hidden rounded-3xl bg-accent-purple aspect-[16/9] lg:aspect-[9/16]"
             >
               <img
                 src={homePageImages.womenImage}
@@ -247,7 +247,7 @@ const Home: React.FC = () => {
             {/* Accessories */}
             <Link
               to="/category/accessories"
-              className="col-span-6 lg:col-span-4 relative group overflow-hidden bg-accent-sunset aspect-square"
+              className="col-span-6 lg:col-span-4 relative group overflow-hidden rounded-3xl bg-accent-sunset aspect-square"
             >
               <img
                 src={homePageImages.accessoryImage}
@@ -266,7 +266,7 @@ const Home: React.FC = () => {
             {/* Sale - Electric Accent */}
             <Link
               to="/category/sale"
-              className="col-span-6 lg:col-span-4 relative group overflow-hidden bg-accent-electric aspect-square"
+              className="col-span-6 lg:col-span-4 relative group overflow-hidden rounded-3xl bg-accent-electric aspect-square"
             >
               <img
                 src={homePageImages.saleImage}
@@ -290,7 +290,7 @@ const Home: React.FC = () => {
             {/* Collections */}
             <Link
               to="/category/collections"
-              className="col-span-12 lg:col-span-4 relative group overflow-hidden bg-brand-700 aspect-[16/9] lg:aspect-square"
+              className="col-span-12 lg:col-span-4 relative group overflow-hidden rounded-3xl bg-brand-700 aspect-[16/9] lg:aspect-square"
             >
               <img
                 src={homePageImages.collectionImage}
@@ -354,7 +354,7 @@ const Home: React.FC = () => {
           </p>
           <Link
             to="/about"
-            className="inline-flex items-center gap-3 bg-accent-electric text-brand-900 px-10 py-5 font-grotesk font-bold text-lg tracking-wide hover:bg-white transition-all duration-300 transform hover:scale-105"
+            className="inline-flex items-center gap-3 bg-accent-electric text-brand-900 px-10 py-5 font-grotesk font-bold text-lg tracking-wide rounded-full hover:bg-white transition-all duration-300 transform hover:scale-105"
           >
             {content.brandStatement.ctaButton}
             <FiArrowUpRight size={24} />
@@ -384,7 +384,7 @@ const Home: React.FC = () => {
                 />
                 <button
                   type="submit"
-                  className="px-10 py-4 bg-accent-electric text-brand-900 font-grotesk font-bold text-lg tracking-wide hover:bg-white transition-all duration-300 transform hover:scale-105"
+                  className="px-10 py-4 bg-accent-electric text-brand-900 font-grotesk font-bold text-lg tracking-wide rounded-full hover:bg-white transition-all duration-300 transform hover:scale-105"
                 >
                   {content.newsletter.submitButton}
                 </button>
