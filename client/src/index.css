@@ -1,9 +1,12 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700&family=Lato:wght@400;700&family=Merriweather:wght@400;700&family=Montserrat:wght@400;700&family=Nunito+Sans:wght@400;700&family=Oswald:wght@400;700&family=Playfair+Display:wght@400;700&family=Poppins:wght@400;700&family=Raleway:wght@400;700&family=Roboto:wght@400;700&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 :root {
   --accent-electric: #00E5FF;
+  --site-heading-font: 'Bebas Neue', Impact, sans-serif;
 }
 
 /* Base styles */
@@ -201,7 +204,7 @@ input[type="number"] {
 
 /* Contemporary brand typography */
 .font-display {
-  font-family: 'Bebas Neue', Impact, sans-serif;
+  font-family: var(--site-heading-font);
   letter-spacing: 0.05em;
 }
 

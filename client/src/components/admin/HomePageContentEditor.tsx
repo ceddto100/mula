@@ -4,6 +4,7 @@ import { adminApi } from '../../api/admin.api';
 import { HomePageContent } from '../../types';
 import { defaultHomePageContent } from '../../pages/Home';
 import { applyAccentColor } from '../../utils/brandTheme';
+import { HEADING_FONT_OPTIONS, HERO_OVERLAY_COLORS } from '../../utils/adminTheme';
 
 type FieldDef = {
   path: string;
@@ -22,8 +23,12 @@ const sections: SectionDef[] = [
   {
     key: 'brandTheme',
     title: 'Brand Theme',
-    description: 'Controls the shared turquoise accent color used across the site.',
-    fields: [{ path: 'brandTheme.accentColor', label: 'Accent color (hex)' }],
+    description: 'Controls site accent color, hero turquoise overlay, and website heading font.',
+    fields: [
+      { path: 'brandTheme.accentColor', label: 'Accent color (hex)' },
+      { path: 'brandTheme.heroOverlayColor', label: 'Hero overlay color (hex)' },
+      { path: 'brandTheme.headingFont', label: 'Website heading font' },
+    ],
   },
   {
     key: 'hero',
@@ -239,23 +244,62 @@ const HomePageContentEditor: React.FC = () => {
                         />
                       ) : (
                         <div className="flex gap-2">
-                          <input
-                            type={field.path === 'brandTheme.accentColor' ? 'color' : 'text'}
-                            value={value || '#00E5FF'}
-                            onChange={(e) => onChange(field.path, e.target.value)}
-                            className={`${
-                              field.path === 'brandTheme.accentColor' ? 'w-14 h-10 p-1' : 'w-full px-3 py-2'
-                            } border border-gray-300 rounded-md text-gray-900 placeholder:text-gray-500 focus:outline-none focus:border-gray-900`}
-                          />
-                          {field.path === 'brandTheme.accentColor' && (
-                            <input
-                              type="text"
-                              value={value}
+                          {field.path === 'brandTheme.headingFont' ? (
+                            <select
+                              value={value || 'Inter'}
                               onChange={(e) => onChange(field.path, e.target.value)}
-                              className="w-full px-3 py-2 border border-gray-300 rounded-md text-gray-900 placeholder:text-gray-500 focus:outline-none focus:border-gray-900"
-                              placeholder="#00E5FF"
-                            />
+                              className="w-full px-3 py-2 border border-gray-300 rounded-md text-gray-900 focus:outline-none focus:border-gray-900"
+                            >
+                              {HEADING_FONT_OPTIONS.map((font) => (
+                                <option key={font.value} value={font.value}>
+                                  {font.label}
+                                </option>
+                              ))}
+                            </select>
+                          ) : (
+                            <>
+                              <input
+                                type={field.path.includes('Color') ? 'color' : 'text'}
+                                value={value || '#00E5FF'}
+                                onChange={(e) => onChange(field.path, e.target.value)}
+                                className={`${
+                                  field.path.includes('Color') ? 'w-14 h-10 p-1' : 'w-full px-3 py-2'
+                                } border border-gray-300 rounded-md text-gray-900 placeholder:text-gray-500 focus:outline-none focus:border-gray-900`}
+                              />
+                              {field.path.includes('Color') && (
+                                <input
+                                  type="text"
+                                  value={value}
+                                  onChange={(e) => onChange(field.path, e.target.value)}
+                                  className="w-full px-3 py-2 border border-gray-300 rounded-md text-gray-900 placeholder:text-gray-500 focus:outline-none focus:border-gray-900"
+                                  placeholder="#00E5FF"
+                                />
+                              )}
+                            </>
                           )}
+                        </div>
+                      )}
+                      {field.path === 'brandTheme.heroOverlayColor' && (
+                        <div className="mt-2 grid grid-cols-6 sm:grid-cols-12 gap-2">
+                          {HERO_OVERLAY_COLORS.map((color) => (
+                            <button
+                              key={color}
+                              type="button"
+                              onClick={() => onChange(field.path, color)}
+                              className={`h-8 w-8 rounded border-2 transition ${
+                                (value || '').toLowerCase() === color.toLowerCase()
+                                  ? 'border-gray-900 scale-110'
+                                  : 'border-gray-300'
+                              }`}
+                              style={{ backgroundColor: color }}
+                              title={color}
+                            />
+                          ))}
+                        </div>
+                      )}
+                      {field.path === 'brandTheme.headingFont' && (
+                        <div className="mt-2 text-sm text-gray-700">
+                          Preview: <span style={{ fontFamily: HEADING_FONT_OPTIONS.find((f) => f.value === (value || 'Inter'))?.family }}>H1 H2 H3 H4 headings</span>
                         </div>
                       )}
                     </label>

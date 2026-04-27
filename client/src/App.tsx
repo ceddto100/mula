@@ -24,7 +24,7 @@ import SearchPage from './pages/SearchPage';
 import WishlistPage from './pages/WishlistPage';
 import InfoPage from './pages/InfoPage';
 import { productsApi } from './api/products.api';
-import { applyAccentColor } from './utils/brandTheme';
+import { applyAccentColor, applyHeadingFont } from './utils/brandTheme';
 
 const App: React.FC = () => {
   useEffect(() => {
@@ -32,8 +32,10 @@ const App: React.FC = () => {
       try {
         const content = await productsApi.getHomePageContent();
         applyAccentColor(content.brandTheme?.accentColor);
+        applyHeadingFont(content.brandTheme?.headingFont);
       } catch (error) {
         applyAccentColor('#00E5FF');
+        applyHeadingFont();
       }
     };
 
