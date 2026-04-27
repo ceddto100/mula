@@ -1,5 +1,5 @@
 import api from './axios.config';
-import { ApiResponse, Product, PaginatedResponse, HomePageImages, HomePageContent } from '../types';
+import { ApiResponse, Product, PaginatedResponse, HomePageImages, HomePageContent, CategoryHeroConfig } from '../types';
 
 export interface ProductFilters {
   page?: number;
@@ -75,6 +75,11 @@ export const productsApi = {
 
   getHomePageContent: async (): Promise<HomePageContent> => {
     const response = await api.get<ApiResponse<HomePageContent>>('/api/products/homepage-content');
+    return response.data.data!;
+  },
+
+  getCategoryHeroes: async (): Promise<CategoryHeroConfig> => {
+    const response = await api.get<ApiResponse<CategoryHeroConfig>>('/api/products/category-heroes');
     return response.data.data!;
   },
 };

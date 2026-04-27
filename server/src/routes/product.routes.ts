@@ -16,6 +16,7 @@ import {
   getFilterOptions,
   getHomePageImages,
   getHomePageContent,
+  getCategoryHeroesPublic,
 } from '../controllers/product.controller';
 import { validateRequest } from '../middleware/validateRequest';
 import { handleValidation, productQueryValidation } from '../utils/validators';
@@ -33,6 +34,7 @@ router.get('/search', searchProducts);
 router.get('/filters', getFilterOptions);
 router.get('/homepage-images', getHomePageImages);
 router.get('/homepage-content', getHomePageContent);
+router.get('/category-heroes', getCategoryHeroesPublic);
 
 // Taxonomy
 router.get('/categories', getCategories);

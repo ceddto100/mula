@@ -1,48 +1,57 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useParams, useSearchParams, Link } from 'react-router-dom';
 import { FiFilter, FiChevronRight } from 'react-icons/fi';
 import Layout from '../components/layout/Layout';
 import ProductGrid from '../components/product/ProductGrid';
 import ProductFilters from '../components/product/ProductFilters';
 import { useProducts } from '../hooks/useProducts';
+import { productsApi } from '../api/products.api';
 import { capitalizeFirst } from '../utils/formatters';
+import { CategoryHeroConfig, CategoryHeroMedia } from '../types';
 
-// ─── Hero Config ─────────────────────────────────────────────────────────────
-const HERO_CONFIG: Record<string, { image: string; title: string; subtitle: string }> = {
+// ─── Hardcoded fallbacks (used until API data loads or for unlisted categories) ─
+const HERO_FALLBACKS: Record<string, CategoryHeroMedia> = {
   men: {
-    image: 'https://images.unsplash.com/photo-1490481651871-ab68de25d43d?auto=format&fit=crop&w=1920&q=80',
+    mediaUrl: 'https://images.unsplash.com/photo-1490481651871-ab68de25d43d?auto=format&fit=crop&w=1920&q=80',
+    mediaType: 'image',
     title: "THE MEN'S EDIT",
     subtitle: 'Fresh drops. Bold moves. No excuses.',
   },
   women: {
-    image: 'https://images.unsplash.com/photo-1469334031218-e382a71b716b?auto=format&fit=crop&w=1920&q=80',
+    mediaUrl: 'https://images.unsplash.com/photo-1469334031218-e382a71b716b?auto=format&fit=crop&w=1920&q=80',
+    mediaType: 'image',
     title: "THE WOMEN'S SHOP",
     subtitle: 'Trending fits for your soft-life era.',
   },
   denim: {
-    image: 'https://images.unsplash.com/photo-1542272604-787c3835535d?auto=format&fit=crop&w=1920&q=80',
+    mediaUrl: 'https://images.unsplash.com/photo-1542272604-787c3835535d?auto=format&fit=crop&w=1920&q=80',
+    mediaType: 'image',
     title: 'THE DENIM SHOP',
     subtitle: 'Lived-in. Broken-in. Built different.',
   },
   sale: {
-    image: 'https://images.unsplash.com/photo-1607082348824-0a96f2a4b9da?auto=format&fit=crop&w=1920&q=80',
+    mediaUrl: 'https://images.unsplash.com/photo-1607082348824-0a96f2a4b9da?auto=format&fit=crop&w=1920&q=80',
+    mediaType: 'image',
     title: 'THE SALE',
     subtitle: "Last call. Major steals. Shop before it's gone.",
   },
   hoodies: {
-    image: 'https://images.unsplash.com/photo-1556821840-3a63f15732ce?auto=format&fit=crop&w=1920&q=80',
+    mediaUrl: 'https://images.unsplash.com/photo-1556821840-3a63f15732ce?auto=format&fit=crop&w=1920&q=80',
+    mediaType: 'image',
     title: 'THE HOODIE DROP',
     subtitle: 'Layer up. Stand out.',
   },
   all: {
-    image: 'https://images.unsplash.com/photo-1558769132-cb1aea458c5e?auto=format&fit=crop&w=1920&q=80',
+    mediaUrl: 'https://images.unsplash.com/photo-1558769132-cb1aea458c5e?auto=format&fit=crop&w=1920&q=80',
+    mediaType: 'image',
     title: 'ALL PRODUCTS',
     subtitle: 'The full collection. Nothing held back.',
   },
 };
 
-const DEFAULT_HERO = {
-  image: 'https://images.unsplash.com/photo-1558769132-cb1aea458c5e?auto=format&fit=crop&w=1920&q=80',
+const DEFAULT_FALLBACK: Omit<CategoryHeroMedia, 'title'> = {
+  mediaUrl: 'https://images.unsplash.com/photo-1558769132-cb1aea458c5e?auto=format&fit=crop&w=1920&q=80',
+  mediaType: 'image',
   subtitle: 'Drop season is now.',
 };
 
@@ -73,22 +82,39 @@ const SUBCATEGORIES: Record<string, SubPill[]> = {
 interface CategoryHeroProps {
   category: string;
   breadcrumbLabel: string;
+  heroConfig: CategoryHeroConfig | null;
 }
 
-const CategoryHero: React.FC<CategoryHeroProps> = ({ category, breadcrumbLabel }) => {
-  const config = HERO_CONFIG[category] ?? {
-    ...DEFAULT_HERO,
-    title: `THE ${(category || 'SHOP').toUpperCase()} SHOP`,
-  };
+const CategoryHero: React.FC<CategoryHeroProps> = ({ category, breadcrumbLabel, heroConfig }) => {
+  // Use API data if available, then hardcoded fallback, then generic default
+  const config: CategoryHeroMedia =
+    (heroConfig?.[category as keyof CategoryHeroConfig] as CategoryHeroMedia | undefined) ??
+    HERO_FALLBACKS[category] ?? {
+      ...DEFAULT_FALLBACK,
+      title: `THE ${(category || 'SHOP').toUpperCase()} SHOP`,
+    };
 
   return (
     <div className="relative h-[50vh] min-h-[380px] overflow-hidden">
-      {/* Background image */}
-      <img
-        src={config.image}
-        alt={config.title}
-        className="absolute inset-0 w-full h-full object-cover object-center"
-      />
+      {/* Background — video or image */}
+      {config.mediaType === 'video' ? (
+        <video
+          autoPlay
+          muted
+          loop
+          playsInline
+          className="absolute inset-0 w-full h-full object-cover object-center"
+        >
+          <source src={config.mediaUrl} />
+        </video>
+      ) : (
+        <img
+          src={config.mediaUrl}
+          alt={config.title}
+          className="absolute inset-0 w-full h-full object-cover object-center"
+        />
+      )}
+
       {/* Cinematic gradient: transparent top → solid brand-900 bottom */}
       <div className="absolute inset-0 bg-gradient-to-t from-brand-900 via-brand-900/55 to-brand-900/10" />
 
@@ -120,10 +146,9 @@ const CategoryHero: React.FC<CategoryHeroProps> = ({ category, breadcrumbLabel }
 // ─── SubCategoryBar ───────────────────────────────────────────────────────────
 interface SubCategoryBarProps {
   category: string;
-  activeHref?: string;
 }
 
-const SubCategoryBar: React.FC<SubCategoryBarProps> = ({ category, activeHref }) => {
+const SubCategoryBar: React.FC<SubCategoryBarProps> = ({ category }) => {
   const pills = SUBCATEGORIES[category];
   if (!pills) return null;
 
@@ -131,22 +156,15 @@ const SubCategoryBar: React.FC<SubCategoryBarProps> = ({ category, activeHref })
     <div className="bg-brand-900 border-b border-brand-700/60">
       <div className="max-w-7xl mx-auto px-6">
         <div className="flex items-center gap-3 overflow-x-auto py-4 scrollbar-hide">
-          {pills.map((pill) => {
-            const isActive = activeHref === pill.href;
-            return (
-              <Link
-                key={pill.label}
-                to={pill.href}
-                className={`flex-shrink-0 px-5 py-2 rounded-full border font-grotesk text-sm tracking-wide whitespace-nowrap transition-all duration-200 ${
-                  isActive
-                    ? 'border-accent-electric text-accent-electric shadow-[0_0_14px_rgba(0,229,255,0.35)] bg-accent-electric/10'
-                    : 'border-brand-600 text-brand-300 hover:border-accent-electric hover:text-accent-electric hover:shadow-[0_0_10px_rgba(0,229,255,0.25)]'
-                }`}
-              >
-                {pill.label}
-              </Link>
-            );
-          })}
+          {pills.map((pill) => (
+            <Link
+              key={pill.label}
+              to={pill.href}
+              className="flex-shrink-0 px-5 py-2 rounded-full border border-brand-600 text-brand-300 font-grotesk text-sm tracking-wide whitespace-nowrap transition-all duration-200 hover:border-accent-electric hover:text-accent-electric hover:shadow-[0_0_10px_rgba(0,229,255,0.25)]"
+            >
+              {pill.label}
+            </Link>
+          ))}
         </div>
       </div>
     </div>
@@ -158,6 +176,7 @@ const CategoryPage: React.FC = () => {
   const { category } = useParams<{ category: string }>();
   const [searchParams, setSearchParams] = useSearchParams();
   const [isFilterOpen, setIsFilterOpen] = useState(false);
+  const [heroConfig, setHeroConfig] = useState<CategoryHeroConfig | null>(null);
 
   const [filters, setFilters] = useState({
     sizes: searchParams.get('sizes')?.split(',').filter(Boolean),
@@ -168,8 +187,12 @@ const CategoryPage: React.FC = () => {
 
   const page = Number(searchParams.get('page')) || 1;
   const sort = searchParams.get('sort') || '-createdAt';
-
   const normalizedCategory = category?.toLowerCase().trim() || 'all';
+
+  // Fetch dynamic hero config — silently falls back to hardcoded if unavailable
+  useEffect(() => {
+    productsApi.getCategoryHeroes().then(setHeroConfig).catch(() => {});
+  }, []);
 
   const { products, isLoading, pagination } = useProducts({
     category: normalizedCategory !== 'all' ? normalizedCategory : undefined,
@@ -216,7 +239,11 @@ const CategoryPage: React.FC = () => {
   return (
     <Layout>
       {/* Full-width cinematic hero */}
-      <CategoryHero category={normalizedCategory} breadcrumbLabel={categoryTitle} />
+      <CategoryHero
+        category={normalizedCategory}
+        breadcrumbLabel={categoryTitle}
+        heroConfig={heroConfig}
+      />
 
       {/* Horizontal subcategory pills */}
       <SubCategoryBar category={normalizedCategory} />

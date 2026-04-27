@@ -25,4 +25,21 @@ export const upload = multer({
   },
 });
 
+// Separate storage for category hero media — supports images AND videos via resource_type: auto
+const heroMediaStorage = new CloudinaryStorage({
+  cloudinary: cloudinary,
+  params: {
+    folder: 'mula-store/category-heroes',
+    resource_type: 'auto',
+    allowed_formats: ['jpg', 'jpeg', 'png', 'webp', 'mp4', 'mov', 'webm', 'avi'],
+  } as any,
+});
+
+export const uploadHeroMedia = multer({
+  storage: heroMediaStorage,
+  limits: {
+    fileSize: 200 * 1024 * 1024, // 200MB to accommodate video
+  },
+});
+
 export { cloudinary };

@@ -160,6 +160,23 @@ export interface HomePageImages {
   saleImage: string;
 }
 
+export interface CategoryHeroMedia {
+  mediaUrl: string;
+  mediaType: 'image' | 'video';
+  title: string;
+  subtitle: string;
+}
+
+export interface CategoryHeroConfig {
+  _id?: string;
+  men: CategoryHeroMedia;
+  women: CategoryHeroMedia;
+  denim: CategoryHeroMedia;
+  sale: CategoryHeroMedia;
+  hoodies: CategoryHeroMedia;
+  all: CategoryHeroMedia;
+}
+
 export interface HeroContent {
   badge: string;
   headline1: string;

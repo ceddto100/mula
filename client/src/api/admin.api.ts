@@ -10,6 +10,7 @@ import {
   ProductFilterOptions,
   HomePageImages,
   HomePageContent,
+  CategoryHeroConfig,
 } from '../types';
 
 // Product list response
@@ -201,6 +202,29 @@ export const adminApi = {
   // Image delete
   deleteImage: async (publicId: string): Promise<void> => {
     await api.delete('/api/admin/image', { data: { publicId } });
+  },
+
+  // Category hero management
+  getCategoryHeroes: async (): Promise<CategoryHeroConfig> => {
+    const response = await api.get<ApiResponse<CategoryHeroConfig>>('/api/admin/category-heroes');
+    return response.data.data!;
+  },
+
+  updateCategoryHeroes: async (data: Partial<CategoryHeroConfig>): Promise<CategoryHeroConfig> => {
+    const response = await api.put<ApiResponse<CategoryHeroConfig>>('/api/admin/category-heroes', data);
+    return response.data.data!;
+  },
+
+  // Upload image or video for hero sections
+  uploadHeroMedia: async (file: File): Promise<{ url: string; mediaType: 'image' | 'video' }> => {
+    const formData = new FormData();
+    formData.append('media', file);
+    const response = await api.post<ApiResponse<{ url: string; mediaType: 'image' | 'video' }>>(
+      '/api/admin/upload-media',
+      formData,
+      { headers: { 'Content-Type': 'multipart/form-data' } }
+    );
+    return response.data.data!;
   },
 };
 
