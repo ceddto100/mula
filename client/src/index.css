@@ -56,7 +56,7 @@ body {
 
 /* ─── Flickering star overlays ────────────────────────────────────────────── */
 
-/* Group A — warm white stars, faster flicker */
+/* Group A — 5 warm/white stars, faster flicker */
 body::before {
   content: '';
   position: fixed;
@@ -69,30 +69,15 @@ body::before {
   pointer-events: none;
   z-index: 0;
   box-shadow:
-    145px  60px 2px 2px rgba(255,255,255,0.95),
     389px 125px 3px 3px rgba(255,240,180,0.90),
-    623px  88px 1px 2px rgba(255,255,255,0.88),
-   1027px 315px 3px 3px rgba(200,220,255,0.92),
-   1283px 179px 2px 2px rgba(255,255,255,0.96),
-    247px 337px 2px 2px rgba(255,240,180,0.85),
     791px 203px 3px 3px rgba(255,255,255,1.00),
-    514px 179px 2px 3px rgba(255,220,150,0.90),
-    981px 448px 2px 2px rgba(255,255,255,0.88),
-   1153px  68px 2px 2px rgba(255,255,255,0.92),
-     91px 204px 1px 1px rgba(220,230,255,0.85),
+   1283px 179px 2px 2px rgba(255,255,255,0.96),
     458px 459px 3px 3px rgba(255,240,180,0.90),
-   1315px 237px 2px 2px rgba(255,255,255,0.86),
-    705px 392px 2px 2px rgba(200,220,255,0.90),
-    856px 567px 3px 3px rgba(255,250,220,0.95),
-     63px 480px 1px 2px rgba(255,255,255,0.82),
-   1190px 534px 2px 2px rgba(255,240,160,0.88),
-    330px 210px 1px 2px rgba(255,255,255,0.90),
-    940px 130px 3px 3px rgba(255,230,150,0.85),
-   1420px  55px 2px 2px rgba(255,255,255,0.92);
+    856px 567px 3px 3px rgba(255,250,220,0.95);
   animation: flicker-a 3.2s ease-in-out infinite;
 }
 
-/* Group B — cool blue-white stars, slower flicker, phase-shifted */
+/* Group B — 5 cool blue-white stars, slower flicker, phase offset */
 body::after {
   content: '';
   position: fixed;
@@ -106,26 +91,12 @@ body::after {
   z-index: 0;
   box-shadow:
     205px 148px 2px 2px rgba(180,210,255,0.92),
-    714px  68px 3px 3px rgba(255,255,255,0.95),
-   1091px 226px 2px 2px rgba(200,225,255,0.88),
-    336px 491px 1px 2px rgba(255,255,255,0.90),
-    892px 314px 3px 3px rgba(180,210,255,0.86),
-     69px 370px 2px 3px rgba(255,255,255,0.92),
-   1247px  91px 3px 3px rgba(200,220,255,0.95),
-    569px 259px 2px 2px rgba(255,255,255,0.88),
-    180px 537px 1px 2px rgba(180,210,255,0.90),
     836px 136px 3px 3px rgba(255,255,255,1.00),
-   1191px 481px 2px 2px rgba(200,225,255,0.86),
-    425px 136px 2px 2px rgba(255,240,200,0.90),
+   1247px  91px 3px 3px rgba(200,220,255,0.95),
     680px 537px 2px 3px rgba(255,255,255,0.92),
-   1347px 370px 1px 2px rgba(180,210,255,0.88),
-    291px  80px 2px 2px rgba(255,255,255,0.95),
-   1080px 490px 3px 3px rgba(200,220,255,0.90),
-    760px 450px 2px 2px rgba(255,255,255,0.86),
-    480px 340px 1px 2px rgba(200,225,255,0.85),
-    120px 640px 2px 2px rgba(255,255,255,0.88),
-   1360px 640px 3px 3px rgba(180,210,255,0.92);
+   1080px 490px 3px 3px rgba(200,220,255,0.90);
   animation: flicker-b 5.1s ease-in-out infinite;
+  animation-delay: 1.8s;
 }
 
 @keyframes flicker-a {
