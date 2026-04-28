@@ -41,12 +41,12 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
 
   return (
     <div
-      className="min-h-screen bg-gray-100 text-gray-900 admin-theme"
+      className="min-h-screen bg-white text-gray-900 admin-theme"
       style={{ '--admin-heading-font': headingFontFamily } as React.CSSProperties}
     >
       {/* Top header */}
       <header className="bg-white shadow-sm">
-        <div className="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
+        <div className="w-full px-4 lg:px-8 h-16 flex items-center justify-between">
           <div className="flex items-center gap-4">
             <Link to="/" className="flex items-center gap-2 text-gray-600 hover:text-gray-900">
               <FiArrowLeft size={20} />
@@ -67,7 +67,7 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
         </div>
       </header>
 
-      <div className="max-w-7xl mx-auto px-4 py-8">
+      <div className="w-full px-4 lg:px-8 py-8">
         <div className="flex flex-col lg:flex-row gap-8">
           {/* Sidebar */}
           <aside className="lg:w-64 flex-shrink-0">
