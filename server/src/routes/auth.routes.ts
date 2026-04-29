@@ -13,8 +13,10 @@ import {
 import { auth } from '../middleware/auth';
 import { validateRequest } from '../middleware/validateRequest';
 import { registerValidation, loginValidation, addressValidation } from '../utils/validators';
+import { getPrimaryClientUrl } from '../utils/clientUrl';
 
 const router = Router();
+const clientUrl = getPrimaryClientUrl();
 
 // Public routes
 router.post('/register', registerValidation, validateRequest, register);
@@ -32,7 +34,7 @@ router.get(
 router.get(
   '/google/callback',
   passport.authenticate('google', {
-    failureRedirect: `${process.env.CLIENT_URL}/login?error=auth_failed`,
+    failureRedirect: `${clientUrl}/login?error=auth_failed`,
     session: false,
   }),
   googleCallback
