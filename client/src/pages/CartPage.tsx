@@ -5,31 +5,11 @@ import Layout from '../components/layout/Layout';
 import CartItem from '../components/cart/CartItem';
 import CartSummary from '../components/cart/CartSummary';
 import { useCart } from '../context/CartContext';
-import { useAuth } from '../context/AuthContext';
 
 const CartPage: React.FC = () => {
   const { cart, isLoading, itemCount } = useCart();
-  const { isAuthenticated } = useAuth();
   const [searchParams] = useSearchParams();
   const canceled = searchParams.get('canceled');
-
-  if (!isAuthenticated) {
-    return (
-      <Layout>
-        <div className="max-w-7xl mx-auto px-4 py-16 text-center">
-          <FiShoppingBag className="mx-auto text-gray-300" size={64} />
-          <h1 className="text-2xl font-bold mt-6 mb-4">Your Cart</h1>
-          <p className="text-gray-500 mb-8">Please login to view your cart</p>
-          <Link
-            to="/login?redirect=/cart"
-            className="inline-block bg-gray-900 text-white px-8 py-3 rounded-md font-medium hover:bg-gray-800 transition-colors"
-          >
-            Login
-          </Link>
-        </div>
-      </Layout>
-    );
-  }
 
   if (isLoading) {
     return (

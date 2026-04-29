@@ -9,18 +9,10 @@ const api = axios.create({
   withCredentials: true,
 });
 
-// Response interceptor to handle errors
+// Response interceptor to normalize errors
 api.interceptors.response.use(
   (response) => response,
-  (error) => {
-    if (error.response?.status === 401) {
-      // Session expired or unauthorized
-      if (window.location.pathname !== '/login') {
-        window.location.href = '/login';
-      }
-    }
-    return Promise.reject(error);
-  }
+  (error) => Promise.reject(error)
 );
 
 export default api;
