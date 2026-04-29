@@ -1,12 +1,11 @@
 import React, { useEffect, useState } from 'react';
-import { useParams, Link, useNavigate } from 'react-router-dom';
+import { useParams, Link } from 'react-router-dom';
 import { FiMinus, FiPlus, FiHeart, FiShare2 } from 'react-icons/fi';
 import Layout from '../components/layout/Layout';
 import ProductImageGallery from '../components/product/ProductImageGallery';
 import ProductGrid from '../components/product/ProductGrid';
 import { useProduct, useProducts } from '../hooks/useProducts';
 import { useCart } from '../context/CartContext';
-import { useAuth } from '../context/AuthContext';
 import { formatPrice } from '../utils/formatters';
 import {
   getProductCategory,
@@ -26,10 +25,8 @@ const ProductPage: React.FC = () => {
   const { id, handle } = useParams<{ id?: string; handle?: string }>();
   const productIdentifier = id || handle || '';
   const isHandleRoute = Boolean(handle && !id);
-  const navigate = useNavigate();
   const { product, isLoading, error } = useProduct(productIdentifier, isHandleRoute);
   const { addToCart, isLoading: cartLoading } = useCart();
-  const { isAuthenticated } = useAuth();
   const categoryFilters = product ? { category: getProductCategory(product), limit: 4 } : { limit: 4 };
 
   const [selectedSize, setSelectedSize] = useState<string>('');
@@ -49,12 +46,6 @@ const ProductPage: React.FC = () => {
   const handleAddToCart = async () => {
     if (!product) return;
 
-    if (!isAuthenticated) {
-      toast.error('Please login to add items to cart');
-      navigate(`/login?redirect=/products/${productIdentifier}`);
-      return;
-    }
-
     if (!selectedSize) {
       toast.error('Please select a size');
       return;
@@ -71,6 +62,7 @@ const ProductPage: React.FC = () => {
         quantity,
         size: selectedSize,
         color: selectedColor,
+        product,
       });
     } catch (error) {
       // Error is handled in context
