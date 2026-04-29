@@ -13,8 +13,10 @@ import {
 import { auth } from '../middleware/auth';
 import { validateRequest } from '../middleware/validateRequest';
 import { registerValidation, loginValidation, addressValidation } from '../utils/validators';
+import { getPrimaryClientUrl, getSafeClientUrl } from '../utils/clientUrl';
 
 const router = Router();
+const clientUrl = getPrimaryClientUrl();
 
 // Public routes
 router.post('/register', registerValidation, validateRequest, register);
@@ -24,15 +26,21 @@ router.post('/logout', logout);
 // Google OAuth routes
 router.get(
   '/google',
-  passport.authenticate('google', {
-    scope: ['profile', 'email'],
-  })
+  (req, res, next) => {
+    const returnTo = typeof req.query.returnTo === 'string' ? req.query.returnTo : undefined;
+    const safeReturnTo = getSafeClientUrl(returnTo);
+
+    passport.authenticate('google', {
+      scope: ['profile', 'email'],
+      state: encodeURIComponent(safeReturnTo),
+    })(req, res, next);
+  }
 );
 
 router.get(
   '/google/callback',
   passport.authenticate('google', {
-    failureRedirect: `${process.env.CLIENT_URL}/login?error=auth_failed`,
+    failureRedirect: `${clientUrl}/login?error=auth_failed`,
     session: false,
   }),
   googleCallback

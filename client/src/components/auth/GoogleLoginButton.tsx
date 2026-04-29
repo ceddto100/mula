@@ -3,7 +3,7 @@ import { authApi } from '../../api/auth.api';
 
 const GoogleLoginButton: React.FC = () => {
   const handleGoogleLogin = () => {
-    window.location.href = authApi.getGoogleAuthUrl();
+    window.location.href = authApi.getGoogleAuthUrl(window.location.origin);
   };
 
   return (

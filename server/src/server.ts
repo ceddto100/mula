@@ -179,6 +179,16 @@ app.get("/health", (req, res) => {
 /**
  * API routes
  */
+app.get("/auth/google", (req, res) => {
+  const query = req.url.includes("?") ? req.url.slice(req.url.indexOf("?")) : "";
+  res.redirect(`/api/auth/google${query}`);
+});
+
+app.get("/auth/google/callback", (req, res) => {
+  const query = req.url.includes("?") ? req.url.slice(req.url.indexOf("?")) : "";
+  res.redirect(`/api/auth/google/callback${query}`);
+});
+
 app.use("/api/auth", authRoutes);
 app.use("/api/products", productRoutes);
 app.use("/api/cart", cartRoutes);
