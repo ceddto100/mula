@@ -2,7 +2,7 @@ import { Request, Response } from 'express';
 import User from '../models/User';
 import { clearAuthCookie, generateToken, setAuthCookie } from '../utils/jwt';
 import { getUserRole } from '../utils/adminEmails';
-import { getPrimaryClientUrl } from '../utils/clientUrl';
+import { getSafeClientUrl } from '../utils/clientUrl';
 import { AuthRequest } from '../types';
 
 // Register with email/password
@@ -109,7 +109,9 @@ export const login = async (req: Request, res: Response): Promise<void> => {
 
 // Google OAuth callback
 export const googleCallback = async (req: AuthRequest, res: Response): Promise<void> => {
-  const clientUrl = getPrimaryClientUrl();
+  const requestedReturnTo =
+    typeof req.query.state === 'string' ? decodeURIComponent(req.query.state) : undefined;
+  const clientUrl = getSafeClientUrl(requestedReturnTo);
 
   try {
     if (!req.user) {

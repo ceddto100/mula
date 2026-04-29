@@ -36,7 +36,9 @@ export const authApi = {
     return response.data.data!;
   },
 
-  getGoogleAuthUrl: (): string => {
-    return `${api.defaults.baseURL}/api/auth/google`;
+  getGoogleAuthUrl: (returnTo?: string): string => {
+    const baseUrl = `${api.defaults.baseURL}/api/auth/google`;
+    if (!returnTo) return baseUrl;
+    return `${baseUrl}?returnTo=${encodeURIComponent(returnTo)}`;
   },
 };

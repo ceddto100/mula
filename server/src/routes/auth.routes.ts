@@ -13,7 +13,7 @@ import {
 import { auth } from '../middleware/auth';
 import { validateRequest } from '../middleware/validateRequest';
 import { registerValidation, loginValidation, addressValidation } from '../utils/validators';
-import { getPrimaryClientUrl } from '../utils/clientUrl';
+import { getPrimaryClientUrl, getSafeClientUrl } from '../utils/clientUrl';
 
 const router = Router();
 const clientUrl = getPrimaryClientUrl();
@@ -26,9 +26,15 @@ router.post('/logout', logout);
 // Google OAuth routes
 router.get(
   '/google',
-  passport.authenticate('google', {
-    scope: ['profile', 'email'],
-  })
+  (req, res, next) => {
+    const returnTo = typeof req.query.returnTo === 'string' ? req.query.returnTo : undefined;
+    const safeReturnTo = getSafeClientUrl(returnTo);
+
+    passport.authenticate('google', {
+      scope: ['profile', 'email'],
+      state: encodeURIComponent(safeReturnTo),
+    })(req, res, next);
+  }
 );
 
 router.get(
