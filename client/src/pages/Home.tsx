@@ -10,12 +10,12 @@ import { HomePageImages, HomePageContent } from '../types';
 import { applyAccentColor } from '../utils/brandTheme';
 
 const defaultHomePageImages: HomePageImages = {
-  heroImage: 'https://images.unsplash.com/photo-1490481651871-ab68de25d43d?auto=format&fit=crop&q=80&w=2070',
-  menImage: 'https://images.unsplash.com/photo-1617137968427-85924c800a22?auto=format&fit=crop&q=80&w=1200',
-  womenImage: 'https://images.unsplash.com/photo-1581044777550-4cfa60707c03?auto=format&fit=crop&q=80&w=600',
-  collectionImage: 'https://images.unsplash.com/photo-1558769132-cb1aea1f8cf5?auto=format&fit=crop&q=80&w=600',
-  accessoryImage: 'https://images.unsplash.com/photo-1523359346063-d879354c0ea5?auto=format&fit=crop&q=80&w=600',
-  saleImage: 'https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?auto=format&fit=crop&q=80&w=600',
+  heroImage: '',
+  menImage: '',
+  womenImage: '',
+  collectionImage: '',
+  accessoryImage: '',
+  saleImage: '',
 };
 
 export const defaultHomePageContent: HomePageContent = {
