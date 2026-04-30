@@ -10,6 +10,7 @@ type FieldDef = {
   path: string;
   label: string;
   multiline?: boolean;
+  type?: 'text' | 'boolean';
 };
 
 type SectionDef = {
@@ -26,6 +27,7 @@ const sections: SectionDef[] = [
     description: 'Controls site accent color, hero turquoise overlay, and website heading font.',
     fields: [
       { path: 'brandTheme.accentColor', label: 'Accent color (hex)' },
+      { path: 'brandTheme.heroOverlayEnabled', label: 'Hero overlay enabled', type: 'boolean' },
       { path: 'brandTheme.heroOverlayColor', label: 'Hero overlay color (hex)' },
       { path: 'brandTheme.headingFont', label: 'Website heading font' },
     ],
@@ -106,11 +108,11 @@ const sections: SectionDef[] = [
   },
 ];
 
-const getByPath = (obj: any, path: string): string => {
-  return path.split('.').reduce((acc, key) => (acc == null ? acc : acc[key]), obj) ?? '';
+const getByPath = (obj: any, path: string): any => {
+  return path.split('.').reduce((acc, key) => (acc == null ? acc : acc[key]), obj);
 };
 
-const setByPath = <T,>(obj: T, path: string, value: string): T => {
+const setByPath = <T,>(obj: T, path: string, value: string | boolean): T => {
   const keys = path.split('.');
   const next: any = Array.isArray(obj) ? [...(obj as any)] : { ...(obj as any) };
   let cursor = next;
@@ -144,9 +146,9 @@ const HomePageContentEditor: React.FC = () => {
     load();
   }, []);
 
-  const onChange = (path: string, value: string) => {
+  const onChange = (path: string, value: string | boolean) => {
     setContent((prev) => setByPath(prev, path, value));
-    if (path === 'brandTheme.accentColor') {
+    if (path === 'brandTheme.accentColor' && typeof value === 'string') {
       applyAccentColor(value);
     }
   };
@@ -236,7 +238,17 @@ const HomePageContentEditor: React.FC = () => {
                       className={`text-sm ${field.multiline ? 'md:col-span-2' : ''}`}
                     >
                       <span className="block text-gray-700 font-medium mb-1">{field.label}</span>
-                      {field.multiline ? (
+                      {field.type === 'boolean' ? (
+                        <label className="inline-flex items-center gap-2 cursor-pointer">
+                          <input
+                            type="checkbox"
+                            checked={Boolean(value)}
+                            onChange={(e) => onChange(field.path, e.target.checked)}
+                            className="h-4 w-4 rounded border-gray-300"
+                          />
+                          <span className="text-gray-700">Enable overlay tint on hero image</span>
+                        </label>
+                      ) : field.multiline ? (
                         <textarea
                           value={value}
                           onChange={(e) => onChange(field.path, e.target.value)}
