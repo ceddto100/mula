@@ -48,6 +48,7 @@ export interface INewsletterContent {
 
 export interface IBrandThemeContent {
   accentColor: string;
+  heroOverlayEnabled: boolean;
   heroOverlayColor: string;
   headingFont: string;
 }
@@ -180,6 +181,7 @@ const newsletterSchema = new Schema<INewsletterContent>(
 const brandThemeSchema = new Schema<IBrandThemeContent>(
   {
     accentColor: { type: String, default: '#00E5FF' },
+    heroOverlayEnabled: { type: Boolean, default: true },
     heroOverlayColor: { type: String, default: '#00AFC2' },
     headingFont: { type: String, default: 'Inter' },
   },

@@ -57,6 +57,7 @@ export const defaultHomePageContent: HomePageContent = {
   },
   brandTheme: {
     accentColor: '',
+    heroOverlayEnabled: true,
     heroOverlayColor: '',
     headingFont: 'Inter',
   },
@@ -127,7 +128,7 @@ const Home: React.FC = () => {
             alt="Fashion"
             className="absolute top-0 right-0 w-3/5 h-full object-cover diagonal-bg"
           />
-          {content.brandTheme?.heroOverlayColor ? (
+          {content.brandTheme?.heroOverlayEnabled && content.brandTheme?.heroOverlayColor ? (
             <div
               className="absolute top-0 right-0 w-3/5 h-full diagonal-bg pointer-events-none"
               style={{ backgroundColor: content.brandTheme.heroOverlayColor, opacity: 0.45 }}
