@@ -17,33 +17,33 @@ const CartSummary: React.FC<CartSummaryProps> = ({ showCheckoutButton = true }) 
   const total = subtotal + shipping + tax;
 
   return (
-    <div className="bg-gray-50 rounded-lg p-6">
-      <h3 className="text-lg font-semibold mb-4">Order Summary</h3>
+    <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-200 text-gray-900">
+      <h3 className="text-2xl font-semibold mb-5 text-gray-900">Order Summary</h3>
 
-      <div className="space-y-3 text-sm">
+      <div className="space-y-3 text-base">
         <div className="flex justify-between">
-          <span className="text-gray-600">Subtotal ({itemCount} items)</span>
+          <span className="text-gray-700">Subtotal ({itemCount} items)</span>
           <span>{formatPrice(subtotal)}</span>
         </div>
 
         <div className="flex justify-between">
-          <span className="text-gray-600">Shipping</span>
+          <span className="text-gray-700">Shipping</span>
           <span>{shipping === 0 ? 'Free' : formatPrice(shipping)}</span>
         </div>
 
         <div className="flex justify-between">
-          <span className="text-gray-600">Estimated Tax</span>
+          <span className="text-gray-700">Estimated Tax</span>
           <span>{formatPrice(tax)}</span>
         </div>
 
         {shipping > 0 && (
-          <p className="text-xs text-gray-500 mt-2">
+          <p className="text-sm text-gray-600 mt-2">
             Free shipping on orders over $100
           </p>
         )}
 
-        <div className="border-t pt-3 mt-3">
-          <div className="flex justify-between font-semibold text-lg">
+        <div className="border-t border-gray-200 pt-4 mt-4">
+          <div className="flex justify-between font-bold text-4xl">
             <span>Total</span>
             <span>{formatPrice(total)}</span>
           </div>
