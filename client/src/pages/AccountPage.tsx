@@ -17,6 +17,14 @@ const AccountPage: React.FC = () => {
   const [isLoadingOrders, setIsLoadingOrders] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [name, setName] = useState(user?.name || '');
+  const [isSavingAddress, setIsSavingAddress] = useState(false);
+  const [addressForm, setAddressForm] = useState({
+    street: '',
+    city: '',
+    state: '',
+    zipCode: '',
+    isDefault: false,
+  });
 
   useEffect(() => {
     if (activeTab === 'orders') {
@@ -62,6 +70,28 @@ const AccountPage: React.FC = () => {
       toast.success('Address deleted');
     } catch (error) {
       toast.error('Failed to delete address');
+    }
+  };
+
+  const handleAddAddress = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsSavingAddress(true);
+
+    try {
+      await authApi.addAddress(addressForm);
+      await refreshUser();
+      setAddressForm({
+        street: '',
+        city: '',
+        state: '',
+        zipCode: '',
+        isDefault: false,
+      });
+      toast.success('Address saved');
+    } catch (error) {
+      toast.error('Failed to save address');
+    } finally {
+      setIsSavingAddress(false);
     }
   };
 
@@ -273,6 +303,78 @@ const AccountPage: React.FC = () => {
               <div className="bg-white rounded-lg border">
                 <div className="p-6 border-b flex justify-between items-center">
                   <h2 className="text-lg font-semibold">Saved Addresses</h2>
+                </div>
+
+                <div className="p-6 border-b">
+                  <form onSubmit={handleAddAddress} className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="md:col-span-2">
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Street</label>
+                      <input
+                        type="text"
+                        required
+                        value={addressForm.street}
+                        onChange={(e) => setAddressForm((prev) => ({ ...prev, street: e.target.value }))}
+                        className="w-full px-4 py-3 border border-gray-300 rounded-md text-gray-900 placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-gray-900"
+                        placeholder="123 Main St"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">City</label>
+                      <input
+                        type="text"
+                        required
+                        value={addressForm.city}
+                        onChange={(e) => setAddressForm((prev) => ({ ...prev, city: e.target.value }))}
+                        className="w-full px-4 py-3 border border-gray-300 rounded-md text-gray-900 placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-gray-900"
+                        placeholder="Los Angeles"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">State</label>
+                      <input
+                        type="text"
+                        required
+                        value={addressForm.state}
+                        onChange={(e) => setAddressForm((prev) => ({ ...prev, state: e.target.value }))}
+                        className="w-full px-4 py-3 border border-gray-300 rounded-md text-gray-900 placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-gray-900"
+                        placeholder="CA"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">ZIP Code</label>
+                      <input
+                        type="text"
+                        required
+                        value={addressForm.zipCode}
+                        onChange={(e) => setAddressForm((prev) => ({ ...prev, zipCode: e.target.value }))}
+                        className="w-full px-4 py-3 border border-gray-300 rounded-md text-gray-900 placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-gray-900"
+                        placeholder="90001"
+                      />
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <input
+                        id="isDefault"
+                        type="checkbox"
+                        checked={addressForm.isDefault}
+                        onChange={(e) =>
+                          setAddressForm((prev) => ({ ...prev, isDefault: e.target.checked }))
+                        }
+                        className="h-4 w-4"
+                      />
+                      <label htmlFor="isDefault" className="text-sm text-gray-700">
+                        Set as default address
+                      </label>
+                    </div>
+                    <div className="md:col-span-2">
+                      <button
+                        type="submit"
+                        disabled={isSavingAddress}
+                        className="px-6 py-2 bg-gray-900 text-white rounded-md hover:bg-gray-800 disabled:opacity-60"
+                      >
+                        {isSavingAddress ? 'Saving...' : 'Add Address'}
+                      </button>
+                    </div>
+                  </form>
                 </div>
 
                 {!user?.addresses || user.addresses.length === 0 ? (
