@@ -4,6 +4,7 @@ import Order from '../models/Order';
 import Cart from '../models/Cart';
 import Product from '../models/Product';
 import { AuthRequest, IOrderItem } from '../types';
+import { sendNewOrderNotification, sendOrderConfirmationToCustomer } from '../utils/email';
 
 const findVariantBySelection = (product: any, item: any) => {
   if (item.variantId) {
@@ -251,6 +252,27 @@ async function handleSuccessfulPayment(session: any): Promise<void> {
       { userId: order.userId },
       { items: [] }
     );
+
+    // Send email notifications
+    const user = await (await import('../models/User')).default.findById(order.userId);
+    const emailData = {
+      orderNumber: order.orderNumber,
+      customerName: user?.name || 'Customer',
+      customerEmail: session.customer_email || user?.email || '',
+      items: order.items.map((item: any) => ({
+        name: item.name,
+        quantity: item.quantity,
+        price: item.price,
+        size: item.size,
+        color: item.color,
+      })),
+      totalAmount: order.totalAmount,
+      shippingAddress: order.shippingAddress,
+    };
+    await Promise.all([
+      sendNewOrderNotification(emailData),
+      sendOrderConfirmationToCustomer(emailData),
+    ]).catch((err) => console.error('Email send error:', err));
 
     console.log('Payment successful for order:', order.orderNumber);
   } catch (error) {
