@@ -18,6 +18,7 @@ export interface IUser extends Document {
   name: string;
   role: 'customer' | 'admin';
   addresses: IAddress[];
+  stripeCustomerId?: string;
   createdAt: Date;
   updatedAt: Date;
   comparePassword(candidatePassword: string): Promise<boolean>;

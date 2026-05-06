@@ -39,6 +39,10 @@ const userSchema = new Schema<IUser>(
       default: 'customer',
     },
     addresses: [addressSchema],
+    stripeCustomerId: {
+      type: String,
+      index: true,
+    },
   },
   {
     timestamps: true,

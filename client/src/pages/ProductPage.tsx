@@ -248,7 +248,7 @@ const ProductPage: React.FC = () => {
 
             {/* Product info */}
             <div className="border-t pt-6 space-y-4 text-sm text-gray-600">
-              <p>Free shipping on orders over $100</p>
+              <p>Shipping calculated at checkout</p>
               <p>30-day easy returns</p>
               <p>Category: {productCategory}</p>
             </div>
