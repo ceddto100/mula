@@ -3,8 +3,27 @@ import stripe from '../config/stripe';
 import Order from '../models/Order';
 import Cart from '../models/Cart';
 import Product from '../models/Product';
+import User from '../models/User';
 import { AuthRequest, IOrderItem } from '../types';
 import { sendNewOrderNotification, sendOrderConfirmationToCustomer } from '../utils/email';
+
+const CHECKOUT_SESSION_TTL_SECONDS = 30 * 60;
+
+async function getOrCreateStripeCustomerId(user: AuthRequest['user']): Promise<string> {
+  if (!user) {
+    throw new Error('User is required to create a Stripe customer');
+  }
+  if (user.stripeCustomerId) {
+    return user.stripeCustomerId;
+  }
+  const customer = await stripe.customers.create({
+    email: user.email,
+    name: user.name,
+    metadata: { userId: user._id.toString() },
+  });
+  await User.updateOne({ _id: user._id }, { stripeCustomerId: customer.id });
+  return customer.id;
+}
 
 const findVariantBySelection = (product: any, item: any) => {
   if (item.variantId) {
@@ -123,23 +142,39 @@ export const createCheckoutSession = async (req: AuthRequest, res: Response): Pr
       orderStatus: 'processing',
     });
 
+    // Reuse a Stripe Customer so saved payment methods, receipts, and the
+    // Stripe dashboard view stay tied to one identity per shopper.
+    const stripeCustomerId = await getOrCreateStripeCustomerId(req.user);
+
     // Create Stripe checkout session
-    const session = await stripe.checkout.sessions.create({
-      payment_method_types: ['card'],
-      line_items: lineItems,
-      mode: 'payment',
-      success_url: `${process.env.CLIENT_URL}/order-success?session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${process.env.CLIENT_URL}/cart?canceled=true`,
-      customer_email: req.user.email,
-      metadata: {
-        orderId: order._id.toString(),
-        orderNumber: order.orderNumber,
-        userId: req.user._id.toString(),
+    const session = await stripe.checkout.sessions.create(
+      {
+        line_items: lineItems,
+        mode: 'payment',
+        customer: stripeCustomerId,
+        customer_update: {
+          address: 'auto',
+          name: 'auto',
+          shipping: 'auto',
+        },
+        success_url: `${process.env.CLIENT_URL}/order-success?session_id={CHECKOUT_SESSION_ID}`,
+        cancel_url: `${process.env.CLIENT_URL}/cart?canceled=true`,
+        metadata: {
+          orderId: order._id.toString(),
+          orderNumber: order.orderNumber,
+          userId: req.user._id.toString(),
+        },
+        shipping_address_collection: {
+          allowed_countries: ['US', 'CA', 'GB'],
+        },
+        phone_number_collection: { enabled: true },
+        allow_promotion_codes: true,
+        expires_at: Math.floor(Date.now() / 1000) + CHECKOUT_SESSION_TTL_SECONDS,
       },
-      shipping_address_collection: {
-        allowed_countries: ['US', 'CA', 'GB'],
-      },
-    });
+      {
+        idempotencyKey: order._id.toString(),
+      }
+    );
 
     // Update order with session ID
     order.stripeSessionId = session.id;
@@ -254,7 +289,7 @@ async function handleSuccessfulPayment(session: any): Promise<void> {
     );
 
     // Send email notifications
-    const user = await (await import('../models/User')).default.findById(order.userId);
+    const user = await User.findById(order.userId);
     const emailData = {
       orderNumber: order.orderNumber,
       customerName: user?.name || 'Customer',

@@ -12,10 +12,6 @@ const CartSummary: React.FC<CartSummaryProps> = ({ showCheckoutButton = true }) 
   const { subtotal, itemCount } = useCart();
   const { isAuthenticated } = useAuth();
 
-  const shipping = subtotal >= 100 ? 0 : 9.99;
-  const tax = subtotal * 0.08; // 8% tax
-  const total = subtotal + shipping + tax;
-
   return (
     <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-200 text-gray-900">
       <h3 className="text-2xl font-semibold mb-5 text-gray-900">Order Summary</h3>
@@ -26,26 +22,14 @@ const CartSummary: React.FC<CartSummaryProps> = ({ showCheckoutButton = true }) 
           <span>{formatPrice(subtotal)}</span>
         </div>
 
-        <div className="flex justify-between">
-          <span className="text-gray-700">Shipping</span>
-          <span>{shipping === 0 ? 'Free' : formatPrice(shipping)}</span>
-        </div>
-
-        <div className="flex justify-between">
-          <span className="text-gray-700">Estimated Tax</span>
-          <span>{formatPrice(tax)}</span>
-        </div>
-
-        {shipping > 0 && (
-          <p className="text-sm text-gray-600 mt-2">
-            Free shipping on orders over $100
-          </p>
-        )}
+        <p className="text-sm text-gray-600">
+          Taxes and shipping calculated at checkout.
+        </p>
 
         <div className="border-t border-gray-200 pt-4 mt-4">
           <div className="flex justify-between font-bold text-4xl">
             <span>Total</span>
-            <span>{formatPrice(total)}</span>
+            <span>{formatPrice(subtotal)}</span>
           </div>
         </div>
       </div>
