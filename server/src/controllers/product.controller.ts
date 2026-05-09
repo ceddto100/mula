@@ -102,7 +102,10 @@ export const getProducts = async (req: Request, res: Response): Promise<void> =>
       const normalizedCategory = String(category).toLowerCase().trim();
       const genderCategories = ['men', 'women', 'unisex'];
       if (genderCategories.includes(normalizedCategory)) {
-        filter.gender = normalizedCategory;
+        filter.$or = [
+          { gender: normalizedCategory },
+          { tags: { $in: [normalizedCategory] } },
+        ];
       } else {
         filter.tags = { $in: [normalizedCategory] };
       }
