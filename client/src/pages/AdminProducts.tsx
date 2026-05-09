@@ -71,6 +71,8 @@ const initialFormState: ProductFormState = {
   requiresShipping: true,
 };
 
+const HEADER_CATEGORY_OPTIONS = ['new', 'men', 'women', 'collections', 'sale'] as const;
+
 const AdminProducts: React.FC = () => {
   const [products, setProducts] = useState<Product[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -782,6 +784,33 @@ const AdminProducts: React.FC = () => {
                                   <option key={g.value} value={g.value}>{g.label}</option>
                                 ))}
                               </select>
+                            </div>
+                          </div>
+
+                          <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-2">Header Categories</label>
+                            <p className="text-xs text-gray-500 mb-2">Choose where this product appears in navigation categories.</p>
+                            <div className="flex flex-wrap gap-2">
+                              {HEADER_CATEGORY_OPTIONS.map((category) => {
+                                const isSelected = formData.tags.includes(category);
+                                return (
+                                  <button
+                                    key={category}
+                                    type="button"
+                                    onClick={() => {
+                                      const nextTags = isSelected
+                                        ? formData.tags.filter((tag) => tag !== category)
+                                        : [...formData.tags, category];
+                                      updateFormField('tags', nextTags);
+                                    }}
+                                    className={`px-4 py-2 border rounded-md text-sm font-medium capitalize transition ${
+                                      isSelected ? 'bg-gray-900 text-white border-gray-900' : 'border-gray-300 hover:border-gray-500'
+                                    }`}
+                                  >
+                                    {category}
+                                  </button>
+                                );
+                              })}
                             </div>
                           </div>
 
