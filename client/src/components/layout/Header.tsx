@@ -30,7 +30,7 @@ const Header: React.FC = () => {
   };
 
   return (
-    <header className="bg-white/80 backdrop-blur-md sticky top-0 z-50 shadow-sm">
+    <header className="bg-black/60 backdrop-blur-md sticky top-0 z-50 shadow-sm">
       {/* Main header */}
       <div className="border-b-2 border-brand-500">
         <div className="max-w-7xl mx-auto px-4">
@@ -121,7 +121,7 @@ const Header: React.FC = () => {
 
       {/* Search bar */}
       {isSearchOpen && (
-        <div className="absolute top-full left-0 right-0 bg-white/85 backdrop-blur-md border-b-2 border-brand-500 shadow-xl">
+        <div className="absolute top-full left-0 right-0 bg-black/70 backdrop-blur-md border-b-2 border-brand-500 shadow-xl">
           <div className="max-w-7xl mx-auto px-4 py-8">
             <form onSubmit={handleSearch} className="max-w-3xl mx-auto">
               <div className="relative">
