@@ -18,6 +18,11 @@ const imageFieldConfig: Array<{ key: keyof HomePageImages; label: string }> = [
   { key: 'saleImage', label: 'Sale Image' },
 ];
 
+const isVideoUrl = (url?: string): boolean => {
+  if (!url) return false;
+  return /\.(mp4|mov|webm|avi)(\?.*)?$/i.test(url) || url.includes('/video/upload/');
+};
+
 const AdminDashboard: React.FC = () => {
   const [stats, setStats] = useState<DashboardStats | null>(null);
   const [homePageImages, setHomePageImages] = useState<HomePageImages | null>(null);
@@ -54,12 +59,15 @@ const AdminDashboard: React.FC = () => {
 
     try {
       setUploadingField(field);
-      const imageUrl = await adminApi.uploadImage(file);
-      setHomePageImages((prev) => (prev ? { ...prev, [field]: imageUrl } : prev));
+      const { url: mediaUrl, mediaType } = await adminApi.uploadHeroMedia(file);
+      setHomePageImages((prev) => (prev ? { ...prev, [field]: mediaUrl } : prev));
       toast.success(`${imageFieldConfig.find((item) => item.key === field)?.label} uploaded`);
+      if (mediaType === 'video') {
+        toast('Video uploaded. This section now supports video playback.', { icon: '🎬' });
+      }
     } catch (error) {
       console.error(`Failed to upload ${field}:`, error);
-      toast.error('Image upload failed');
+      toast.error('Media upload failed');
     } finally {
       setUploadingField(null);
       event.target.value = '';
@@ -120,7 +128,7 @@ const AdminDashboard: React.FC = () => {
             <div>
               <h3 className="text-lg font-semibold">Home Page Image Manager</h3>
               <p className="text-sm text-gray-700">
-                Upload images for hero, men, women, collection, accessory, and sale sections.
+                Upload images or videos for hero, men, women, collection, accessory, and sale sections.
               </p>
             </div>
             <button
@@ -138,23 +146,33 @@ const AdminDashboard: React.FC = () => {
                 <div className="text-sm font-medium text-gray-700">{item.label}</div>
                 <div className="aspect-[4/3] bg-gray-100 rounded-md overflow-hidden">
                   {homePageImages?.[item.key] ? (
-                    <img
-                      src={homePageImages[item.key]}
-                      alt={item.label}
-                      className="w-full h-full object-cover"
-                    />
+                    isVideoUrl(homePageImages[item.key]) ? (
+                      <video
+                        src={homePageImages[item.key]}
+                        className="w-full h-full object-cover"
+                        controls
+                        muted
+                        playsInline
+                      />
+                    ) : (
+                      <img
+                        src={homePageImages[item.key]}
+                        alt={item.label}
+                        className="w-full h-full object-cover"
+                      />
+                    )
                   ) : (
                     <div className="w-full h-full flex items-center justify-center text-xs text-gray-500">
-                      No image uploaded
+                      No media uploaded
                     </div>
                   )}
                 </div>
                 <label className="inline-flex items-center gap-2 px-3 py-2 bg-gray-100 rounded-md text-sm cursor-pointer hover:bg-gray-200">
                   <FiUpload size={14} />
-                  {uploadingField === item.key ? 'Uploading...' : 'Upload Image'}
+                  {uploadingField === item.key ? 'Uploading...' : 'Upload Image or Video'}
                   <input
                     type="file"
-                    accept="image/*"
+                    accept="image/*,video/*"
                     className="hidden"
                     onChange={(event) => handleImageUpload(item.key, event)}
                     disabled={uploadingField === item.key}
