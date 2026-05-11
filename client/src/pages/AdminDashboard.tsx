@@ -151,7 +151,9 @@ const AdminDashboard: React.FC = () => {
                         src={homePageImages[item.key]}
                         className="w-full h-full object-cover"
                         controls
+                        autoPlay
                         muted
+                        loop
                         playsInline
                       />
                     ) : (
