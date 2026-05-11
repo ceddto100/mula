@@ -24,13 +24,33 @@ const isVideoUrl = (url?: string): boolean => {
   return /\.(mp4|mov|webm|avi)(\?.*)?$/i.test(url) || url.includes('/video/upload/');
 };
 
+const CLOUDINARY_IMG_RE = /^(https?:\/\/res\.cloudinary\.com\/[^/]+\/image\/upload\/)(.*)/;
+
+const buildCloudinaryImage = (url: string, width: number): string => {
+  const match = url.match(CLOUDINARY_IMG_RE);
+  if (!match) return url;
+  const versionMatch = match[2].match(/(v\d+\/.+)$/);
+  const assetPath = versionMatch ? versionMatch[1] : match[2];
+  return `${match[1]}f_auto,q_auto,c_fill,g_auto,w_${width}/${assetPath}`;
+};
+
+const HERO_WIDTHS = [640, 960, 1280, 1600, 1920];
+const TILE_WIDTHS = [480, 720, 960, 1280];
+
+const buildSrcSet = (url: string, widths: number[]): string | undefined => {
+  if (!CLOUDINARY_IMG_RE.test(url)) return undefined;
+  return widths.map((w) => `${buildCloudinaryImage(url, w)} ${w}w`).join(', ');
+};
+
 type HomeMediaOptions = {
   eager?: boolean;
   preload?: 'none' | 'metadata' | 'auto';
+  hero?: boolean;
+  sizes?: string;
 };
 
 const renderHomeMedia = (url: string, alt: string, className: string, options: HomeMediaOptions = {}) => {
-  const { eager = false, preload = 'none' } = options;
+  const { eager = false, preload = 'none', hero = false, sizes } = options;
   if (isVideoUrl(url)) {
     return (
       <video
@@ -45,9 +65,16 @@ const renderHomeMedia = (url: string, alt: string, className: string, options: H
     );
   }
 
+  const widths = hero ? HERO_WIDTHS : TILE_WIDTHS;
+  const srcSet = url ? buildSrcSet(url, widths) : undefined;
+  const fallbackWidth = hero ? 1280 : 720;
+  const src = url && CLOUDINARY_IMG_RE.test(url) ? buildCloudinaryImage(url, fallbackWidth) : url;
+
   return (
     <img
-      src={url}
+      src={src}
+      srcSet={srcSet}
+      sizes={sizes || (hero ? '60vw' : '(min-width: 1024px) 40vw, 100vw')}
       alt={alt}
       className={className}
       loading={eager ? 'eager' : 'lazy'}
@@ -110,32 +137,32 @@ const Home: React.FC = () => {
   useSeo({ title: 'Cualquier — Contemporary Urban Fashion', description: 'Street-inspired fashion drops and curated collections.', canonicalPath: '/', ogType: 'website', image: '/images/Cualquier_logo.png' });
 
   useEffect(() => {
-    const fetchHomePageImages = async () => {
-      try {
-        const data = await productsApi.getHomePageImages();
-        setHomePageImages(data);
-      } catch (error) {
-        console.error('Failed to fetch home page images:', error);
-      }
-    };
+    let cancelled = false;
 
-    const fetchHomePageContent = async () => {
-      try {
-        const data = await productsApi.getHomePageContent();
-        setContent(data);
-      } catch (error) {
-        console.error('Failed to fetch home page content:', error);
-      }
-    };
-
-    fetchHomePageImages();
-    fetchHomePageContent();
+    // Both endpoints are deduped/cached in productsApi, so calling them
+    // here in parallel doesn't refetch when App.tsx already warmed the cache.
+    Promise.all([
+      productsApi.getHomePageImages().catch((err) => {
+        console.error('Failed to fetch home page images:', err);
+        return null;
+      }),
+      productsApi.getHomePageContent().catch((err) => {
+        console.error('Failed to fetch home page content:', err);
+        return null;
+      }),
+    ]).then(([images, contentData]) => {
+      if (cancelled) return;
+      if (images) setHomePageImages(images);
+      if (contentData) setContent(contentData);
+    });
 
     observerRef.current = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
           if (entry.isIntersecting) {
             entry.target.classList.add('animate-in');
+            // Animations are one-shot; stop observing to free CPU.
+            observerRef.current?.unobserve(entry.target);
           }
         });
       },
@@ -146,7 +173,10 @@ const Home: React.FC = () => {
       observerRef.current?.observe(el);
     });
 
-    return () => observerRef.current?.disconnect();
+    return () => {
+      cancelled = true;
+      observerRef.current?.disconnect();
+    };
   }, []);
 
   useEffect(() => {
@@ -162,7 +192,7 @@ const Home: React.FC = () => {
           <div
             className="absolute top-0 left-0 h-full w-[55%] bg-black/60"
           />
-          {renderHomeMedia(homePageImages.heroImage, 'Fashion', 'absolute top-0 right-0 w-3/5 h-full object-cover diagonal-bg', { eager: true, preload: 'metadata' })}
+          {renderHomeMedia(homePageImages.heroImage, 'Fashion', 'absolute top-0 right-0 w-3/5 h-full object-cover diagonal-bg', { eager: true, preload: 'metadata', hero: true })}
           {content.brandTheme?.heroOverlayEnabled && content.brandTheme?.heroOverlayColor ? (
             <div
               className="absolute top-0 right-0 w-3/5 h-full diagonal-bg pointer-events-none"
@@ -171,11 +201,11 @@ const Home: React.FC = () => {
           ) : null}
         </div>
 
-        {/* Floating Arrow Elements */}
-        <div className="absolute inset-0 overflow-hidden pointer-events-none">
-          <div className="absolute top-20 left-10 text-accent-electric opacity-20 text-9xl animate-pulse">→</div>
-          <div className="absolute bottom-40 right-20 text-accent-neon opacity-20 text-9xl rotate-45 animate-pulse delay-300">→</div>
-          <div className="absolute top-1/2 left-1/3 text-white opacity-10 text-9xl -rotate-12 animate-pulse delay-700">→</div>
+        {/* Decorative Arrows — static (no infinite animation) for smoother scroll */}
+        <div className="absolute inset-0 overflow-hidden pointer-events-none" aria-hidden="true">
+          <div className="absolute top-20 left-10 text-accent-electric opacity-20 text-9xl">→</div>
+          <div className="absolute bottom-40 right-20 text-accent-neon opacity-20 text-9xl rotate-45">→</div>
+          <div className="absolute top-1/2 left-1/3 text-white opacity-10 text-9xl -rotate-12">→</div>
         </div>
 
         {/* Hero Content */}
@@ -239,7 +269,7 @@ const Home: React.FC = () => {
       </section>
 
       {/* Bold Category Grid - Asymmetric Layout */}
-      <section className="relative py-24 bg-transparent animate-on-scroll opacity-0 translate-y-12 transition-all duration-1000">
+      <section className="relative py-24 bg-transparent animate-on-scroll opacity-0 translate-y-12 transition-all duration-1000 cv-auto">
         <div className="max-w-7xl mx-auto px-4">
           <div className="mb-16 text-center">
             <h2 className="text-6xl md:text-7xl font-display text-white mb-4 drop-shadow-[0_2px_12px_rgba(0,0,0,0.6)]">{content.shopByStyle.sectionTitle}</h2>
@@ -345,7 +375,7 @@ const Home: React.FC = () => {
       </section>
 
       {/* Featured Products with Bold Header */}
-      <section className="py-24 bg-transparent animate-on-scroll opacity-0 translate-y-12 transition-all duration-1000">
+      <section className="py-24 bg-transparent animate-on-scroll opacity-0 translate-y-12 transition-all duration-1000 cv-auto">
         <div className="max-w-7xl mx-auto px-4">
           <div className="mb-16 flex flex-col lg:flex-row lg:items-end lg:justify-between gap-6">
             <div>
@@ -368,11 +398,11 @@ const Home: React.FC = () => {
       </section>
 
       {/* Bold Brand Statement Section */}
-      <section className="relative py-32 bg-transparent overflow-hidden animate-on-scroll opacity-0 translate-y-12 transition-all duration-1000">
-        <div className="absolute inset-0 bg-gradient-to-r from-brand-900/40 via-brand-700/30 to-brand-900/40 animate-gradient" />
+      <section className="relative py-32 bg-transparent overflow-hidden animate-on-scroll opacity-0 translate-y-12 transition-all duration-1000 cv-auto">
+        <div className="absolute inset-0 bg-gradient-to-r from-brand-900/40 via-brand-700/30 to-brand-900/40" />
 
         {/* Large Background Text */}
-        <div className="absolute inset-0 flex items-center justify-center opacity-10 overflow-hidden">
+        <div className="absolute inset-0 flex items-center justify-center opacity-10 overflow-hidden pointer-events-none" aria-hidden="true">
           <span className="font-display text-[20vw] text-white whitespace-nowrap">CUALQUIER</span>
         </div>
 
@@ -396,7 +426,7 @@ const Home: React.FC = () => {
       </section>
 
       {/* Newsletter - Bold CTA */}
-      <section className="py-20 bg-transparent animate-on-scroll opacity-0 translate-y-12 transition-all duration-1000">
+      <section className="py-20 bg-transparent animate-on-scroll opacity-0 translate-y-12 transition-all duration-1000 cv-auto">
         <div className="max-w-4xl mx-auto px-4">
           <div
             className="p-12 lg:p-16 relative overflow-hidden"

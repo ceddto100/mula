@@ -10,6 +10,14 @@ export default defineConfig({
     },
   },
   build: {
+    target: 'es2020',
+    minify: 'esbuild',
+    cssCodeSplit: true,
+    cssMinify: true,
+    sourcemap: false,
+    reportCompressedSize: false,
+    chunkSizeWarningLimit: 1000,
+    modulePreload: { polyfill: false },
     rollupOptions: {
       output: {
         manualChunks: {
@@ -19,6 +27,11 @@ export default defineConfig({
         },
       },
     },
+  },
+  esbuild: {
+    legalComments: 'none',
+    drop: ['debugger'],
+    pure: ['console.debug'],
   },
   server: {
     port: 5173,

@@ -13,6 +13,38 @@ export interface ProductFilters {
   sort?: string;
 }
 
+// In-flight + short-lived response cache for read-only endpoints.
+// Prevents duplicate concurrent fetches (e.g. App + Home both load
+// home-page content) and avoids re-hitting the network when the user
+// navigates back to a cached route during a session.
+const CACHE_TTL_MS = 60_000;
+type CacheEntry<T> = { value?: T; promise?: Promise<T>; expires: number };
+const cache = new Map<string, CacheEntry<unknown>>();
+
+const cached = <T>(key: string, fetcher: () => Promise<T>, ttl = CACHE_TTL_MS): Promise<T> => {
+  const now = Date.now();
+  const entry = cache.get(key) as CacheEntry<T> | undefined;
+  if (entry && entry.expires > now) {
+    if (entry.value !== undefined) return Promise.resolve(entry.value);
+    if (entry.promise) return entry.promise;
+  }
+  const promise = fetcher()
+    .then((value) => {
+      cache.set(key, { value, expires: Date.now() + ttl });
+      return value;
+    })
+    .catch((err) => {
+      cache.delete(key);
+      throw err;
+    });
+  cache.set(key, { promise, expires: now + ttl });
+  return promise;
+};
+
+export const invalidateProductsCache = (): void => {
+  cache.clear();
+};
+
 export const productsApi = {
   getProducts: async (filters: ProductFilters = {}): Promise<{
     products: Product[];
@@ -58,28 +90,33 @@ export const productsApi = {
     return response.data.data!;
   },
 
-  getFeaturedProducts: async (limit = 8): Promise<Product[]> => {
-    const response = await api.get<ApiResponse<Product[]>>(`/api/products/featured?limit=${limit}`);
-    return response.data.data!;
-  },
+  getFeaturedProducts: (limit = 8): Promise<Product[]> =>
+    cached(`featured:${limit}`, async () => {
+      const response = await api.get<ApiResponse<Product[]>>(`/api/products/featured?limit=${limit}`);
+      return response.data.data!;
+    }),
 
-  getCategories: async (): Promise<string[]> => {
-    const response = await api.get<ApiResponse<string[]>>('/api/products/categories');
-    return response.data.data!;
-  },
+  getCategories: (): Promise<string[]> =>
+    cached('categories', async () => {
+      const response = await api.get<ApiResponse<string[]>>('/api/products/categories');
+      return response.data.data!;
+    }),
 
-  getHomePageImages: async (): Promise<HomePageImages> => {
-    const response = await api.get<ApiResponse<HomePageImages>>('/api/products/homepage-images');
-    return response.data.data!;
-  },
+  getHomePageImages: (): Promise<HomePageImages> =>
+    cached('homepage-images', async () => {
+      const response = await api.get<ApiResponse<HomePageImages>>('/api/products/homepage-images');
+      return response.data.data!;
+    }),
 
-  getHomePageContent: async (): Promise<HomePageContent> => {
-    const response = await api.get<ApiResponse<HomePageContent>>('/api/products/homepage-content');
-    return response.data.data!;
-  },
+  getHomePageContent: (): Promise<HomePageContent> =>
+    cached('homepage-content', async () => {
+      const response = await api.get<ApiResponse<HomePageContent>>('/api/products/homepage-content');
+      return response.data.data!;
+    }),
 
-  getCategoryHeroes: async (): Promise<CategoryHeroConfig> => {
-    const response = await api.get<ApiResponse<CategoryHeroConfig>>('/api/products/category-heroes');
-    return response.data.data!;
-  },
+  getCategoryHeroes: (): Promise<CategoryHeroConfig> =>
+    cached('category-heroes', async () => {
+      const response = await api.get<ApiResponse<CategoryHeroConfig>>('/api/products/category-heroes');
+      return response.data.data!;
+    }),
 };

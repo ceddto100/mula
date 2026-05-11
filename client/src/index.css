@@ -1,5 +1,3 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700&family=Lato:wght@400;700&family=Merriweather:wght@400;700&family=Montserrat:wght@400;700&family=Nunito+Sans:wght@400;700&family=Oswald:wght@400;700&family=Playfair+Display:wght@400;700&family=Poppins:wght@400;700&family=Raleway:wght@400;700&family=Roboto:wght@400;700&display=swap');
-
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -20,114 +18,43 @@ body,
   min-height: 100%;
 }
 
+/*
+ * Cosmic backdrop — kept as a static, non-fixed background.
+ * background-attachment: fixed + many gradients caused full-viewport
+ * repaints on every scroll frame; we now paint it once on a fixed
+ * pseudo-element so scrolling does not invalidate the background layer.
+ */
 body {
   background-color: #02010a;
-  background-image:
-    /* Central galaxy-cluster glow */
-    radial-gradient(ellipse 600px 420px at 52% 42%, rgba(255, 230, 190, 0.22) 0%, rgba(255, 230, 190, 0) 65%),
-    /* Cooler nebula tints */
-    radial-gradient(ellipse 520px 380px at 22% 65%, rgba(140, 110, 220, 0.14) 0%, transparent 70%),
-    radial-gradient(ellipse 560px 400px at 80% 22%, rgba(70, 140, 255, 0.12) 0%, transparent 70%),
-    radial-gradient(ellipse 380px 280px at 88% 78%, rgba(255, 150, 100, 0.08) 0%, transparent 75%),
-    /* Star field — Tile A (180px) */
-    radial-gradient(3px 3px at 24px 38px, rgba(255,255,255,0.95), transparent 60%),
-    radial-gradient(3px 3px at 96px 110px, rgba(255,255,255,0.9), transparent 60%),
-    radial-gradient(4px 4px at 150px 26px, rgba(255,255,255,0.85), transparent 60%),
-    radial-gradient(4px 4px at 60px 160px, rgba(255,255,255,1), transparent 60%),
-    radial-gradient(3px 3px at 170px 150px, rgba(220,230,255,0.85), transparent 60%),
-    /* Tile B (260px) */
-    radial-gradient(3px 3px at 40px 80px, rgba(255,255,255,0.9), transparent 60%),
-    radial-gradient(5px 5px at 200px 200px, rgba(255,255,255,1), transparent 60%),
-    radial-gradient(3px 3px at 130px 50px, rgba(255,240,220,0.9), transparent 60%),
-    radial-gradient(4px 4px at 80px 230px, rgba(255,255,255,0.75), transparent 60%),
-    /* Tile C (340px) — warm distant stars */
-    radial-gradient(5px 3px at 220px 90px, rgba(255, 175, 110, 0.95), transparent 65%),
-    radial-gradient(3px 5px at 70px 280px, rgba(255, 200, 150, 0.9), transparent 65%),
-    radial-gradient(6px 4px at 300px 200px, rgba(255, 160, 100, 0.85), transparent 65%),
-    /* Tile D (520px) — bright foreground stars */
-    radial-gradient(6px 6px at 120px 140px, rgba(255,255,255,1), transparent 60%),
-    radial-gradient(5px 5px at 420px 380px, rgba(255,250,235,1), transparent 60%),
-    /* Deep space base */
-    linear-gradient(180deg, #02010a 0%, #050218 45%, #02010a 100%);
-  background-size:
-    auto, auto, auto, auto,
-    180px 180px, 180px 180px, 180px 180px, 180px 180px, 180px 180px,
-    260px 260px, 260px 260px, 260px 260px, 260px 260px,
-    340px 340px, 340px 340px, 340px 340px,
-    520px 520px, 520px 520px,
-    auto;
-  background-attachment: fixed;
   color: #e5e7eb;
 }
 
-/* ─── Flickering star overlays ────────────────────────────────────────────── */
-
-/* Group A — 5 warm/white stars, faster flicker */
 body::before {
   content: '';
   position: fixed;
-  top: 0;
-  left: 0;
-  width: 1px;
-  height: 1px;
-  background: transparent;
-  border-radius: 50%;
+  inset: 0;
+  z-index: -1;
   pointer-events: none;
-  z-index: 0;
-  box-shadow:
-    389px 125px 3px 3px rgba(255,240,180,0.90),
-    791px 203px 3px 3px rgba(255,255,255,1.00),
-   1283px 179px 2px 2px rgba(255,255,255,0.96),
-    458px 459px 3px 3px rgba(255,240,180,0.90),
-    856px 567px 3px 3px rgba(255,250,220,0.95);
-  animation: flicker-a 3.2s ease-in-out infinite;
-}
-
-/* Group B — 5 cool blue-white stars, slower flicker, phase offset */
-body::after {
-  content: '';
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 1px;
-  height: 1px;
-  background: transparent;
-  border-radius: 50%;
-  pointer-events: none;
-  z-index: 0;
-  box-shadow:
-    205px 148px 2px 2px rgba(180,210,255,0.92),
-    836px 136px 3px 3px rgba(255,255,255,1.00),
-   1247px  91px 3px 3px rgba(200,220,255,0.95),
-    680px 537px 2px 3px rgba(255,255,255,0.92),
-   1080px 490px 3px 3px rgba(200,220,255,0.90);
-  animation: flicker-b 5.1s ease-in-out infinite;
-  animation-delay: 1.8s;
-}
-
-@keyframes flicker-a {
-  0%   { opacity: 1;    }
-  12%  { opacity: 0.15; }
-  24%  { opacity: 0.90; }
-  38%  { opacity: 0.05; }
-  50%  { opacity: 0.95; }
-  63%  { opacity: 0.30; }
-  76%  { opacity: 0.85; }
-  88%  { opacity: 0.10; }
-  100% { opacity: 1;    }
-}
-
-@keyframes flicker-b {
-  0%   { opacity: 0.90; }
-  10%  { opacity: 1;    }
-  22%  { opacity: 0.10; }
-  35%  { opacity: 0.80; }
-  48%  { opacity: 0.05; }
-  58%  { opacity: 0.95; }
-  70%  { opacity: 0.35; }
-  82%  { opacity: 0.88; }
-  92%  { opacity: 0.20; }
-  100% { opacity: 0.90; }
+  background-color: #02010a;
+  background-image:
+    radial-gradient(ellipse 600px 420px at 52% 42%, rgba(255, 230, 190, 0.22) 0%, rgba(255, 230, 190, 0) 65%),
+    radial-gradient(ellipse 520px 380px at 22% 65%, rgba(140, 110, 220, 0.14) 0%, transparent 70%),
+    radial-gradient(ellipse 560px 400px at 80% 22%, rgba(70, 140, 255, 0.12) 0%, transparent 70%),
+    radial-gradient(3px 3px at 24px 38px, rgba(255,255,255,0.95), transparent 60%),
+    radial-gradient(4px 4px at 150px 26px, rgba(255,255,255,0.85), transparent 60%),
+    radial-gradient(4px 4px at 60px 160px, rgba(255,255,255,1), transparent 60%),
+    radial-gradient(3px 3px at 40px 80px, rgba(255,255,255,0.9), transparent 60%),
+    radial-gradient(5px 5px at 200px 200px, rgba(255,255,255,1), transparent 60%),
+    radial-gradient(3px 3px at 130px 50px, rgba(255,240,220,0.9), transparent 60%),
+    linear-gradient(180deg, #02010a 0%, #050218 45%, #02010a 100%);
+  background-size:
+    auto, auto, auto,
+    180px 180px, 180px 180px, 180px 180px,
+    260px 260px, 260px 260px, 260px 260px,
+    auto;
+  /* Promote to its own compositor layer so scroll never repaints it */
+  will-change: transform;
+  transform: translateZ(0);
 }
 
 /* Custom scrollbar */
@@ -149,10 +76,11 @@ body::after {
   background: #555;
 }
 
-/* Smooth scroll */
-html {
-  scroll-behavior: smooth;
-}
+/*
+ * Smooth scroll intentionally disabled — on long pages with many images
+ * it causes a perceptibly sluggish scroll. Programmatic scrollTo callers
+ * can opt-in via `behavior: 'smooth'` per-call.
+ */
 
 /* Focus styles */
 *:focus-visible {
@@ -199,6 +127,15 @@ input[type="number"] {
 /* Loading skeleton */
 .skeleton {
   @apply bg-gray-200 animate-pulse rounded;
+}
+
+/*
+ * Defer paint/layout of off-screen sections. Pair with an intrinsic-size
+ * hint so the scrollbar doesn't jump as sections come into view.
+ */
+.cv-auto {
+  content-visibility: auto;
+  contain-intrinsic-size: 1px 800px;
 }
 
 /* Contemporary brand typography */
