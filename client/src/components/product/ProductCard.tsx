@@ -13,24 +13,37 @@ import {
   getProductStock,
 } from '../../utils/productView';
 
-const PRODUCT_TRANSFORMS = 'w_1200,h_1200,c_fill,g_auto,f_auto,q_auto';
+const CLOUDINARY_RE = /^(https?:\/\/res\.cloudinary\.com\/[^/]+\/image\/upload\/)(.*)/;
 
-function getOptimizedImageUrl(url: string): string {
+function buildCloudinaryUrl(url: string, width: number): string {
   if (!url) return url;
-  const match = url.match(/^(https?:\/\/res\.cloudinary\.com\/[^/]+\/image\/upload\/)(.*)/);
+  const match = url.match(CLOUDINARY_RE);
   if (!match) return url;
-  // If the URL has a version segment (v1234567890), strip any transforms that precede it
-  // so we never end up with conflicting chained transforms from a previous upload preset.
+  // If a version segment exists, strip any prior transforms preceding it
+  // so chained transforms from older presets don't conflict.
   const versionMatch = match[2].match(/(v\d+\/.+)$/);
   const assetPath = versionMatch ? versionMatch[1] : match[2];
-  return `${match[1]}${PRODUCT_TRANSFORMS}/${assetPath}`;
+  return `${match[1]}f_auto,q_auto,c_fill,g_auto,w_${width}/${assetPath}`;
+}
+
+const CARD_WIDTHS = [240, 360, 480, 720];
+
+function getCardSrcSet(url: string): string | undefined {
+  if (!url || !CLOUDINARY_RE.test(url)) return undefined;
+  return CARD_WIDTHS.map((w) => `${buildCloudinaryUrl(url, w)} ${w}w`).join(', ');
+}
+
+function getCardSrc(url: string): string {
+  if (!url) return url;
+  if (!CLOUDINARY_RE.test(url)) return url;
+  return buildCloudinaryUrl(url, 480);
 }
 
 interface ProductCardProps {
   product: Product;
 }
 
-const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
+const ProductCardComponent: React.FC<ProductCardProps> = ({ product }) => {
   const imageUrls = getProductImageUrls(product);
   const productName = getProductName(product);
   const productPrice = getProductPrice(product);
@@ -48,10 +61,15 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
       <div className="relative aspect-[3/4] overflow-hidden bg-brand-800 mb-4 shadow-md hover:shadow-2xl transition-shadow duration-300">
         {imageUrls[0] ? (
           <img
-            src={getOptimizedImageUrl(imageUrls[0])}
+            src={getCardSrc(imageUrls[0])}
+            srcSet={getCardSrcSet(imageUrls[0])}
+            sizes="(min-width: 1024px) 22vw, (min-width: 768px) 30vw, 45vw"
             alt={productName}
             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
             loading="lazy"
+            decoding="async"
+            width={480}
+            height={640}
           />
         ) : (
           <div className="w-full h-full flex items-center justify-center">
@@ -127,5 +145,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
     </Link>
   );
 };
+
+const ProductCard = React.memo(ProductCardComponent);
 
 export default ProductCard;

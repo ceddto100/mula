@@ -13,6 +13,25 @@ const HEADING_FONT_MAP: Record<string, string> = {
   Raleway: '"Raleway", system-ui, sans-serif',
 };
 
+const loadedFonts = new Set<string>();
+
+const ensureGoogleFont = (fontName: string): void => {
+  if (!fontName || loadedFonts.has(fontName) || typeof document === 'undefined') return;
+  if (fontName === 'Bebas Neue') return; // already preloaded in index.html
+  const family = fontName.replace(/ /g, '+');
+  const href = `https://fonts.googleapis.com/css2?family=${family}:wght@400;700&display=swap`;
+  if (document.querySelector(`link[data-font="${fontName}"]`)) {
+    loadedFonts.add(fontName);
+    return;
+  }
+  const link = document.createElement('link');
+  link.rel = 'stylesheet';
+  link.href = href;
+  link.setAttribute('data-font', fontName);
+  document.head.appendChild(link);
+  loadedFonts.add(fontName);
+};
+
 export const normalizeAccentColor = (value?: string): string | null => {
   if (!value) return null;
   const trimmed = value.trim();
@@ -31,6 +50,9 @@ export const applyAccentColor = (value?: string): string | null => {
 
 export const applyHeadingFont = (fontName?: string): string => {
   const family = HEADING_FONT_MAP[fontName || ''] || '"Bebas Neue", Impact, sans-serif';
+  if (fontName && HEADING_FONT_MAP[fontName]) {
+    ensureGoogleFont(fontName);
+  }
   document.documentElement.style.setProperty('--site-heading-font', family);
   return family;
 };
