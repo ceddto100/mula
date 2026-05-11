@@ -8,7 +8,7 @@ import { useSeo } from '../hooks/useSeo';
 const WishlistPage: React.FC = () => {
   const [wishlistIds, setWishlistIds] = useState<string[]>(wishlistStore.getAll());
   const { products, isLoading } = useProducts({ limit: 100 });
-  useSeo('Wishlist | Cualquier', 'Saved products you want to come back to.');
+  useSeo({ title: 'Wishlist | Cualquier', description: 'Saved products you want to come back to.', canonicalPath: '/wishlist', ogType: 'website' });
 
   const wishedProducts = useMemo(
     () => products.filter((product) => wishlistIds.includes(product._id)),

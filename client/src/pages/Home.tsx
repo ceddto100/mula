@@ -68,7 +68,7 @@ const Home: React.FC = () => {
   const observerRef = useRef<IntersectionObserver | null>(null);
   const [homePageImages, setHomePageImages] = useState<HomePageImages>(defaultHomePageImages);
   const [content, setContent] = useState<HomePageContent>(defaultHomePageContent);
-  useSeo('Cualquier — Contemporary Urban Fashion', 'Street-inspired fashion drops and curated collections.');
+  useSeo({ title: 'Cualquier — Contemporary Urban Fashion', description: 'Street-inspired fashion drops and curated collections.', canonicalPath: '/', ogType: 'website', image: '/images/Cualquier_logo.png' });
 
   useEffect(() => {
     const fetchHomePageImages = async () => {

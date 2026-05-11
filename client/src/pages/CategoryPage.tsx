@@ -8,6 +8,7 @@ import { useProducts } from '../hooks/useProducts';
 import { productsApi } from '../api/products.api';
 import { capitalizeFirst } from '../utils/formatters';
 import { CategoryHeroConfig, CategoryHeroMedia } from '../types';
+import { useSeo } from '../hooks/useSeo';
 
 // ─── Text-only fallbacks (media URL comes from backend) ─
 const HERO_FALLBACKS: Record<string, CategoryHeroMedia> = {
@@ -205,6 +206,23 @@ const CategoryPage: React.FC = () => {
   useEffect(() => {
     productsApi.getCategoryHeroes().then(setHeroConfig).catch(() => {});
   }, []);
+
+
+  useSeo({
+    title: `${capitalizeFirst(normalizedCategory)} Collection | Cualquier`,
+    description: `Shop ${capitalizeFirst(normalizedCategory)} apparel and streetwear from Cualquier.`,
+    canonicalPath: `/category/${normalizedCategory}`,
+    ogType: 'website',
+    image: ((heroConfig?.[normalizedCategory as keyof CategoryHeroConfig] as CategoryHeroMedia | undefined)?.mediaUrl) || '/images/Cualquier_logo.png',
+    jsonLd: {
+      '@context': 'https://schema.org',
+      '@type': 'BreadcrumbList',
+      itemListElement: [
+        { '@type': 'ListItem', position: 1, name: 'Home', item: `${window.location.origin}/` },
+        { '@type': 'ListItem', position: 2, name: capitalizeFirst(normalizedCategory), item: `${window.location.origin}/category/${normalizedCategory}` },
+      ],
+    },
+  });
 
   const { products, isLoading, pagination } = useProducts({
     category: normalizedCategory !== 'all' ? normalizedCategory : undefined,
