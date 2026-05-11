@@ -24,7 +24,13 @@ const isVideoUrl = (url?: string): boolean => {
   return /\.(mp4|mov|webm|avi)(\?.*)?$/i.test(url) || url.includes('/video/upload/');
 };
 
-const renderHomeMedia = (url: string, alt: string, className: string) => {
+type HomeMediaOptions = {
+  eager?: boolean;
+  preload?: 'none' | 'metadata' | 'auto';
+};
+
+const renderHomeMedia = (url: string, alt: string, className: string, options: HomeMediaOptions = {}) => {
+  const { eager = false, preload = 'none' } = options;
   if (isVideoUrl(url)) {
     return (
       <video
@@ -34,11 +40,21 @@ const renderHomeMedia = (url: string, alt: string, className: string) => {
         muted
         loop
         playsInline
+        preload={preload}
       />
     );
   }
 
-  return <img src={url} alt={alt} className={className} />;
+  return (
+    <img
+      src={url}
+      alt={alt}
+      className={className}
+      loading={eager ? 'eager' : 'lazy'}
+      fetchPriority={eager ? 'high' : 'low'}
+      decoding="async"
+    />
+  );
 };
 
 export const defaultHomePageContent: HomePageContent = {
@@ -146,7 +162,7 @@ const Home: React.FC = () => {
           <div
             className="absolute top-0 left-0 h-full w-[55%] bg-black/60"
           />
-          {renderHomeMedia(homePageImages.heroImage, 'Fashion', 'absolute top-0 right-0 w-3/5 h-full object-cover diagonal-bg')}
+          {renderHomeMedia(homePageImages.heroImage, 'Fashion', 'absolute top-0 right-0 w-3/5 h-full object-cover diagonal-bg', { eager: true, preload: 'metadata' })}
           {content.brandTheme?.heroOverlayEnabled && content.brandTheme?.heroOverlayColor ? (
             <div
               className="absolute top-0 right-0 w-3/5 h-full diagonal-bg pointer-events-none"
