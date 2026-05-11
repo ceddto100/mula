@@ -134,7 +134,7 @@ const InfoPage: React.FC = () => {
     body: ['The requested page is not available yet.'],
   };
 
-  useSeo(`${content.title} | Cualquier`, content.body[0]);
+  useSeo({ title: `${content.title} | Cualquier`, description: content.body[0], canonicalPath: pathname, ogType: 'website' });
 
   return (
     <Layout>

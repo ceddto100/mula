@@ -78,10 +78,47 @@ const ProductPage: React.FC = () => {
 
   const productName = product ? getProductName(product) : 'Product';
   const productDescription = product ? getProductDescription(product) : '';
-  useSeo(
-    product ? `${productName} | Cualquier` : 'Product | Cualquier',
-    productDescription || (product ? `Shop ${productName} from Cualquier.` : 'Browse product details from Cualquier.'),
-  );
+  const productCategoryForSeo = product ? getProductCategory(product) : 'shop';
+  useSeo({
+    title: product ? `${productName} | Cualquier` : 'Product | Cualquier',
+    description:
+      productDescription || (product ? `Shop ${productName} from Cualquier.` : 'Browse product details from Cualquier.'),
+    canonicalPath: product ? `/products/${product.handle}` : '/products',
+    ogType: 'product',
+    image: product?.images?.[0]?.url || product?.media?.[0]?.url,
+    imageAlt: product?.images?.[0]?.alt || productName,
+    jsonLd: product
+      ? [
+          {
+            '@context': 'https://schema.org',
+            '@type': 'Product',
+            name: product.title,
+            image: (product.images || []).map((img) => img.url),
+            description: product.descriptionHtml,
+            sku: product.variants?.[0]?.sku,
+            brand: { '@type': 'Brand', name: product.vendor || 'Cualquier' },
+            offers: {
+              '@type': 'Offer',
+              priceCurrency: 'USD',
+              price: String(product.variants?.[0]?.price || 0),
+              availability: (product.variants?.[0]?.inventoryQuantity || 0) > 0
+                ? 'https://schema.org/InStock'
+                : 'https://schema.org/OutOfStock',
+              url: `${window.location.origin}/products/${product.handle}`,
+            },
+          },
+          {
+            '@context': 'https://schema.org',
+            '@type': 'BreadcrumbList',
+            itemListElement: [
+              { '@type': 'ListItem', position: 1, name: 'Home', item: `${window.location.origin}/` },
+              { '@type': 'ListItem', position: 2, name: productCategoryForSeo, item: `${window.location.origin}/category/${productCategoryForSeo.toLowerCase()}` },
+              { '@type': 'ListItem', position: 3, name: productName, item: `${window.location.origin}/products/${product.handle}` },
+            ],
+          },
+        ]
+      : undefined,
+  });
 
   if (isLoading) {
     return (

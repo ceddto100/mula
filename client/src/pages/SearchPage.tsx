@@ -17,10 +17,12 @@ const SearchPage: React.FC = () => {
     maxPrice: maxPrice ? Number(maxPrice) : undefined,
     limit: 48,
   });
-  useSeo(
-    query ? `Search "${query}" | Cualquier` : 'Search | Cualquier',
-    'Search the Cualquier catalog by product, collection, and style.'
-  );
+  useSeo({
+    title: query ? `Search "${query}" | Cualquier` : 'Search | Cualquier',
+    description: 'Search the Cualquier catalog by product, collection, and style.',
+    canonicalPath: `/search${query ? `?q=${encodeURIComponent(query)}` : ''}`,
+    ogType: 'website',
+  });
 
   const updateQuery = (value: string) => {
     const next = new URLSearchParams(searchParams);
