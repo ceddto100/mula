@@ -18,6 +18,29 @@ const defaultHomePageImages: HomePageImages = {
   saleImage: '',
 };
 
+
+const isVideoUrl = (url?: string): boolean => {
+  if (!url) return false;
+  return /\.(mp4|mov|webm|avi)(\?.*)?$/i.test(url) || url.includes('/video/upload/');
+};
+
+const renderHomeMedia = (url: string, alt: string, className: string) => {
+  if (isVideoUrl(url)) {
+    return (
+      <video
+        src={url}
+        className={className}
+        autoPlay
+        muted
+        loop
+        playsInline
+      />
+    );
+  }
+
+  return <img src={url} alt={alt} className={className} />;
+};
+
 export const defaultHomePageContent: HomePageContent = {
   hero: {
     badge: 'NEW COLLECTION 2025',
@@ -123,11 +146,7 @@ const Home: React.FC = () => {
           <div
             className="absolute top-0 left-0 h-full w-[55%] bg-black/60"
           />
-          <img
-            src={homePageImages.heroImage}
-            alt="Fashion"
-            className="absolute top-0 right-0 w-3/5 h-full object-cover diagonal-bg"
-          />
+          {renderHomeMedia(homePageImages.heroImage, 'Fashion', 'absolute top-0 right-0 w-3/5 h-full object-cover diagonal-bg')}
           {content.brandTheme?.heroOverlayEnabled && content.brandTheme?.heroOverlayColor ? (
             <div
               className="absolute top-0 right-0 w-3/5 h-full diagonal-bg pointer-events-none"
@@ -218,11 +237,7 @@ const Home: React.FC = () => {
               to="/category/men"
               className="col-span-12 lg:col-span-8 relative group overflow-hidden rounded-3xl bg-brand-900 aspect-[16/9] lg:aspect-[16/10]"
             >
-              <img
-                src={homePageImages.menImage}
-                alt="Men's Collection"
-                className="absolute inset-0 w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
-              />
+              {renderHomeMedia(homePageImages.menImage, "Men's Collection", "absolute inset-0 w-full h-full object-cover group-hover:scale-110 transition-transform duration-700")}
               <div className="absolute inset-0 bg-gradient-to-t from-brand-900/90 via-brand-900/40 to-transparent" />
               <div className="absolute bottom-0 left-0 p-8 lg:p-12">
                 {content.shopByStyle.men.badge && (
@@ -245,11 +260,7 @@ const Home: React.FC = () => {
               to="/category/women"
               className="col-span-12 lg:col-span-4 relative group overflow-hidden rounded-3xl bg-accent-purple aspect-[16/9] lg:aspect-[9/16]"
             >
-              <img
-                src={homePageImages.womenImage}
-                alt="Women's Collection"
-                className="absolute inset-0 w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
-              />
+              {renderHomeMedia(homePageImages.womenImage, "Women's Collection", "absolute inset-0 w-full h-full object-cover group-hover:scale-110 transition-transform duration-700")}
               <div className="absolute inset-0 bg-gradient-to-t from-brand-900/90 via-brand-900/30 to-transparent" />
               <div className="absolute bottom-0 left-0 p-8">
                 <h3 className="text-5xl lg:text-6xl font-display text-white mb-2">{content.shopByStyle.women.title}</h3>
@@ -267,11 +278,7 @@ const Home: React.FC = () => {
               to="/category/accessories"
               className="col-span-6 lg:col-span-4 relative group overflow-hidden rounded-3xl bg-accent-sunset aspect-square"
             >
-              <img
-                src={homePageImages.accessoryImage}
-                alt="Accessories"
-                className="absolute inset-0 w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
-              />
+              {renderHomeMedia(homePageImages.accessoryImage, 'Accessories', 'absolute inset-0 w-full h-full object-cover group-hover:scale-110 transition-transform duration-700')}
               <div className="absolute inset-0 bg-brand-900/60 group-hover:bg-brand-900/40 transition-all" />
               <div className="absolute bottom-0 left-0 p-6">
                 <h3 className="text-3xl lg:text-4xl font-display text-white mb-2">{content.shopByStyle.accessories.title}</h3>
@@ -286,11 +293,7 @@ const Home: React.FC = () => {
               to="/category/sale"
               className="col-span-6 lg:col-span-4 relative group overflow-hidden rounded-3xl bg-accent-electric aspect-square"
             >
-              <img
-                src={homePageImages.saleImage}
-                alt="Sale Collection"
-                className="absolute inset-0 w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
-              />
+              {renderHomeMedia(homePageImages.saleImage, 'Sale Collection', 'absolute inset-0 w-full h-full object-cover group-hover:scale-110 transition-transform duration-700')}
               <div className="absolute inset-0 bg-gradient-to-br from-accent-electric/80 to-brand-500/85" />
               <div className="absolute inset-0 flex flex-col items-center justify-center p-6 text-center">
                 <div className="text-brand-900 font-display text-6xl lg:text-7xl mb-2 group-hover:scale-110 transition-transform">
@@ -310,11 +313,7 @@ const Home: React.FC = () => {
               to="/category/collections"
               className="col-span-12 lg:col-span-4 relative group overflow-hidden rounded-3xl bg-brand-700 aspect-[16/9] lg:aspect-square"
             >
-              <img
-                src={homePageImages.collectionImage}
-                alt="Collections"
-                className="absolute inset-0 w-full h-full object-cover opacity-50 group-hover:opacity-70 group-hover:scale-110 transition-all duration-700"
-              />
+              {renderHomeMedia(homePageImages.collectionImage, 'Collections', 'absolute inset-0 w-full h-full object-cover opacity-50 group-hover:opacity-70 group-hover:scale-110 transition-all duration-700')}
               <div className="absolute inset-0 flex flex-col items-center justify-center p-6 text-center">
                 <h3 className="text-4xl lg:text-5xl font-display text-white mb-4">{content.shopByStyle.collections.title}</h3>
                 {content.shopByStyle.collections.description && (
