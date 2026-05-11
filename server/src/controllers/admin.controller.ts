@@ -699,6 +699,28 @@ export const uploadImages = async (req: Request, res: Response): Promise<void> =
   }
 };
 
+
+export const uploadProductMediaFiles = async (req: Request, res: Response): Promise<void> => {
+  try {
+    if (!req.files || (req.files as Express.Multer.File[]).length === 0) {
+      res.status(400).json({ success: false, message: 'No files uploaded' });
+      return;
+    }
+
+    const files = req.files as (Express.Multer.File & { path: string })[];
+    const media = files.map((file, idx) => ({
+      url: file.path,
+      mediaType: file.mimetype.startsWith('video/') ? 'video' : 'image',
+      alt: '',
+      position: idx,
+    }));
+
+    res.json({ success: true, data: { media } });
+  } catch (error: any) {
+    res.status(500).json({ success: false, message: error.message || 'Error uploading media' });
+  }
+};
+
 // Delete image from Cloudinary
 export const deleteImage = async (req: Request, res: Response): Promise<void> => {
   try {

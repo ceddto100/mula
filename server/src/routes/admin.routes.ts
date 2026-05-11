@@ -22,6 +22,7 @@ import {
   getCategoryHeroes,
   updateCategoryHeroes,
   uploadMedia,
+  uploadProductMediaFiles,
 } from '../controllers/admin.controller';
 import { auth } from '../middleware/auth';
 import { adminAuth } from '../middleware/adminAuth';
@@ -31,7 +32,7 @@ import {
   shopifyProductUpdateValidation,
   mongoIdValidation,
 } from '../utils/validators';
-import { upload, uploadHeroMedia } from '../config/cloudinary';
+import { upload, uploadHeroMedia, uploadProductMedia } from '../config/cloudinary';
 
 const router = Router();
 
@@ -73,6 +74,7 @@ router.put('/category-heroes', updateCategoryHeroes);
 router.post('/upload', upload.single('image'), uploadImage);
 router.post('/upload-multiple', upload.array('images', 10), uploadImages);
 router.post('/upload-media', uploadHeroMedia.single('media'), uploadMedia);
+router.post('/upload-product-media', uploadProductMedia.array('media', 10), uploadProductMediaFiles);
 router.delete('/image', deleteImage);
 
 export default router;

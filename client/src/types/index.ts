@@ -50,6 +50,14 @@ export interface ProductImage {
   position?: number;
 }
 
+export interface ProductMedia {
+  _id?: string;
+  url: string;
+  mediaType: 'image' | 'video';
+  alt?: string;
+  position?: number;
+}
+
 export interface Product {
   _id: string;
   // Core fields
@@ -60,8 +68,9 @@ export interface Product {
   productType: string;
   descriptionHtml: string;
 
-  // Images
+  // Images / media
   images: ProductImage[];
+  media?: ProductMedia[];
 
   // Variants & Options
   variants: ProductVariant[];
@@ -118,6 +127,7 @@ export interface CreateProductData {
   productType?: string;
   descriptionHtml?: string;
   images?: Array<{ url: string; alt?: string; position?: number }>;
+  media?: Array<{ url: string; mediaType: 'image' | 'video'; alt?: string; position?: number }>;
   variants: Array<{
     sku: string;
     title?: string;
