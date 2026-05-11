@@ -2,7 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { FiPlus, FiX, FiImage, FiTrash2, FiChevronDown, FiChevronUp } from 'react-icons/fi';
 import AdminLayout from '../components/admin/AdminLayout';
 import { adminApi } from '../api/admin.api';
-import { Product, CreateProductData, ProductVariant, ProductOption, ProductImage } from '../types';
+import { Product, CreateProductData, ProductVariant, ProductOption, ProductImage, ProductMedia } from '../types';
 import { formatPrice } from '../utils/formatters';
 import {
   PRODUCT_TYPES,
@@ -36,6 +36,7 @@ interface ProductFormState {
   productType: string;
   descriptionHtml: string;
   images: ProductImage[];
+  media: ProductMedia[];
   variants: ProductVariant[];
   options: ProductOption[];
   seoTitle: string;
@@ -57,6 +58,7 @@ const initialFormState: ProductFormState = {
   productType: '',
   descriptionHtml: '',
   images: [],
+  media: [],
   variants: [createDefaultVariant()],
   options: [],
   seoTitle: '',
@@ -150,6 +152,7 @@ const AdminProducts: React.FC = () => {
       productType: product.productType || '',
       descriptionHtml: product.descriptionHtml || '',
       images: product.images || [],
+      media: product.media || (product.images || []).map((img) => ({ ...img, mediaType: 'image' as const })),
       variants: product.variants.length > 0 ? product.variants : [createDefaultVariant()],
       options: product.options || [],
       seoTitle: product.seoTitle || '',
@@ -187,21 +190,18 @@ const AdminProducts: React.FC = () => {
     }
   };
 
-  // Image handling
+  // Media handling
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
     if (!files) return;
     setUploading(true);
     try {
       const fileArray = Array.from(files);
-      const urls = await adminApi.uploadImages(fileArray);
-      const newImages: ProductImage[] = urls.map((url, idx) => ({
-        url,
-        alt: '',
-        position: formData.images.length + idx,
-      }));
-      updateFormField('images', [...formData.images, ...newImages]);
-      toast.success('Images uploaded');
+      const mediaItems = await adminApi.uploadProductMedia(fileArray);
+      const normalized = mediaItems.map((m, idx) => ({ ...m, position: formData.media.length + idx }));
+      updateFormField('media', [...formData.media, ...normalized]);
+      updateFormField('images', [...formData.images, ...normalized.filter((m) => m.mediaType === 'image').map((m) => ({ url: m.url, alt: m.alt || '', position: m.position }))]);
+      toast.success('Media uploaded');
     } catch {
       toast.error('Failed to upload images');
     } finally {
@@ -237,6 +237,7 @@ const AdminProducts: React.FC = () => {
     };
 
     updateFormField('images', [...formData.images, newImage]);
+    updateFormField('media', [...formData.media, { ...newImage, mediaType: 'image' }]);
     setMediaUrlInput('');
     toast.success('Cloudinary URL added');
   };
@@ -332,6 +333,7 @@ const AdminProducts: React.FC = () => {
         productType: formData.productType || undefined,
         descriptionHtml: formData.descriptionHtml || undefined,
         images: formData.images.length > 0 ? formData.images : undefined,
+        media: formData.media.length > 0 ? formData.media : undefined,
         variants: formData.variants,
         options: options.length > 0 ? options : undefined,
         seoTitle: formData.seoTitle || undefined,
@@ -595,12 +597,12 @@ const AdminProducts: React.FC = () => {
                       {expandedSections.media && (
                         <div className="pt-4 space-y-3">
                           <label className="flex items-center justify-between text-sm text-gray-600">
-                            <span>Images</span>
+                            <span>Media (images/videos)</span>
                             {uploading && <span className="text-xs text-gray-500">Uploading...</span>}
                           </label>
                           <input
                             type="file"
-                            accept="image/*"
+                            accept="image/*,video/*"
                             multiple
                             onChange={handleImageUpload}
                             disabled={uploading}

@@ -87,6 +87,13 @@ const variantSchema = new Schema({
 }, { _id: true });
 
 // Image with alt text
+const mediaSchema = new Schema({
+  url: { type: String, required: true },
+  mediaType: { type: String, enum: ['image', 'video'], required: true, default: 'image' },
+  alt: { type: String, default: '', trim: true },
+  position: { type: Number, default: 0 },
+}, { _id: true });
+
 const imageSchema = new Schema({
   url: {
     type: String,
@@ -125,6 +132,14 @@ export interface IProductOption {
   values: string[];
 }
 
+export interface IProductMedia {
+  _id?: Types.ObjectId;
+  url: string;
+  mediaType: 'image' | 'video';
+  alt?: string;
+  position?: number;
+}
+
 export interface IProductImage {
   _id?: Types.ObjectId;
   url: string;
@@ -142,8 +157,9 @@ export interface IProduct extends Document {
   productType: string;
   descriptionHtml: string;
 
-  // Images
+  // Images/media
   images: IProductImage[];
+  media: IProductMedia[];
 
   // Variants & Options
   variants: IProductVariant[];
@@ -214,8 +230,9 @@ const productSchema = new Schema<IProduct>(
       default: '',
     },
 
-    // Images
+    // Images/media
     images: [imageSchema],
+    media: [mediaSchema],
 
     // Variants & Options
     variants: {

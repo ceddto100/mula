@@ -207,6 +207,7 @@ export interface CreateProductInput {
   productType?: string;
   descriptionHtml?: string;
   images?: Array<{ url: string; alt?: string; position?: number }>;
+  media?: Array<{ url: string; mediaType: 'image' | 'video'; alt?: string; position?: number }> ;
   variants: Array<{
     sku: string;
     title?: string;

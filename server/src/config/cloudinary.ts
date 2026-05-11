@@ -36,6 +36,26 @@ export const upload = multer({
   },
 });
 
+
+const productMediaStorage = new CloudinaryStorage({
+  cloudinary: cloudinary,
+  params: {
+    folder: 'mula-store/products',
+    resource_type: 'auto',
+    use_filename: true,
+    unique_filename: true,
+    overwrite: true,
+    allowed_formats: ['jpg', 'jpeg', 'png', 'webp', 'mp4', 'mov', 'webm'],
+  } as any,
+});
+
+export const uploadProductMedia = multer({
+  storage: productMediaStorage,
+  limits: {
+    fileSize: 200 * 1024 * 1024,
+  },
+});
+
 // ─── Category hero media upload storage ──────────────────────────────────────
 // Supports images AND videos via resource_type: auto
 const heroMediaStorage = new CloudinaryStorage({

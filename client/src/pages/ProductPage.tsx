@@ -11,7 +11,7 @@ import {
   getProductCategory,
   getProductColors,
   getProductDescription,
-  getProductImageUrls,
+  getProductMedia,
   getProductName,
   getProductPrice,
   getProductSizes,
@@ -116,7 +116,7 @@ const ProductPage: React.FC = () => {
   const productPrice = getProductPrice(product);
   const productStock = getProductStock(product);
   const productCategory = getProductCategory(product);
-  const productImages = getProductImageUrls(product);
+  const productMedia = getProductMedia(product);
   const productSizes = getProductSizes(product);
   const productColors = getProductColors(product);
 
@@ -137,7 +137,7 @@ const ProductPage: React.FC = () => {
         {/* Product Details */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
           {/* Images */}
-          <ProductImageGallery images={productImages} productName={productName} />
+          <ProductImageGallery media={productMedia} productName={productName} />
 
           {/* Info */}
           <div>

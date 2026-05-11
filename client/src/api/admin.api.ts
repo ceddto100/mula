@@ -199,6 +199,18 @@ export const adminApi = {
     return response.data.data!.urls;
   },
 
+
+  uploadProductMedia: async (files: File[]): Promise<Array<{ url: string; mediaType: 'image' | 'video'; alt?: string; position?: number }>> => {
+    const formData = new FormData();
+    files.forEach((file) => formData.append('media', file));
+    const response = await api.post<ApiResponse<{ media: Array<{ url: string; mediaType: 'image' | 'video'; alt?: string; position?: number }> }>>(
+      '/api/admin/upload-product-media',
+      formData,
+      { headers: { 'Content-Type': 'multipart/form-data' } }
+    );
+    return response.data.data!.media;
+  },
+
   // Image delete
   deleteImage: async (publicId: string): Promise<void> => {
     await api.delete('/api/admin/image', { data: { publicId } });
