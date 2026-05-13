@@ -47,7 +47,7 @@ const Header: React.FC = () => {
             {/* Logo */}
             <Link to="/" className="flex items-center lg:mr-12">
               <img
-                src="/images/Cualquier_logo.png"
+                src="/Images/ccosa_logo.png"
                 alt="Cualquier"
                 className="h-12 lg:h-16 w-auto hover:scale-105 transition-transform duration-300"
               />
