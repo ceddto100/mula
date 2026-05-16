@@ -166,9 +166,9 @@ const HomePageContentEditor: React.FC = () => {
     <div className="bg-white rounded-lg shadow-sm p-6 space-y-6 text-gray-900">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
         <div>
-          <h3 className="text-lg font-semibold">Home Page Content Editor</h3>
+          <h3 className="text-lg font-semibold">Script Editor</h3>
           <p className="text-sm text-gray-700">
-            Edit every line of copy from the hero down to the newsletter signup.
+            Edit every line of homepage script copy, including Shop By Style panels.
           </p>
         </div>
         <div className="flex gap-2">
@@ -186,7 +186,7 @@ const HomePageContentEditor: React.FC = () => {
             disabled={isLoading || isSaving}
             className="px-4 py-2 bg-gray-900 text-white rounded-md font-medium disabled:opacity-60"
           >
-            {isSaving ? 'Saving...' : 'Save Content'}
+            {isSaving ? 'Updating Script...' : 'Update Script'}
           </button>
         </div>
       </div>
