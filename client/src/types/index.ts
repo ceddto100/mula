@@ -206,6 +206,7 @@ export interface CategoryCardContent {
 
 export interface ShopByStyleContent {
   sectionTitle: string;
+  panels: CategoryCardContent[];
   men: CategoryCardContent;
   women: CategoryCardContent;
   accessories: CategoryCardContent;
