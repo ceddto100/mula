@@ -203,20 +203,29 @@ const AdminProducts: React.FC = () => {
       updateFormField('images', [...formData.images, ...normalized.filter((m) => m.mediaType === 'image').map((m) => ({ url: m.url, alt: m.alt || '', position: m.position }))]);
       toast.success('Media uploaded');
     } catch {
-      toast.error('Failed to upload images');
+      toast.error('Failed to upload media');
     } finally {
       setUploading(false);
     }
   };
 
-  const updateImageAlt = (index: number, alt: string) => {
-    const updated = [...formData.images];
-    updated[index] = { ...updated[index], alt };
-    updateFormField('images', updated);
+  const updateMediaAlt = (index: number, alt: string) => {
+    const updatedMedia = [...formData.media];
+    const target = updatedMedia[index];
+    if (!target) return;
+
+    updatedMedia[index] = { ...target, alt };
+    updateFormField('media', updatedMedia);
+    updateFormField('images', updatedMedia.filter((m) => m.mediaType === 'image').map((m) => ({ url: m.url, alt: m.alt || '', position: m.position })));
   };
 
-  const removeImage = (index: number) => {
-    updateFormField('images', formData.images.filter((_, i) => i !== index));
+  const removeMedia = (index: number) => {
+    const updatedMedia = formData.media
+      .filter((_, i) => i !== index)
+      .map((item, idx) => ({ ...item, position: idx }));
+
+    updateFormField('media', updatedMedia);
+    updateFormField('images', updatedMedia.filter((m) => m.mediaType === 'image').map((m) => ({ url: m.url, alt: m.alt || '', position: m.position })));
   };
 
   const addImageFromUrl = () => {
@@ -628,20 +637,24 @@ const AdminProducts: React.FC = () => {
                             </div>
                           </div>
                           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                            {formData.images.map((img, idx) => (
-                              <div key={idx} className="relative group">
-                                <img src={img.url} alt={img.alt || ''} className="w-full h-32 object-cover rounded-lg border" />
+                            {formData.media.map((item, idx) => (
+                              <div key={`${item.url}-${idx}`} className="relative group">
+                                {item.mediaType === 'video' ? (
+                                  <video src={item.url} className="w-full h-32 object-cover rounded-lg border bg-black" controls preload="metadata" />
+                                ) : (
+                                  <img src={item.url} alt={item.alt || ''} className="w-full h-32 object-cover rounded-lg border" />
+                                )}
                                 <button
                                   type="button"
-                                  onClick={() => removeImage(idx)}
+                                  onClick={() => removeMedia(idx)}
                                   className="absolute top-2 right-2 bg-white text-red-600 rounded-full p-1 shadow-sm opacity-0 group-hover:opacity-100 transition-opacity"
                                 >
                                   <FiX size={14} />
                                 </button>
                                 <input
                                   type="text"
-                                  value={img.alt || ''}
-                                  onChange={(e) => updateImageAlt(idx, e.target.value)}
+                                  value={item.alt || ''}
+                                  onChange={(e) => updateMediaAlt(idx, e.target.value)}
                                   placeholder="Alt text"
                                   className="mt-2 w-full px-2 py-1 text-xs border rounded"
                                 />
