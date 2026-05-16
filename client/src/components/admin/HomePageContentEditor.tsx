@@ -49,29 +49,9 @@ const sections: SectionDef[] = [
   {
     key: 'shopByStyle',
     title: 'Shop By Style',
-    description: 'Section heading and the five category cards.',
+    description: 'Section heading and editable panels.',
     fields: [
       { path: 'shopByStyle.sectionTitle', label: 'Section title' },
-
-      { path: 'shopByStyle.men.badge', label: "Men — badge" },
-      { path: 'shopByStyle.men.title', label: "Men — title" },
-      { path: 'shopByStyle.men.description', label: "Men — description" },
-      { path: 'shopByStyle.men.linkText', label: "Men — link text" },
-
-      { path: 'shopByStyle.women.title', label: "Women — title" },
-      { path: 'shopByStyle.women.description', label: "Women — description" },
-      { path: 'shopByStyle.women.linkText', label: "Women — link text" },
-
-      { path: 'shopByStyle.accessories.title', label: 'Accessories — title' },
-      { path: 'shopByStyle.accessories.linkText', label: 'Accessories — link text' },
-
-      { path: 'shopByStyle.sale.title', label: 'Sale — title' },
-      { path: 'shopByStyle.sale.description', label: 'Sale — description' },
-      { path: 'shopByStyle.sale.linkText', label: 'Sale — link text' },
-
-      { path: 'shopByStyle.collections.title', label: 'Collections — title' },
-      { path: 'shopByStyle.collections.description', label: 'Collections — description' },
-      { path: 'shopByStyle.collections.linkText', label: 'Collections — link text' },
     ],
   },
   {
@@ -318,6 +298,56 @@ const HomePageContentEditor: React.FC = () => {
                     </label>
                   );
                 })}
+                {section.key === 'shopByStyle' && (
+                  <div className="md:col-span-2 border-t pt-4 space-y-4">
+                    <div className="flex items-center justify-between">
+                      <h4 className="font-semibold text-gray-800">Panels</h4>
+                      <button
+                        type="button"
+                        className="px-3 py-1.5 text-sm border rounded-md"
+                        onClick={() =>
+                          setContent((prev) => ({
+                            ...prev,
+                            shopByStyle: {
+                              ...prev.shopByStyle,
+                              panels: [...(prev.shopByStyle.panels || []), { badge: '', title: '', description: '', linkText: '' }],
+                            },
+                          }))
+                        }
+                      >
+                        Add panel
+                      </button>
+                    </div>
+                    {(content.shopByStyle.panels || []).map((panel, index) => (
+                      <div key={index} className="border rounded-lg p-3 grid grid-cols-1 md:grid-cols-2 gap-3">
+                        <input value={panel.badge || ''} onChange={(e) => {
+                          const panels = [...content.shopByStyle.panels];
+                          panels[index] = { ...panels[index], badge: e.target.value };
+                          setContent((prev) => ({ ...prev, shopByStyle: { ...prev.shopByStyle, panels } }));
+                        }} placeholder="Badge" className="px-3 py-2 border rounded-md" />
+                        <input value={panel.title || ''} onChange={(e) => {
+                          const panels = [...content.shopByStyle.panels];
+                          panels[index] = { ...panels[index], title: e.target.value };
+                          setContent((prev) => ({ ...prev, shopByStyle: { ...prev.shopByStyle, panels } }));
+                        }} placeholder="Title" className="px-3 py-2 border rounded-md" />
+                        <textarea value={panel.description || ''} onChange={(e) => {
+                          const panels = [...content.shopByStyle.panels];
+                          panels[index] = { ...panels[index], description: e.target.value };
+                          setContent((prev) => ({ ...prev, shopByStyle: { ...prev.shopByStyle, panels } }));
+                        }} placeholder="Description" className="md:col-span-2 px-3 py-2 border rounded-md" rows={2} />
+                        <input value={panel.linkText || ''} onChange={(e) => {
+                          const panels = [...content.shopByStyle.panels];
+                          panels[index] = { ...panels[index], linkText: e.target.value };
+                          setContent((prev) => ({ ...prev, shopByStyle: { ...prev.shopByStyle, panels } }));
+                        }} placeholder="Link text" className="px-3 py-2 border rounded-md" />
+                        <button type="button" className="px-3 py-2 text-sm text-red-700 border border-red-300 rounded-md" onClick={() => {
+                          const panels = content.shopByStyle.panels.filter((_, i) => i !== index);
+                          setContent((prev) => ({ ...prev, shopByStyle: { ...prev.shopByStyle, panels } }));
+                        }}>Remove</button>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
             </details>
           ))}

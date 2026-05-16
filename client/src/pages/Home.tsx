@@ -97,6 +97,13 @@ export const defaultHomePageContent: HomePageContent = {
   },
   shopByStyle: {
     sectionTitle: 'SHOP BY STYLE',
+    panels: [
+      { badge: 'TRENDING', title: "MEN'S", description: 'Bold. Confident. Urban.', linkText: 'DISCOVER' },
+      { badge: '', title: "WOMEN'S", description: 'Fierce & Elegant', linkText: 'SHOP' },
+      { badge: '', title: 'ACCESSORIES', description: '', linkText: 'VIEW' },
+      { badge: '', title: 'SALE', description: 'UP TO 50% OFF', linkText: 'SHOP DEALS' },
+      { badge: '', title: 'COLLECTIONS', description: 'Curated Style Sets', linkText: 'EXPLORE' },
+    ],
     men: { badge: 'TRENDING', title: "MEN'S", description: 'Bold. Confident. Urban.', linkText: 'DISCOVER' },
     women: { badge: '', title: "WOMEN'S", description: 'Fierce & Elegant', linkText: 'SHOP' },
     accessories: { badge: '', title: 'ACCESSORIES', description: '', linkText: 'VIEW' },
@@ -276,100 +283,26 @@ const Home: React.FC = () => {
             <div className="w-24 h-1 bg-accent-electric mx-auto" />
           </div>
 
-          {/* Asymmetric Grid */}
-          <div className="grid grid-cols-12 gap-4 lg:gap-6">
-            {/* Large Featured - Men */}
-            <Link
-              to="/category/men"
-              className="col-span-12 lg:col-span-8 relative group overflow-hidden rounded-3xl bg-brand-900 aspect-[16/9] lg:aspect-[16/10]"
-            >
-              {renderHomeMedia(homePageImages.menImage, "Men's Collection", "absolute inset-0 w-full h-full object-cover group-hover:scale-110 transition-transform duration-700")}
-              <div className="absolute inset-0 bg-gradient-to-t from-brand-900/90 via-brand-900/40 to-transparent" />
-              <div className="absolute bottom-0 left-0 p-8 lg:p-12">
-                {content.shopByStyle.men.badge && (
-                  <div className="inline-block bg-accent-electric text-brand-900 px-4 py-1 text-sm font-grotesk font-bold mb-4">
-                    {content.shopByStyle.men.badge}
-                  </div>
-                )}
-                <h3 className="text-5xl lg:text-7xl font-display text-white mb-2">{content.shopByStyle.men.title}</h3>
-                {content.shopByStyle.men.description && (
-                  <p className="text-xl text-brand-100 font-grotesk mb-4">{content.shopByStyle.men.description}</p>
-                )}
-                <span className="inline-flex items-center gap-2 text-accent-electric font-grotesk font-semibold text-lg group-hover:gap-4 transition-all">
-                  {content.shopByStyle.men.linkText} <FiArrowRight size={24} />
-                </span>
-              </div>
-            </Link>
-
-            {/* Women - Vertical */}
-            <Link
-              to="/category/women"
-              className="col-span-12 lg:col-span-4 relative group overflow-hidden rounded-3xl bg-accent-purple aspect-[16/9] lg:aspect-[9/16]"
-            >
-              {renderHomeMedia(homePageImages.womenImage, "Women's Collection", "absolute inset-0 w-full h-full object-cover group-hover:scale-110 transition-transform duration-700")}
-              <div className="absolute inset-0 bg-gradient-to-t from-brand-900/90 via-brand-900/30 to-transparent" />
-              <div className="absolute bottom-0 left-0 p-8">
-                <h3 className="text-5xl lg:text-6xl font-display text-white mb-2">{content.shopByStyle.women.title}</h3>
-                {content.shopByStyle.women.description && (
-                  <p className="text-lg text-brand-100 font-grotesk mb-4">{content.shopByStyle.women.description}</p>
-                )}
-                <span className="inline-flex items-center gap-2 text-accent-neon font-grotesk font-semibold group-hover:gap-4 transition-all">
-                  {content.shopByStyle.women.linkText} <FiArrowRight size={20} />
-                </span>
-              </div>
-            </Link>
-
-            {/* Accessories */}
-            <Link
-              to="/category/accessories"
-              className="col-span-6 lg:col-span-4 relative group overflow-hidden rounded-3xl bg-accent-sunset aspect-square"
-            >
-              {renderHomeMedia(homePageImages.accessoryImage, 'Accessories', 'absolute inset-0 w-full h-full object-cover group-hover:scale-110 transition-transform duration-700')}
-              <div className="absolute inset-0 bg-brand-900/60 group-hover:bg-brand-900/40 transition-all" />
-              <div className="absolute bottom-0 left-0 p-6">
-                <h3 className="text-3xl lg:text-4xl font-display text-white mb-2">{content.shopByStyle.accessories.title}</h3>
-                <span className="inline-flex items-center gap-2 text-accent-electric font-grotesk font-semibold group-hover:gap-4 transition-all">
-                  {content.shopByStyle.accessories.linkText} <FiArrowRight />
-                </span>
-              </div>
-            </Link>
-
-            {/* Sale - Electric Accent */}
-            <Link
-              to="/category/sale"
-              className="col-span-6 lg:col-span-4 relative group overflow-hidden rounded-3xl bg-accent-electric aspect-square"
-            >
-              {renderHomeMedia(homePageImages.saleImage, 'Sale Collection', 'absolute inset-0 w-full h-full object-cover group-hover:scale-110 transition-transform duration-700')}
-              <div className="absolute inset-0 bg-gradient-to-br from-accent-electric/80 to-brand-500/85" />
-              <div className="absolute inset-0 flex flex-col items-center justify-center p-6 text-center">
-                <div className="text-brand-900 font-display text-6xl lg:text-7xl mb-2 group-hover:scale-110 transition-transform">
-                  {content.shopByStyle.sale.title}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 lg:gap-6">
+            {(content.shopByStyle.panels?.length ? content.shopByStyle.panels : [
+              content.shopByStyle.men,
+              content.shopByStyle.women,
+              content.shopByStyle.accessories,
+              content.shopByStyle.sale,
+              content.shopByStyle.collections,
+            ]).map((panel, index) => (
+              <div key={`${panel.title}-${index}`} className="relative group overflow-hidden rounded-3xl bg-brand-900 min-h-[320px]">
+                <div className="absolute inset-0 bg-gradient-to-t from-brand-900/90 via-brand-900/30 to-transparent" />
+                <div className="absolute bottom-0 left-0 p-8">
+                  {panel.badge && <div className="inline-block bg-accent-electric text-brand-900 px-4 py-1 text-sm font-grotesk font-bold mb-4">{panel.badge}</div>}
+                  <h3 className="text-4xl font-display text-white mb-2">{panel.title}</h3>
+                  {panel.description && <p className="text-lg text-brand-100 font-grotesk mb-4">{panel.description}</p>}
+                  <span className="inline-flex items-center gap-2 text-accent-electric font-grotesk font-semibold group-hover:gap-4 transition-all">
+                    {panel.linkText} <FiArrowRight size={20} />
+                  </span>
                 </div>
-                {content.shopByStyle.sale.description && (
-                  <p className="text-brand-900 font-grotesk font-bold text-xl mb-4">{content.shopByStyle.sale.description}</p>
-                )}
-                <span className="inline-flex items-center gap-2 text-brand-900 font-grotesk font-bold text-lg group-hover:gap-4 transition-all">
-                  {content.shopByStyle.sale.linkText} <FiArrowRight size={24} />
-                </span>
               </div>
-            </Link>
-
-            {/* Collections */}
-            <Link
-              to="/category/collections"
-              className="col-span-12 lg:col-span-4 relative group overflow-hidden rounded-3xl bg-brand-700 aspect-[16/9] lg:aspect-square"
-            >
-              {renderHomeMedia(homePageImages.collectionImage, 'Collections', 'absolute inset-0 w-full h-full object-cover opacity-50 group-hover:opacity-70 group-hover:scale-110 transition-all duration-700')}
-              <div className="absolute inset-0 flex flex-col items-center justify-center p-6 text-center">
-                <h3 className="text-4xl lg:text-5xl font-display text-white mb-4">{content.shopByStyle.collections.title}</h3>
-                {content.shopByStyle.collections.description && (
-                  <p className="text-brand-100 font-grotesk text-lg mb-4">{content.shopByStyle.collections.description}</p>
-                )}
-                <span className="inline-flex items-center gap-2 text-accent-electric font-grotesk font-bold group-hover:gap-4 transition-all">
-                  {content.shopByStyle.collections.linkText} <FiArrowRight size={20} />
-                </span>
-              </div>
-            </Link>
+            ))}
           </div>
         </div>
       </section>
