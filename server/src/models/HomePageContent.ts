@@ -19,6 +19,7 @@ export interface ICategoryCard {
 
 export interface IShopByStyleContent {
   sectionTitle: string;
+  panels: ICategoryCard[];
   men: ICategoryCard;
   women: ICategoryCard;
   accessories: ICategoryCard;
@@ -92,6 +93,16 @@ const categoryCardSchema = new Schema<ICategoryCard>(
 const shopByStyleSchema = new Schema<IShopByStyleContent>(
   {
     sectionTitle: { type: String, default: 'SHOP BY STYLE' },
+    panels: {
+      type: [categoryCardSchema],
+      default: () => ([
+        { badge: 'TRENDING', title: "MEN'S", description: 'Bold. Confident. Urban.', linkText: 'DISCOVER' },
+        { badge: '', title: "WOMEN'S", description: 'Fierce & Elegant', linkText: 'SHOP' },
+        { badge: '', title: 'ACCESSORIES', description: '', linkText: 'VIEW' },
+        { badge: '', title: 'SALE', description: 'UP TO 50% OFF', linkText: 'SHOP DEALS' },
+        { badge: '', title: 'COLLECTIONS', description: 'Curated Style Sets', linkText: 'EXPLORE' },
+      ]),
+    },
     men: {
       type: categoryCardSchema,
       default: () => ({
