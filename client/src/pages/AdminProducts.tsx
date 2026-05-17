@@ -75,6 +75,16 @@ const initialFormState: ProductFormState = {
 
 const HEADER_CATEGORY_OPTIONS = ['new', 'men', 'women', 'collections', 'sale'] as const;
 
+
+const toImageList = (media: ProductMedia[]): ProductImage[] =>
+  media
+    .filter((item) => item.mediaType === 'image')
+    .map((item, idx) => ({
+      url: item.url,
+      alt: item.alt || '',
+      position: item.position ?? idx,
+    }));
+
 const AdminProducts: React.FC = () => {
   const [products, setProducts] = useState<Product[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -199,8 +209,9 @@ const AdminProducts: React.FC = () => {
       const fileArray = Array.from(files);
       const mediaItems = await adminApi.uploadProductMedia(fileArray);
       const normalized = mediaItems.map((m, idx) => ({ ...m, position: formData.media.length + idx }));
-      updateFormField('media', [...formData.media, ...normalized]);
-      updateFormField('images', [...formData.images, ...normalized.filter((m) => m.mediaType === 'image').map((m) => ({ url: m.url, alt: m.alt || '', position: m.position }))]);
+      const nextMedia = [...formData.media, ...normalized];
+      updateFormField('media', nextMedia);
+      updateFormField('images', toImageList(nextMedia));
       toast.success('Media uploaded');
     } catch {
       toast.error('Failed to upload media');
@@ -211,12 +222,12 @@ const AdminProducts: React.FC = () => {
 
   const updateMediaAlt = (index: number, alt: string) => {
     const updatedMedia = [...formData.media];
-    const target = updatedMedia[index];
-    if (!target) return;
+    const item = updatedMedia[index];
+    if (!item) return;
 
-    updatedMedia[index] = { ...target, alt };
+    updatedMedia[index] = { ...item, alt };
     updateFormField('media', updatedMedia);
-    updateFormField('images', updatedMedia.filter((m) => m.mediaType === 'image').map((m) => ({ url: m.url, alt: m.alt || '', position: m.position })));
+    updateFormField('images', toImageList(updatedMedia));
   };
 
   const removeMedia = (index: number) => {
@@ -225,7 +236,7 @@ const AdminProducts: React.FC = () => {
       .map((item, idx) => ({ ...item, position: idx }));
 
     updateFormField('media', updatedMedia);
-    updateFormField('images', updatedMedia.filter((m) => m.mediaType === 'image').map((m) => ({ url: m.url, alt: m.alt || '', position: m.position })));
+    updateFormField('images', toImageList(updatedMedia));
   };
 
   const addImageFromUrl = () => {
@@ -245,8 +256,9 @@ const AdminProducts: React.FC = () => {
       position: formData.images.length,
     };
 
-    updateFormField('images', [...formData.images, newImage]);
-    updateFormField('media', [...formData.media, { ...newImage, mediaType: 'image' }]);
+    const nextMedia = [...formData.media, { ...newImage, mediaType: 'image' as const }];
+    updateFormField('media', nextMedia);
+    updateFormField('images', toImageList(nextMedia));
     setMediaUrlInput('');
     toast.success('Cloudinary URL added');
   };
@@ -640,7 +652,12 @@ const AdminProducts: React.FC = () => {
                             {formData.media.map((item, idx) => (
                               <div key={`${item.url}-${idx}`} className="relative group">
                                 {item.mediaType === 'video' ? (
-                                  <video src={item.url} className="w-full h-32 object-cover rounded-lg border bg-black" controls preload="metadata" />
+                                  <video
+                                    src={item.url}
+                                    className="w-full h-32 object-cover rounded-lg border bg-black"
+                                    controls
+                                    preload="metadata"
+                                  />
                                 ) : (
                                   <img src={item.url} alt={item.alt || ''} className="w-full h-32 object-cover rounded-lg border" />
                                 )}
