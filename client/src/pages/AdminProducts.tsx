@@ -75,6 +75,16 @@ const initialFormState: ProductFormState = {
 
 const HEADER_CATEGORY_OPTIONS = ['new', 'men', 'women', 'collections', 'sale'] as const;
 
+
+const toImageList = (media: ProductMedia[]): ProductImage[] =>
+  media
+    .filter((item) => item.mediaType === 'image')
+    .map((item, idx) => ({
+      url: item.url,
+      alt: item.alt || '',
+      position: item.position ?? idx,
+    }));
+
 const AdminProducts: React.FC = () => {
   const [products, setProducts] = useState<Product[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -199,24 +209,34 @@ const AdminProducts: React.FC = () => {
       const fileArray = Array.from(files);
       const mediaItems = await adminApi.uploadProductMedia(fileArray);
       const normalized = mediaItems.map((m, idx) => ({ ...m, position: formData.media.length + idx }));
-      updateFormField('media', [...formData.media, ...normalized]);
-      updateFormField('images', [...formData.images, ...normalized.filter((m) => m.mediaType === 'image').map((m) => ({ url: m.url, alt: m.alt || '', position: m.position }))]);
+      const nextMedia = [...formData.media, ...normalized];
+      updateFormField('media', nextMedia);
+      updateFormField('images', toImageList(nextMedia));
       toast.success('Media uploaded');
     } catch {
-      toast.error('Failed to upload images');
+      toast.error('Failed to upload media');
     } finally {
       setUploading(false);
     }
   };
 
-  const updateImageAlt = (index: number, alt: string) => {
-    const updated = [...formData.images];
-    updated[index] = { ...updated[index], alt };
-    updateFormField('images', updated);
+  const updateMediaAlt = (index: number, alt: string) => {
+    const updatedMedia = [...formData.media];
+    const item = updatedMedia[index];
+    if (!item) return;
+
+    updatedMedia[index] = { ...item, alt };
+    updateFormField('media', updatedMedia);
+    updateFormField('images', toImageList(updatedMedia));
   };
 
-  const removeImage = (index: number) => {
-    updateFormField('images', formData.images.filter((_, i) => i !== index));
+  const removeMedia = (index: number) => {
+    const updatedMedia = formData.media
+      .filter((_, i) => i !== index)
+      .map((item, idx) => ({ ...item, position: idx }));
+
+    updateFormField('media', updatedMedia);
+    updateFormField('images', toImageList(updatedMedia));
   };
 
   const addImageFromUrl = () => {
@@ -236,8 +256,9 @@ const AdminProducts: React.FC = () => {
       position: formData.images.length,
     };
 
-    updateFormField('images', [...formData.images, newImage]);
-    updateFormField('media', [...formData.media, { ...newImage, mediaType: 'image' }]);
+    const nextMedia = [...formData.media, { ...newImage, mediaType: 'image' as const }];
+    updateFormField('media', nextMedia);
+    updateFormField('images', toImageList(nextMedia));
     setMediaUrlInput('');
     toast.success('Cloudinary URL added');
   };
@@ -628,20 +649,29 @@ const AdminProducts: React.FC = () => {
                             </div>
                           </div>
                           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                            {formData.images.map((img, idx) => (
-                              <div key={idx} className="relative group">
-                                <img src={img.url} alt={img.alt || ''} className="w-full h-32 object-cover rounded-lg border" />
+                            {formData.media.map((item, idx) => (
+                              <div key={`${item.url}-${idx}`} className="relative group">
+                                {item.mediaType === 'video' ? (
+                                  <video
+                                    src={item.url}
+                                    className="w-full h-32 object-cover rounded-lg border bg-black"
+                                    controls
+                                    preload="metadata"
+                                  />
+                                ) : (
+                                  <img src={item.url} alt={item.alt || ''} className="w-full h-32 object-cover rounded-lg border" />
+                                )}
                                 <button
                                   type="button"
-                                  onClick={() => removeImage(idx)}
+                                  onClick={() => removeMedia(idx)}
                                   className="absolute top-2 right-2 bg-white text-red-600 rounded-full p-1 shadow-sm opacity-0 group-hover:opacity-100 transition-opacity"
                                 >
                                   <FiX size={14} />
                                 </button>
                                 <input
                                   type="text"
-                                  value={img.alt || ''}
-                                  onChange={(e) => updateImageAlt(idx, e.target.value)}
+                                  value={item.alt || ''}
+                                  onChange={(e) => updateMediaAlt(idx, e.target.value)}
                                   placeholder="Alt text"
                                   className="mt-2 w-full px-2 py-1 text-xs border rounded"
                                 />
