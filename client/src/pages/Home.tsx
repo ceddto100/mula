@@ -195,7 +195,12 @@ const Home: React.FC = () => {
       {/* Hero Section */}
       <section className="relative min-h-[90vh] overflow-hidden">
         <div className="absolute inset-0">
-          {/* Image renders first so overlays stack on top of it */}
+          {/* Base overlays rendered BEFORE the image so the hero photo shows unobscured on the
+              right side (desktop). The left column where text lives has no image behind it, so
+              these overlays darken that cream background adequately. */}
+          <div className="absolute inset-0 bg-black/55" />
+          <div className="absolute top-0 left-0 h-full w-[58%] bg-black/25 hidden lg:block" />
+          {/* Hero image — floats on top of the overlays above in the paint order */}
           {renderHomeMedia(homePageImages.heroImage, 'Fashion', 'absolute top-0 right-0 w-3/5 h-full object-cover diagonal-bg', { eager: true, preload: 'metadata', hero: true })}
           {content.brandTheme?.heroOverlayEnabled && content.brandTheme?.heroOverlayColor ? (
             <div
@@ -203,11 +208,9 @@ const Home: React.FC = () => {
               style={{ backgroundColor: content.brandTheme.heroOverlayColor, opacity: 0.45 }}
             />
           ) : null}
-          {/* Desktop: dark left panel + light global tint */}
-          <div className="absolute inset-0 bg-black/30" />
-          <div className="absolute top-0 left-0 h-full w-[55%] bg-black/50 hidden lg:block" />
-          {/* Mobile: full-width overlay so text is readable over the hero image */}
-          <div className="absolute inset-0 bg-black/65 lg:hidden" />
+          {/* Mobile only: rendered AFTER the image so it sits on top and darkens it,
+              making all hero text readable regardless of screen width */}
+          <div className="absolute inset-0 bg-black/50 lg:hidden" />
         </div>
 
         {/* Decorative Arrows — static (no infinite animation) for smoother scroll */}
@@ -286,25 +289,49 @@ const Home: React.FC = () => {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 lg:gap-6">
-            {(content.shopByStyle.panels?.length ? content.shopByStyle.panels : [
-              content.shopByStyle.men,
-              content.shopByStyle.women,
-              content.shopByStyle.accessories,
-              content.shopByStyle.sale,
-              content.shopByStyle.collections,
-            ]).map((panel, index) => (
-              <div key={`${panel.title}-${index}`} className="relative group overflow-hidden rounded-3xl bg-brand-900 min-h-[320px]">
-                <div className="absolute inset-0 bg-gradient-to-t from-brand-900 via-brand-900/75 to-brand-900/20" />
-                <div className="absolute bottom-0 left-0 p-8">
-                  {panel.badge && <div className="inline-block bg-accent-electric text-brand-900 px-4 py-1 text-sm font-grotesk font-bold mb-4">{panel.badge}</div>}
-                  <h3 className="text-4xl font-display text-white mb-2" style={{ textShadow: '0 1px 8px rgba(0,0,0,0.7)' }}>{panel.title}</h3>
-                  {panel.description && <p className="text-lg text-brand-100 font-grotesk mb-4">{panel.description}</p>}
-                  <span className="inline-flex items-center gap-2 text-accent-electric font-grotesk font-semibold group-hover:gap-4 transition-all">
-                    {panel.linkText} <FiArrowRight size={20} />
-                  </span>
-                </div>
-              </div>
-            ))}
+            {(() => {
+              const panels = content.shopByStyle.panels?.length
+                ? content.shopByStyle.panels
+                : [
+                    content.shopByStyle.men,
+                    content.shopByStyle.women,
+                    content.shopByStyle.accessories,
+                    content.shopByStyle.sale,
+                    content.shopByStyle.collections,
+                  ];
+              // Map each panel index to its uploaded category image (admin order:
+              // men → women → accessories → sale → collections)
+              const panelImages = [
+                homePageImages.menImage,
+                homePageImages.womenImage,
+                homePageImages.accessoryImage,
+                homePageImages.saleImage,
+                homePageImages.collectionImage,
+              ];
+              return panels.map((panel, index) => {
+                const panelImg = panelImages[index] || '';
+                return (
+                  <div key={`${panel.title}-${index}`} className="relative group overflow-hidden rounded-3xl bg-brand-900 min-h-[320px]">
+                    {/* Category background image */}
+                    {panelImg && (
+                      <div className="absolute inset-0">
+                        {renderHomeMedia(panelImg, panel.title, 'w-full h-full object-cover transition-transform duration-700 group-hover:scale-105', { sizes: '(min-width: 1024px) 33vw, (min-width: 768px) 50vw, 100vw' })}
+                      </div>
+                    )}
+                    {/* Gradient scrim — strong at the bottom so text is always readable */}
+                    <div className="absolute inset-0 bg-gradient-to-t from-brand-900 via-brand-900/70 to-brand-900/20" />
+                    <div className="absolute bottom-0 left-0 p-8">
+                      {panel.badge && <div className="inline-block bg-accent-electric text-brand-900 px-4 py-1 text-sm font-grotesk font-bold mb-4">{panel.badge}</div>}
+                      <h3 className="text-4xl font-display text-white mb-2" style={{ textShadow: '0 1px 8px rgba(0,0,0,0.8)' }}>{panel.title}</h3>
+                      {panel.description && <p className="text-lg text-brand-100 font-grotesk mb-4">{panel.description}</p>}
+                      <span className="inline-flex items-center gap-2 text-accent-electric font-grotesk font-semibold group-hover:gap-4 transition-all">
+                        {panel.linkText} <FiArrowRight size={20} />
+                      </span>
+                    </div>
+                  </div>
+                );
+              });
+            })()}
           </div>
         </div>
       </section>
