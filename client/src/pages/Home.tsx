@@ -196,19 +196,8 @@ const Home: React.FC = () => {
           the full viewport from top to bottom (Gucci-style full-bleed hero) */}
       <section className="relative min-h-screen overflow-hidden -mt-20 lg:-mt-24">
         <div className="absolute inset-0">
-          {/* Full-width hero media */}
+          {/* Full-width hero media — no tint or overlay, image shows at full clarity */}
           {renderHomeMedia(homePageImages.heroImage, 'Fashion', 'absolute inset-0 w-full h-full object-cover', { eager: true, preload: 'metadata', hero: true, sizes: '100vw' })}
-          {/* Brand theme colour tint over the full image */}
-          {content.brandTheme?.heroOverlayEnabled && content.brandTheme?.heroOverlayColor ? (
-            <div
-              className="absolute inset-0 pointer-events-none"
-              style={{ backgroundColor: content.brandTheme.heroOverlayColor, opacity: 0.35 }}
-            />
-          ) : null}
-          {/* Gradient scrim: very dark on the left where text lives, fades right */}
-          <div className="absolute inset-0 bg-gradient-to-r from-black/85 via-black/50 to-black/10" />
-          {/* Mobile: extra darkening across the full image for full-width text */}
-          <div className="absolute inset-0 bg-black/30 lg:hidden" />
         </div>
 
         {/* Decorative Arrows */}
@@ -286,58 +275,45 @@ const Home: React.FC = () => {
           <div className="w-24 h-1 bg-accent-electric mx-auto" />
         </div>
 
-        {/* Full-bleed card strip: stacked on mobile, 5 columns edge-to-edge on desktop */}
-        <div className="grid grid-cols-1 lg:grid-cols-5">
-          {(() => {
-            const panels = content.shopByStyle.panels?.length
-              ? content.shopByStyle.panels
-              : [
-                  content.shopByStyle.women,
-                  content.shopByStyle.accessories,
-                  content.shopByStyle.men,
-                  content.shopByStyle.sale,
-                  content.shopByStyle.collections,
-                ];
-            // Images in panel order: Women → Accessories → Men's → Sale → Collections
-            const panelImages = [
-              homePageImages.womenImage,
-              homePageImages.accessoryImage,
-              homePageImages.menImage,
-              homePageImages.saleImage,
-              homePageImages.collectionImage,
-            ];
-            return panels.map((panel, index) => {
-              const panelImg = panelImages[index] || '';
-              return (
-                <div key={`${panel.title}-${index}`} className="relative group overflow-hidden bg-brand-900 min-h-[60vw] lg:min-h-[65vh]">
-                  {/* Category background image */}
-                  {panelImg && (
-                    <div className="absolute inset-0">
-                      {renderHomeMedia(panelImg, panel.title, 'w-full h-full object-cover transition-transform duration-700 group-hover:scale-105', { sizes: '(min-width: 1024px) 20vw, 100vw' })}
-                    </div>
-                  )}
-                  {/* Gradient scrim — solid at bottom for text, fades upward */}
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/30 to-transparent" />
-                  <div className="absolute bottom-0 left-0 p-6 lg:p-8">
-                    {panel.badge && (
-                      <div className="inline-block bg-accent-electric text-brand-900 px-3 py-1 text-xs font-grotesk font-bold mb-3 tracking-wider">
-                        {panel.badge}
-                      </div>
-                    )}
-                    <h3 className="text-3xl lg:text-4xl font-display text-white mb-1" style={{ textShadow: '0 1px 8px rgba(0,0,0,0.9)' }}>
-                      {panel.title}
-                    </h3>
-                    {panel.description && (
-                      <p className="text-sm lg:text-base text-white/80 font-grotesk mb-3">{panel.description}</p>
-                    )}
-                    <span className="inline-flex items-center gap-2 text-accent-electric font-grotesk font-semibold text-sm tracking-wider group-hover:gap-4 transition-all">
-                      {panel.linkText} <FiArrowRight size={16} />
-                    </span>
-                  </div>
+        {/* Full-bleed card strip: stacked on mobile, 5 columns edge-to-edge on desktop.
+            Always rendered in fixed order (Women → Accessories → Men's → Sale → Collections)
+            using named fields so DB-stored panel order never overrides the layout. */}
+        <div className="grid grid-cols-1 lg:grid-cols-5 gap-1">
+          {[
+            { panel: content.shopByStyle.women,       img: homePageImages.womenImage,      href: '/category/women' },
+            { panel: content.shopByStyle.accessories, img: homePageImages.accessoryImage,  href: '/category/accessories' },
+            { panel: content.shopByStyle.men,         img: homePageImages.menImage,        href: '/category/men' },
+            { panel: content.shopByStyle.sale,        img: homePageImages.saleImage,       href: '/category/sale' },
+            { panel: content.shopByStyle.collections, img: homePageImages.collectionImage, href: '/category/collections' },
+          ].map(({ panel, img, href }) => (
+            <Link
+              key={panel.title}
+              to={href}
+              className="relative group overflow-hidden bg-brand-900 min-h-[60vw] lg:min-h-[65vh] block"
+            >
+              {img && (
+                <div className="absolute inset-0">
+                  {renderHomeMedia(img, panel.title, 'w-full h-full object-cover transition-transform duration-700 group-hover:scale-105', { sizes: '(min-width: 1024px) 20vw, 100vw' })}
                 </div>
-              );
-            });
-          })()}
+              )}
+              <div className="absolute bottom-0 left-0 p-6 lg:p-8">
+                {panel.badge && (
+                  <div className="inline-block bg-accent-electric text-brand-900 px-3 py-1 text-xs font-grotesk font-bold mb-3 tracking-wider">
+                    {panel.badge}
+                  </div>
+                )}
+                <h3 className="text-3xl lg:text-4xl font-display text-white mb-1" style={{ textShadow: '0 1px 8px rgba(0,0,0,0.9)' }}>
+                  {panel.title}
+                </h3>
+                {panel.description && (
+                  <p className="text-sm lg:text-base text-white/80 font-grotesk mb-3">{panel.description}</p>
+                )}
+                <span className="inline-flex items-center gap-2 text-accent-electric font-grotesk font-semibold text-sm tracking-wider group-hover:gap-4 transition-all">
+                  {panel.linkText} <FiArrowRight size={16} />
+                </span>
+              </div>
+            </Link>
+          ))}
         </div>
       </section>
 
