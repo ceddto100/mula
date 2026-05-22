@@ -108,7 +108,7 @@ const CategoryHero: React.FC<CategoryHeroProps> = ({ category, breadcrumbLabel, 
     };
 
   return (
-    <div className="relative h-[50vh] min-h-[380px] overflow-hidden">
+    <div className="relative -mt-20 lg:-mt-24 h-[calc(50vh+5rem)] min-h-[calc(380px+5rem)] lg:h-[calc(50vh+6rem)] lg:min-h-[calc(380px+6rem)] overflow-hidden">
       {/* Background — video or image */}
       {config.mediaType === 'video' ? (
         <video
@@ -129,7 +129,7 @@ const CategoryHero: React.FC<CategoryHeroProps> = ({ category, breadcrumbLabel, 
       ) : null}
 
       {/* Content */}
-      <div className="relative h-full flex flex-col justify-between max-w-7xl mx-auto px-6 py-6">
+      <div className="relative h-full flex flex-col justify-between max-w-7xl mx-auto px-6 pt-20 pb-6 lg:pt-24">
         {/* Breadcrumb — small, muted, top-left */}
         <nav className="flex items-center gap-1.5 text-xs text-brand-400 font-grotesk tracking-widest">
           <Link to="/" className="hover:text-accent-electric transition-colors uppercase">
