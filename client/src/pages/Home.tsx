@@ -196,19 +196,8 @@ const Home: React.FC = () => {
           the full viewport from top to bottom (Gucci-style full-bleed hero) */}
       <section className="relative min-h-screen overflow-hidden -mt-20 lg:-mt-24">
         <div className="absolute inset-0">
-          {/* Full-width hero media */}
+          {/* Full-width hero media — no tint or overlay, image shows at full clarity */}
           {renderHomeMedia(homePageImages.heroImage, 'Fashion', 'absolute inset-0 w-full h-full object-cover', { eager: true, preload: 'metadata', hero: true, sizes: '100vw' })}
-          {/* Brand theme colour tint over the full image */}
-          {content.brandTheme?.heroOverlayEnabled && content.brandTheme?.heroOverlayColor ? (
-            <div
-              className="absolute inset-0 pointer-events-none"
-              style={{ backgroundColor: content.brandTheme.heroOverlayColor, opacity: 0.35 }}
-            />
-          ) : null}
-          {/* Gradient scrim: very dark on the left where text lives, fades right */}
-          <div className="absolute inset-0 bg-gradient-to-r from-black/85 via-black/50 to-black/10" />
-          {/* Mobile: extra darkening across the full image for full-width text */}
-          <div className="absolute inset-0 bg-black/30 lg:hidden" />
         </div>
 
         {/* Decorative Arrows */}
@@ -316,8 +305,6 @@ const Home: React.FC = () => {
                       {renderHomeMedia(panelImg, panel.title, 'w-full h-full object-cover transition-transform duration-700 group-hover:scale-105', { sizes: '(min-width: 1024px) 20vw, 100vw' })}
                     </div>
                   )}
-                  {/* Gradient scrim — solid at bottom for text, fades upward */}
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/30 to-transparent" />
                   <div className="absolute bottom-0 left-0 p-6 lg:p-8">
                     {panel.badge && (
                       <div className="inline-block bg-accent-electric text-brand-900 px-3 py-1 text-xs font-grotesk font-bold mb-3 tracking-wider">

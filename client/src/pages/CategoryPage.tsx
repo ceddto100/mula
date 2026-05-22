@@ -128,9 +128,6 @@ const CategoryHero: React.FC<CategoryHeroProps> = ({ category, breadcrumbLabel, 
         />
       ) : null}
 
-      {/* Cinematic gradient: transparent top → solid brand-900 bottom */}
-      <div className="absolute inset-0 bg-gradient-to-t from-brand-900 via-brand-900/55 to-brand-900/10" />
-
       {/* Content */}
       <div className="relative h-full flex flex-col justify-between max-w-7xl mx-auto px-6 py-6">
         {/* Breadcrumb — small, muted, top-left */}
