@@ -192,8 +192,9 @@ const Home: React.FC = () => {
 
   return (
     <Layout>
-      {/* Hero Section — full-viewport, image fills the entire section */}
-      <section className="relative min-h-screen overflow-hidden">
+      {/* Hero Section — extends behind the transparent header so the image fills
+          the full viewport from top to bottom (Gucci-style full-bleed hero) */}
+      <section className="relative min-h-screen overflow-hidden -mt-20 lg:-mt-24">
         <div className="absolute inset-0">
           {/* Full-width hero media */}
           {renderHomeMedia(homePageImages.heroImage, 'Fashion', 'absolute inset-0 w-full h-full object-cover', { eager: true, preload: 'metadata', hero: true, sizes: '100vw' })}
@@ -204,22 +205,21 @@ const Home: React.FC = () => {
               style={{ backgroundColor: content.brandTheme.heroOverlayColor, opacity: 0.35 }}
             />
           ) : null}
-          {/* Gradient scrim: very dark on the left where text lives, fades out to the right
-              so the right half of the image remains vivid and visible */}
+          {/* Gradient scrim: very dark on the left where text lives, fades right */}
           <div className="absolute inset-0 bg-gradient-to-r from-black/85 via-black/50 to-black/10" />
-          {/* Mobile: extra darkening so full-width text is readable across the whole image */}
+          {/* Mobile: extra darkening across the full image for full-width text */}
           <div className="absolute inset-0 bg-black/30 lg:hidden" />
         </div>
 
-        {/* Decorative Arrows — static (no infinite animation) for smoother scroll */}
+        {/* Decorative Arrows */}
         <div className="absolute inset-0 overflow-hidden pointer-events-none" aria-hidden="true">
           <div className="absolute top-20 left-10 text-accent-electric opacity-20 text-9xl">→</div>
           <div className="absolute bottom-40 right-20 text-accent-neon opacity-20 text-9xl rotate-45">→</div>
           <div className="absolute top-1/2 left-1/3 text-white opacity-10 text-9xl -rotate-12">→</div>
         </div>
 
-        {/* Hero Content */}
-        <div className="relative z-10 max-w-7xl mx-auto px-4 min-h-screen flex items-center">
+        {/* Hero Content — pt offsets the transparent header so text never hides behind it */}
+        <div className="relative z-10 max-w-7xl mx-auto px-4 min-h-screen flex items-center pt-20 lg:pt-24">
           <div className="lg:w-1/2">
             <div className="mb-6 overflow-hidden">
               <div className="inline-block bg-accent-electric text-brand-900 px-6 py-2 font-grotesk font-bold text-sm tracking-wider animate-slide-up">
@@ -278,60 +278,66 @@ const Home: React.FC = () => {
         </div>
       </section>
 
-      {/* Bold Category Grid - Asymmetric Layout */}
-      <section className="relative py-24 bg-transparent animate-on-scroll opacity-0 translate-y-12 transition-all duration-1000 cv-auto">
-        <div className="max-w-7xl mx-auto px-4">
-          <div className="mb-16 text-center">
-            <h2 className="text-6xl md:text-7xl font-display text-gray-900 mb-4">{content.shopByStyle.sectionTitle}</h2>
-            <div className="w-24 h-1 bg-accent-electric mx-auto" />
-          </div>
+      {/* Shop By Style — full-bleed horizontal strip, no outer padding */}
+      <section className="relative bg-transparent animate-on-scroll opacity-0 translate-y-12 transition-all duration-1000 cv-auto">
+        {/* Section label — constrained to readable width */}
+        <div className="py-14 text-center max-w-7xl mx-auto px-4">
+          <h2 className="text-6xl md:text-7xl font-display text-gray-900 mb-4">{content.shopByStyle.sectionTitle}</h2>
+          <div className="w-24 h-1 bg-accent-electric mx-auto" />
+        </div>
 
-          {/* Single horizontal row on desktop: Women · Accessories · Men's · Sale · Collections */}
-          <div className="grid grid-cols-2 lg:grid-cols-5 gap-4 lg:gap-3">
-            {(() => {
-              const panels = content.shopByStyle.panels?.length
-                ? content.shopByStyle.panels
-                : [
-                    content.shopByStyle.women,
-                    content.shopByStyle.accessories,
-                    content.shopByStyle.men,
-                    content.shopByStyle.sale,
-                    content.shopByStyle.collections,
-                  ];
-              // Image order matches the default panel order:
-              // Women → Accessories → Men's → Sale → Collections
-              const panelImages = [
-                homePageImages.womenImage,
-                homePageImages.accessoryImage,
-                homePageImages.menImage,
-                homePageImages.saleImage,
-                homePageImages.collectionImage,
-              ];
-              return panels.map((panel, index) => {
-                const panelImg = panelImages[index] || '';
-                return (
-                  <div key={`${panel.title}-${index}`} className="relative group overflow-hidden rounded-3xl bg-brand-900 min-h-[300px] lg:min-h-[420px]">
-                    {/* Category background image */}
-                    {panelImg && (
-                      <div className="absolute inset-0">
-                        {renderHomeMedia(panelImg, panel.title, 'w-full h-full object-cover transition-transform duration-700 group-hover:scale-105', { sizes: '(min-width: 1024px) 33vw, (min-width: 768px) 50vw, 100vw' })}
+        {/* Full-bleed card strip: stacked on mobile, 5 columns edge-to-edge on desktop */}
+        <div className="grid grid-cols-1 lg:grid-cols-5">
+          {(() => {
+            const panels = content.shopByStyle.panels?.length
+              ? content.shopByStyle.panels
+              : [
+                  content.shopByStyle.women,
+                  content.shopByStyle.accessories,
+                  content.shopByStyle.men,
+                  content.shopByStyle.sale,
+                  content.shopByStyle.collections,
+                ];
+            // Images in panel order: Women → Accessories → Men's → Sale → Collections
+            const panelImages = [
+              homePageImages.womenImage,
+              homePageImages.accessoryImage,
+              homePageImages.menImage,
+              homePageImages.saleImage,
+              homePageImages.collectionImage,
+            ];
+            return panels.map((panel, index) => {
+              const panelImg = panelImages[index] || '';
+              return (
+                <div key={`${panel.title}-${index}`} className="relative group overflow-hidden bg-brand-900 min-h-[60vw] lg:min-h-[65vh]">
+                  {/* Category background image */}
+                  {panelImg && (
+                    <div className="absolute inset-0">
+                      {renderHomeMedia(panelImg, panel.title, 'w-full h-full object-cover transition-transform duration-700 group-hover:scale-105', { sizes: '(min-width: 1024px) 20vw, 100vw' })}
+                    </div>
+                  )}
+                  {/* Gradient scrim — solid at bottom for text, fades upward */}
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/30 to-transparent" />
+                  <div className="absolute bottom-0 left-0 p-6 lg:p-8">
+                    {panel.badge && (
+                      <div className="inline-block bg-accent-electric text-brand-900 px-3 py-1 text-xs font-grotesk font-bold mb-3 tracking-wider">
+                        {panel.badge}
                       </div>
                     )}
-                    {/* Gradient scrim — strong at the bottom so text is always readable */}
-                    <div className="absolute inset-0 bg-gradient-to-t from-brand-900 via-brand-900/70 to-brand-900/20" />
-                    <div className="absolute bottom-0 left-0 p-8">
-                      {panel.badge && <div className="inline-block bg-accent-electric text-brand-900 px-4 py-1 text-sm font-grotesk font-bold mb-4">{panel.badge}</div>}
-                      <h3 className="text-4xl font-display text-white mb-2" style={{ textShadow: '0 1px 8px rgba(0,0,0,0.8)' }}>{panel.title}</h3>
-                      {panel.description && <p className="text-lg text-brand-100 font-grotesk mb-4">{panel.description}</p>}
-                      <span className="inline-flex items-center gap-2 text-accent-electric font-grotesk font-semibold group-hover:gap-4 transition-all">
-                        {panel.linkText} <FiArrowRight size={20} />
-                      </span>
-                    </div>
+                    <h3 className="text-3xl lg:text-4xl font-display text-white mb-1" style={{ textShadow: '0 1px 8px rgba(0,0,0,0.9)' }}>
+                      {panel.title}
+                    </h3>
+                    {panel.description && (
+                      <p className="text-sm lg:text-base text-white/80 font-grotesk mb-3">{panel.description}</p>
+                    )}
+                    <span className="inline-flex items-center gap-2 text-accent-electric font-grotesk font-semibold text-sm tracking-wider group-hover:gap-4 transition-all">
+                      {panel.linkText} <FiArrowRight size={16} />
+                    </span>
                   </div>
-                );
-              });
-            })()}
-          </div>
+                </div>
+              );
+            });
+          })()}
         </div>
       </section>
 
