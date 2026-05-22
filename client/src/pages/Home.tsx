@@ -210,25 +210,25 @@ const Home: React.FC = () => {
         {/* Hero Content — pt offsets the transparent header so text never hides behind it */}
         <div className="relative z-10 max-w-7xl mx-auto px-4 min-h-screen flex items-center pt-20 lg:pt-24">
           <div className="lg:w-1/2">
-            <div className="mb-6 overflow-hidden">
+            <div className="mb-6">
               <div className="inline-block bg-accent-electric text-brand-900 px-6 py-2 font-grotesk font-bold text-sm tracking-wider animate-slide-up">
                 {content.hero.badge}
               </div>
             </div>
 
-            <div className="overflow-hidden mb-4">
+            <div className="mb-4">
               <h1 className="text-7xl md:text-8xl lg:text-9xl font-display text-white leading-none animate-slide-up-delayed" style={{ textShadow: '0 2px 16px rgba(0,0,0,0.85)' }}>
                 {content.hero.headline1}
               </h1>
             </div>
 
-            <div className="overflow-hidden mb-8">
+            <div className="mb-8">
               <h2 className="text-6xl md:text-7xl lg:text-8xl font-display text-accent-electric leading-none animate-slide-up-more-delayed" style={{ textShadow: '0 2px 16px rgba(0,0,0,0.85)' }}>
                 {content.hero.headline2}
               </h2>
             </div>
 
-            <div className="overflow-hidden mb-12">
+            <div className="mb-12">
               <p className="text-xl md:text-2xl text-white font-grotesk max-w-lg leading-relaxed animate-fade-in-delayed whitespace-pre-line" style={{ textShadow: '0 1px 8px rgba(0,0,0,0.8)' }}>
                 {content.hero.subheading}
               </p>
