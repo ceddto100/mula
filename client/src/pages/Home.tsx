@@ -98,9 +98,9 @@ export const defaultHomePageContent: HomePageContent = {
   shopByStyle: {
     sectionTitle: 'SHOP BY STYLE',
     panels: [
-      { badge: 'TRENDING', title: "MEN'S", description: 'Bold. Confident. Urban.', linkText: 'DISCOVER' },
       { badge: '', title: "WOMEN'S", description: 'Fierce & Elegant', linkText: 'SHOP' },
       { badge: '', title: 'ACCESSORIES', description: '', linkText: 'VIEW' },
+      { badge: 'TRENDING', title: "MEN'S", description: 'Bold. Confident. Urban.', linkText: 'DISCOVER' },
       { badge: '', title: 'SALE', description: 'UP TO 50% OFF', linkText: 'SHOP DEALS' },
       { badge: '', title: 'COLLECTIONS', description: 'Curated Style Sets', linkText: 'EXPLORE' },
     ],
@@ -192,25 +192,23 @@ const Home: React.FC = () => {
 
   return (
     <Layout>
-      {/* Hero Section */}
-      <section className="relative min-h-[90vh] overflow-hidden">
+      {/* Hero Section — full-viewport, image fills the entire section */}
+      <section className="relative min-h-screen overflow-hidden">
         <div className="absolute inset-0">
-          {/* Base overlays rendered BEFORE the image so the hero photo shows unobscured on the
-              right side (desktop). The left column where text lives has no image behind it, so
-              these overlays darken that cream background adequately. */}
-          <div className="absolute inset-0 bg-black/55" />
-          <div className="absolute top-0 left-0 h-full w-[58%] bg-black/25 hidden lg:block" />
-          {/* Hero image — floats on top of the overlays above in the paint order */}
-          {renderHomeMedia(homePageImages.heroImage, 'Fashion', 'absolute top-0 right-0 w-3/5 h-full object-cover diagonal-bg', { eager: true, preload: 'metadata', hero: true })}
+          {/* Full-width hero media */}
+          {renderHomeMedia(homePageImages.heroImage, 'Fashion', 'absolute inset-0 w-full h-full object-cover', { eager: true, preload: 'metadata', hero: true, sizes: '100vw' })}
+          {/* Brand theme colour tint over the full image */}
           {content.brandTheme?.heroOverlayEnabled && content.brandTheme?.heroOverlayColor ? (
             <div
-              className="absolute top-0 right-0 w-3/5 h-full diagonal-bg pointer-events-none"
-              style={{ backgroundColor: content.brandTheme.heroOverlayColor, opacity: 0.45 }}
+              className="absolute inset-0 pointer-events-none"
+              style={{ backgroundColor: content.brandTheme.heroOverlayColor, opacity: 0.35 }}
             />
           ) : null}
-          {/* Mobile only: rendered AFTER the image so it sits on top and darkens it,
-              making all hero text readable regardless of screen width */}
-          <div className="absolute inset-0 bg-black/50 lg:hidden" />
+          {/* Gradient scrim: very dark on the left where text lives, fades out to the right
+              so the right half of the image remains vivid and visible */}
+          <div className="absolute inset-0 bg-gradient-to-r from-black/85 via-black/50 to-black/10" />
+          {/* Mobile: extra darkening so full-width text is readable across the whole image */}
+          <div className="absolute inset-0 bg-black/30 lg:hidden" />
         </div>
 
         {/* Decorative Arrows — static (no infinite animation) for smoother scroll */}
@@ -221,7 +219,7 @@ const Home: React.FC = () => {
         </div>
 
         {/* Hero Content */}
-        <div className="relative z-10 max-w-7xl mx-auto px-4 h-[90vh] flex items-center">
+        <div className="relative z-10 max-w-7xl mx-auto px-4 min-h-screen flex items-center">
           <div className="lg:w-1/2">
             <div className="mb-6 overflow-hidden">
               <div className="inline-block bg-accent-electric text-brand-900 px-6 py-2 font-grotesk font-bold text-sm tracking-wider animate-slide-up">
@@ -288,30 +286,31 @@ const Home: React.FC = () => {
             <div className="w-24 h-1 bg-accent-electric mx-auto" />
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 lg:gap-6">
+          {/* Single horizontal row on desktop: Women · Accessories · Men's · Sale · Collections */}
+          <div className="grid grid-cols-2 lg:grid-cols-5 gap-4 lg:gap-3">
             {(() => {
               const panels = content.shopByStyle.panels?.length
                 ? content.shopByStyle.panels
                 : [
-                    content.shopByStyle.men,
                     content.shopByStyle.women,
                     content.shopByStyle.accessories,
+                    content.shopByStyle.men,
                     content.shopByStyle.sale,
                     content.shopByStyle.collections,
                   ];
-              // Map each panel index to its uploaded category image (admin order:
-              // men → women → accessories → sale → collections)
+              // Image order matches the default panel order:
+              // Women → Accessories → Men's → Sale → Collections
               const panelImages = [
-                homePageImages.menImage,
                 homePageImages.womenImage,
                 homePageImages.accessoryImage,
+                homePageImages.menImage,
                 homePageImages.saleImage,
                 homePageImages.collectionImage,
               ];
               return panels.map((panel, index) => {
                 const panelImg = panelImages[index] || '';
                 return (
-                  <div key={`${panel.title}-${index}`} className="relative group overflow-hidden rounded-3xl bg-brand-900 min-h-[320px]">
+                  <div key={`${panel.title}-${index}`} className="relative group overflow-hidden rounded-3xl bg-brand-900 min-h-[300px] lg:min-h-[420px]">
                     {/* Category background image */}
                     {panelImg && (
                       <div className="absolute inset-0">

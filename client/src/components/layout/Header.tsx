@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { FiShoppingBag, FiUser, FiMenu, FiX, FiSearch, FiHeart } from 'react-icons/fi';
 import { useAuth } from '../../context/AuthContext';
@@ -16,9 +16,18 @@ const Header: React.FC = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+  const [scrolled, setScrolled] = useState(false);
   const { isAuthenticated, user } = useAuth();
   const { itemCount } = useCart();
   const navigate = useNavigate();
+
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 20);
+    window.addEventListener('scroll', onScroll, { passive: true });
+    // Initialise on mount in case the page is already scrolled (e.g. browser back)
+    onScroll();
+    return () => window.removeEventListener('scroll', onScroll);
+  }, []);
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -30,9 +39,9 @@ const Header: React.FC = () => {
   };
 
   return (
-    <header className="bg-black/60 backdrop-blur-md sticky top-0 z-50 shadow-sm">
+    <header className={`sticky top-0 z-50 transition-all duration-500 ${scrolled ? 'bg-black/70 backdrop-blur-md shadow-md' : 'bg-transparent'}`}>
       {/* Main header */}
-      <div className="border-b-2 border-brand-500">
+      <div className={`border-b-2 transition-colors duration-500 ${scrolled ? 'border-brand-500' : 'border-transparent'}`}>
         <div className="max-w-7xl mx-auto px-4">
           <div className="flex items-center justify-between h-20 lg:h-24">
             {/* Mobile menu button */}
