@@ -19,11 +19,11 @@ body,
 }
 
 /*
- * Warm cream gradient backdrop — painted once on a fixed pseudo-element
+ * Site-wide background image — painted once on a fixed pseudo-element
  * so scrolling does not trigger a repaint of the background layer.
  */
 body {
-  background-color: #FFF8F0;
+  background-color: #FFF8F0; /* fallback shown while image loads */
   color: #1a1a1a;
 }
 
@@ -33,15 +33,11 @@ body::before {
   inset: 0;
   z-index: -1;
   pointer-events: none;
-  background-color: #FFF8F0;
-  background-image:
-    radial-gradient(ellipse 900px 700px at 15% 0%, rgba(255, 220, 155, 0.45) 0%, transparent 60%),
-    radial-gradient(ellipse 750px 600px at 90% 100%, rgba(255, 190, 110, 0.30) 0%, transparent 60%),
-    radial-gradient(ellipse 650px 500px at 55% 45%, rgba(255, 240, 195, 0.28) 0%, transparent 65%),
-    radial-gradient(ellipse 500px 400px at 10% 85%, rgba(255, 200, 140, 0.22) 0%, transparent 60%),
-    linear-gradient(155deg, #FFF8F0 0%, #FFFCF5 30%, #FFF4E3 65%, #FFEBD0 100%);
-  background-size: auto, auto, auto, auto, auto;
-  /* Promote to its own compositor layer so scroll never repaints it */
+  background-image: url('/Images/Ccosa_background.jpeg');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  /* Own compositor layer — scroll never repaints this element */
   will-change: transform;
   transform: translateZ(0);
 }

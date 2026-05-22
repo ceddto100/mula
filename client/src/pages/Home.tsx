@@ -275,10 +275,10 @@ const Home: React.FC = () => {
           <div className="w-24 h-1 bg-accent-electric mx-auto" />
         </div>
 
-        {/* Full-bleed card strip: stacked on mobile, 5 columns edge-to-edge on desktop.
-            Always rendered in fixed order (Women → Accessories → Men's → Sale → Collections)
-            using named fields so DB-stored panel order never overrides the layout. */}
-        <div className="grid grid-cols-1 lg:grid-cols-5 gap-1">
+        {/* Mobile: 2:3 portrait cards stacked (grid-cols-1, no lg: override on grid).
+            Desktop: each card is a full-viewport-width section with a 16:9 frame,
+            content beautifully centred via lg: prefixed utilities only. */}
+        <div className="grid grid-cols-1 gap-1">
           {[
             { panel: content.shopByStyle.women,       img: homePageImages.womenImage,      href: '/category/women' },
             { panel: content.shopByStyle.accessories, img: homePageImages.accessoryImage,  href: '/category/accessories' },
@@ -289,27 +289,47 @@ const Home: React.FC = () => {
             <Link
               key={panel.title}
               to={href}
-              className="relative group overflow-hidden bg-brand-900 aspect-[2/3] lg:aspect-auto lg:h-[56.25vw] block"
+              className="relative group overflow-hidden bg-brand-900 aspect-[2/3] lg:aspect-[16/9] block"
             >
               {img && (
                 <div className="absolute inset-0">
-                  {renderHomeMedia(img, panel.title, 'w-full h-full object-cover transition-transform duration-700 group-hover:scale-105', { sizes: '(min-width: 1024px) 20vw, 100vw' })}
+                  {renderHomeMedia(img, panel.title, 'w-full h-full object-cover lg:transition-transform lg:duration-700 lg:group-hover:scale-105', { sizes: '100vw' })}
                 </div>
               )}
-              <div className="absolute bottom-0 left-0 p-6 lg:p-8">
+
+              {/* Mobile content: anchored bottom-left — no lg: classes here */}
+              <div className="absolute bottom-0 left-0 p-6 lg:hidden">
                 {panel.badge && (
                   <div className="inline-block bg-accent-electric text-brand-900 px-3 py-1 text-xs font-grotesk font-bold mb-3 tracking-wider">
                     {panel.badge}
                   </div>
                 )}
-                <h3 className="text-3xl lg:text-4xl font-display text-white mb-1" style={{ textShadow: '0 1px 8px rgba(0,0,0,0.9)' }}>
+                <h3 className="text-3xl font-display text-white mb-1" style={{ textShadow: '0 1px 8px rgba(0,0,0,0.9)' }}>
                   {panel.title}
                 </h3>
                 {panel.description && (
-                  <p className="text-sm lg:text-base text-white/80 font-grotesk mb-3">{panel.description}</p>
+                  <p className="text-sm text-white/80 font-grotesk mb-3">{panel.description}</p>
                 )}
                 <span className="inline-flex items-center gap-2 text-accent-electric font-grotesk font-semibold text-sm tracking-wider group-hover:gap-4 transition-all">
                   {panel.linkText} <FiArrowRight size={16} />
+                </span>
+              </div>
+
+              {/* Desktop content: centred inside the 16:9 frame — all lg: prefixed */}
+              <div className="hidden lg:absolute lg:inset-0 lg:flex lg:flex-col lg:items-center lg:justify-center lg:text-center lg:px-16">
+                {panel.badge && (
+                  <div className="lg:inline-block lg:bg-accent-electric lg:text-brand-900 lg:px-4 lg:py-1 lg:text-sm lg:font-grotesk lg:font-bold lg:mb-6 lg:tracking-widest">
+                    {panel.badge}
+                  </div>
+                )}
+                <h3 className="lg:text-7xl lg:font-display lg:text-white lg:mb-4" style={{ textShadow: '0 2px 20px rgba(0,0,0,0.9)' }}>
+                  {panel.title}
+                </h3>
+                {panel.description && (
+                  <p className="lg:text-xl lg:text-white/90 lg:font-grotesk lg:mb-8 lg:max-w-lg">{panel.description}</p>
+                )}
+                <span className="lg:inline-flex lg:items-center lg:gap-3 lg:text-accent-electric lg:font-grotesk lg:font-semibold lg:text-base lg:tracking-widest lg:border-b lg:border-accent-electric lg:pb-1 lg:group-hover:gap-5 lg:transition-all">
+                  {panel.linkText} <FiArrowRight size={18} />
                 </span>
               </div>
             </Link>
