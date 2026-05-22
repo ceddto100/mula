@@ -289,7 +289,7 @@ const Home: React.FC = () => {
             <Link
               key={panel.title}
               to={href}
-              className="relative group overflow-hidden bg-brand-900 min-h-[60vw] lg:min-h-[65vh] block"
+              className="relative group overflow-hidden bg-brand-900 aspect-[2/3] lg:aspect-auto lg:h-[56.25vw] block"
             >
               {img && (
                 <div className="absolute inset-0">
