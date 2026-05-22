@@ -195,10 +195,7 @@ const Home: React.FC = () => {
       {/* Hero Section */}
       <section className="relative min-h-[90vh] overflow-hidden">
         <div className="absolute inset-0">
-          <div className="absolute inset-0 bg-black/30" />
-          <div
-            className="absolute top-0 left-0 h-full w-[55%] bg-black/60"
-          />
+          {/* Image renders first so overlays stack on top of it */}
           {renderHomeMedia(homePageImages.heroImage, 'Fashion', 'absolute top-0 right-0 w-3/5 h-full object-cover diagonal-bg', { eager: true, preload: 'metadata', hero: true })}
           {content.brandTheme?.heroOverlayEnabled && content.brandTheme?.heroOverlayColor ? (
             <div
@@ -206,6 +203,11 @@ const Home: React.FC = () => {
               style={{ backgroundColor: content.brandTheme.heroOverlayColor, opacity: 0.45 }}
             />
           ) : null}
+          {/* Desktop: dark left panel + light global tint */}
+          <div className="absolute inset-0 bg-black/30" />
+          <div className="absolute top-0 left-0 h-full w-[55%] bg-black/50 hidden lg:block" />
+          {/* Mobile: full-width overlay so text is readable over the hero image */}
+          <div className="absolute inset-0 bg-black/65 lg:hidden" />
         </div>
 
         {/* Decorative Arrows — static (no infinite animation) for smoother scroll */}
@@ -225,19 +227,19 @@ const Home: React.FC = () => {
             </div>
 
             <div className="overflow-hidden mb-4">
-              <h1 className="text-7xl md:text-8xl lg:text-9xl font-display text-white leading-none animate-slide-up-delayed">
+              <h1 className="text-7xl md:text-8xl lg:text-9xl font-display text-white leading-none animate-slide-up-delayed" style={{ textShadow: '0 2px 16px rgba(0,0,0,0.85)' }}>
                 {content.hero.headline1}
               </h1>
             </div>
 
             <div className="overflow-hidden mb-8">
-              <h2 className="text-6xl md:text-7xl lg:text-8xl font-display text-accent-electric leading-none animate-slide-up-more-delayed">
+              <h2 className="text-6xl md:text-7xl lg:text-8xl font-display text-accent-electric leading-none animate-slide-up-more-delayed" style={{ textShadow: '0 2px 16px rgba(0,0,0,0.85)' }}>
                 {content.hero.headline2}
               </h2>
             </div>
 
             <div className="overflow-hidden mb-12">
-              <p className="text-xl md:text-2xl text-brand-100 font-grotesk max-w-lg leading-relaxed animate-fade-in-delayed whitespace-pre-line">
+              <p className="text-xl md:text-2xl text-white font-grotesk max-w-lg leading-relaxed animate-fade-in-delayed whitespace-pre-line" style={{ textShadow: '0 1px 8px rgba(0,0,0,0.8)' }}>
                 {content.hero.subheading}
               </p>
             </div>
@@ -279,7 +281,7 @@ const Home: React.FC = () => {
       <section className="relative py-24 bg-transparent animate-on-scroll opacity-0 translate-y-12 transition-all duration-1000 cv-auto">
         <div className="max-w-7xl mx-auto px-4">
           <div className="mb-16 text-center">
-            <h2 className="text-6xl md:text-7xl font-display text-white mb-4 drop-shadow-[0_2px_12px_rgba(0,0,0,0.6)]">{content.shopByStyle.sectionTitle}</h2>
+            <h2 className="text-6xl md:text-7xl font-display text-gray-900 mb-4">{content.shopByStyle.sectionTitle}</h2>
             <div className="w-24 h-1 bg-accent-electric mx-auto" />
           </div>
 
@@ -292,10 +294,10 @@ const Home: React.FC = () => {
               content.shopByStyle.collections,
             ]).map((panel, index) => (
               <div key={`${panel.title}-${index}`} className="relative group overflow-hidden rounded-3xl bg-brand-900 min-h-[320px]">
-                <div className="absolute inset-0 bg-gradient-to-t from-brand-900/90 via-brand-900/30 to-transparent" />
+                <div className="absolute inset-0 bg-gradient-to-t from-brand-900 via-brand-900/75 to-brand-900/20" />
                 <div className="absolute bottom-0 left-0 p-8">
                   {panel.badge && <div className="inline-block bg-accent-electric text-brand-900 px-4 py-1 text-sm font-grotesk font-bold mb-4">{panel.badge}</div>}
-                  <h3 className="text-4xl font-display text-white mb-2">{panel.title}</h3>
+                  <h3 className="text-4xl font-display text-white mb-2" style={{ textShadow: '0 1px 8px rgba(0,0,0,0.7)' }}>{panel.title}</h3>
                   {panel.description && <p className="text-lg text-brand-100 font-grotesk mb-4">{panel.description}</p>}
                   <span className="inline-flex items-center gap-2 text-accent-electric font-grotesk font-semibold group-hover:gap-4 transition-all">
                     {panel.linkText} <FiArrowRight size={20} />
@@ -315,11 +317,11 @@ const Home: React.FC = () => {
               <div className="inline-block bg-accent-electric text-brand-900 px-4 py-1 text-sm font-grotesk font-bold mb-4">
                 {content.freshDrops.badge}
               </div>
-              <h2 className="text-6xl md:text-7xl font-display text-white drop-shadow-[0_2px_12px_rgba(0,0,0,0.6)]">{content.freshDrops.sectionTitle}</h2>
+              <h2 className="text-6xl md:text-7xl font-display text-gray-900">{content.freshDrops.sectionTitle}</h2>
             </div>
             <Link
               to="/category/new-arrivals"
-              className="group inline-flex items-center gap-3 text-white font-grotesk font-bold text-lg border-b-2 border-white pb-2 hover:border-accent-electric hover:text-accent-electric transition-all"
+              className="group inline-flex items-center gap-3 text-gray-900 font-grotesk font-bold text-lg border-b-2 border-gray-900 pb-2 hover:border-accent-electric hover:text-accent-electric transition-all"
             >
               {content.freshDrops.viewAllLink}
               <FiArrowRight className="group-hover:translate-x-2 transition-transform" size={24} />
@@ -331,8 +333,8 @@ const Home: React.FC = () => {
       </section>
 
       {/* Bold Brand Statement Section */}
-      <section className="relative py-32 bg-transparent overflow-hidden animate-on-scroll opacity-0 translate-y-12 transition-all duration-1000 cv-auto">
-        <div className="absolute inset-0 bg-gradient-to-r from-brand-900/40 via-brand-700/30 to-brand-900/40" />
+      <section className="relative py-32 bg-brand-900 overflow-hidden animate-on-scroll opacity-0 translate-y-12 transition-all duration-1000 cv-auto">
+        <div className="absolute inset-0 bg-gradient-to-r from-brand-900 via-brand-800/80 to-brand-900" />
 
         {/* Large Background Text */}
         <div className="absolute inset-0 flex items-center justify-center opacity-10 overflow-hidden pointer-events-none" aria-hidden="true">
