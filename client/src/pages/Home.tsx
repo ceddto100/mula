@@ -278,7 +278,7 @@ const Home: React.FC = () => {
         {/* Mobile: 2:3 portrait cards stacked (grid-cols-1, no lg: override on grid).
             Desktop: each card is a full-viewport-width section with a 16:9 frame,
             content beautifully centred via lg: prefixed utilities only. */}
-        <div className="grid grid-cols-1 gap-1">
+        <div className="grid grid-cols-1 gap-8 lg:gap-1">
           {[
             { panel: content.shopByStyle.women,       img: homePageImages.womenImage,      href: '/category/women' },
             { panel: content.shopByStyle.accessories, img: homePageImages.accessoryImage,  href: '/category/accessories' },
@@ -289,7 +289,7 @@ const Home: React.FC = () => {
             <Link
               key={panel.title}
               to={href}
-              className="relative group overflow-hidden bg-brand-900 aspect-[2/3] lg:aspect-[16/9] block"
+              className="relative group overflow-hidden bg-brand-900 aspect-[2/3] lg:aspect-[16/9] block rounded-2xl lg:rounded-none mx-4 lg:mx-0"
             >
               {img && (
                 <div className="absolute inset-0">
