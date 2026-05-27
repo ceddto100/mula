@@ -178,11 +178,11 @@ const ProductPage: React.FC = () => {
 
           {/* Info */}
           <div>
-            <h1 className="text-3xl font-bold mb-2">{productName}</h1>
-            <p className="text-2xl font-semibold mb-6">{formatPrice(productPrice)}</p>
+            <h1 className="text-3xl font-bold mb-2 text-black">{productName}</h1>
+            <p className="text-2xl font-semibold mb-6 text-black">{formatPrice(productPrice)}</p>
 
             {productDescription && (
-              <p className="text-gray-600 mb-8">{productDescription}</p>
+              <p className="text-black mb-8">{productDescription}</p>
             )}
 
             {/* Size selection */}

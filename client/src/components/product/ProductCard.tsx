@@ -116,10 +116,10 @@ const ProductCardComponent: React.FC<ProductCardProps> = ({ product }) => {
 
       {/* Product info */}
       <div className="space-y-1.5">
-        <h3 className="font-grotesk font-semibold text-brand-200 group-hover:text-white transition-colors text-sm leading-tight line-clamp-2">
+        <h3 className="font-grotesk font-semibold text-black group-hover:text-gray-700 transition-colors text-sm leading-tight line-clamp-2">
           {productName}
         </h3>
-        <p className="text-white font-grotesk font-bold text-base">{formatPrice(productPrice)}</p>
+        <p className="text-black font-grotesk font-bold text-base">{formatPrice(productPrice)}</p>
 
         {/* Color swatches */}
         {productColors.length > 0 && (
