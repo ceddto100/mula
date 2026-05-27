@@ -53,25 +53,25 @@ const Header: React.FC = () => {
               />
             </Link>
 
-            {/* Desktop Navigation — only visible on desktop, black */}
+            {/* Desktop Navigation */}
             <nav className="hidden lg:flex items-center space-x-8 xl:space-x-10 flex-1">
               {NAV_ITEMS.map((item) => (
                 <Link
                   key={item.label}
                   to={item.path}
-                  className="text-sm xl:text-base font-grotesk font-semibold tracking-wide text-black hover:opacity-70 transition-opacity relative group"
+                  className="text-sm xl:text-base font-grotesk font-semibold tracking-wide text-[#B53BEA] hover:opacity-70 transition-opacity relative group"
                 >
                   {item.label}
-                  <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-black transition-all duration-300 group-hover:w-full" />
+                  <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-[#B53BEA] transition-all duration-300 group-hover:w-full" />
                 </Link>
               ))}
             </nav>
 
-            {/* Right side icons — purple on mobile, black on desktop */}
+            {/* Right side icons */}
             <div className="flex items-center space-x-3 lg:space-x-4">
               <button
                 onClick={() => setIsSearchOpen(!isSearchOpen)}
-                className="p-2 text-[#B53BEA] lg:text-black hover:opacity-70 transition-opacity hover:scale-110 duration-300"
+                className="p-2 text-[#B53BEA] hover:opacity-70 transition-opacity hover:scale-110 duration-300"
                 aria-label="Search"
               >
                 <FiSearch size={22} strokeWidth={2} />
@@ -79,7 +79,7 @@ const Header: React.FC = () => {
 
               <Link
                 to={isAuthenticated ? '/account' : '/login'}
-                className="p-2 text-[#B53BEA] lg:text-black hover:opacity-70 transition-opacity hover:scale-110 duration-300"
+                className="p-2 text-[#B53BEA] hover:opacity-70 transition-opacity hover:scale-110 duration-300"
                 aria-label="Account"
               >
                 <FiUser size={22} strokeWidth={2} />
@@ -87,7 +87,7 @@ const Header: React.FC = () => {
 
               <Link
                 to="/wishlist"
-                className="hidden lg:block p-2 text-black hover:opacity-70 transition-opacity hover:scale-110 duration-300"
+                className="hidden lg:block p-2 text-[#B53BEA] hover:opacity-70 transition-opacity hover:scale-110 duration-300"
                 aria-label="Wishlist"
               >
                 <FiHeart size={22} strokeWidth={2} />
@@ -95,7 +95,7 @@ const Header: React.FC = () => {
 
               <Link
                 to="/cart"
-                className="p-2 text-[#B53BEA] lg:text-black hover:opacity-70 transition-opacity hover:scale-110 duration-300 relative"
+                className="p-2 text-[#B53BEA] hover:opacity-70 transition-opacity hover:scale-110 duration-300 relative"
                 aria-label="Shopping bag"
               >
                 <FiShoppingBag size={22} strokeWidth={2} />
@@ -109,7 +109,7 @@ const Header: React.FC = () => {
               {isAuthenticated && user?.role === 'admin' && (
                 <Link
                   to="/admin"
-                  className="hidden xl:inline-block text-xs font-grotesk font-semibold tracking-wider text-black hover:opacity-70 transition-opacity ml-2"
+                  className="hidden xl:inline-block text-xs font-grotesk font-semibold tracking-wider text-[#B53BEA] hover:opacity-70 transition-opacity ml-2"
                 >
                   ADMIN
                 </Link>
