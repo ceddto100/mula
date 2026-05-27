@@ -35,9 +35,9 @@ const Header: React.FC = () => {
       <div className="border-b-2 border-transparent">
         <div className="max-w-7xl mx-auto px-4">
           <div className="flex items-center justify-between h-20 lg:h-24">
-            {/* Mobile menu button */}
+            {/* Mobile menu button — only visible on mobile, stays purple */}
             <button
-              className="lg:hidden p-2 -ml-2 text-white hover:text-brand-300 transition-colors"
+              className="lg:hidden p-2 -ml-2 text-[#B53BEA] transition-opacity hover:opacity-70"
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
               aria-label="Toggle menu"
             >
@@ -53,25 +53,25 @@ const Header: React.FC = () => {
               />
             </Link>
 
-            {/* Desktop Navigation */}
+            {/* Desktop Navigation — only visible on desktop, black */}
             <nav className="hidden lg:flex items-center space-x-8 xl:space-x-10 flex-1">
               {NAV_ITEMS.map((item) => (
                 <Link
                   key={item.label}
                   to={item.path}
-                  className="text-sm xl:text-base font-grotesk font-semibold tracking-wide text-white hover:text-brand-300 transition-colors relative group"
+                  className="text-sm xl:text-base font-grotesk font-semibold tracking-wide text-black hover:opacity-70 transition-opacity relative group"
                 >
                   {item.label}
-                  <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-brand-500 transition-all duration-300 group-hover:w-full" />
+                  <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-black transition-all duration-300 group-hover:w-full" />
                 </Link>
               ))}
             </nav>
 
-            {/* Right side icons */}
+            {/* Right side icons — purple on mobile, black on desktop */}
             <div className="flex items-center space-x-3 lg:space-x-4">
               <button
                 onClick={() => setIsSearchOpen(!isSearchOpen)}
-                className="p-2 text-white hover:text-brand-300 transition-colors hover:scale-110 duration-300"
+                className="p-2 text-[#B53BEA] lg:text-black hover:opacity-70 transition-opacity hover:scale-110 duration-300"
                 aria-label="Search"
               >
                 <FiSearch size={22} strokeWidth={2} />
@@ -79,7 +79,7 @@ const Header: React.FC = () => {
 
               <Link
                 to={isAuthenticated ? '/account' : '/login'}
-                className="p-2 text-white hover:text-brand-300 transition-colors hover:scale-110 duration-300"
+                className="p-2 text-[#B53BEA] lg:text-black hover:opacity-70 transition-opacity hover:scale-110 duration-300"
                 aria-label="Account"
               >
                 <FiUser size={22} strokeWidth={2} />
@@ -87,7 +87,7 @@ const Header: React.FC = () => {
 
               <Link
                 to="/wishlist"
-                className="hidden lg:block p-2 text-white hover:text-brand-300 transition-colors hover:scale-110 duration-300"
+                className="hidden lg:block p-2 text-black hover:opacity-70 transition-opacity hover:scale-110 duration-300"
                 aria-label="Wishlist"
               >
                 <FiHeart size={22} strokeWidth={2} />
@@ -95,7 +95,7 @@ const Header: React.FC = () => {
 
               <Link
                 to="/cart"
-                className="p-2 text-white hover:text-brand-300 transition-colors hover:scale-110 duration-300 relative"
+                className="p-2 text-[#B53BEA] lg:text-black hover:opacity-70 transition-opacity hover:scale-110 duration-300 relative"
                 aria-label="Shopping bag"
               >
                 <FiShoppingBag size={22} strokeWidth={2} />
@@ -109,7 +109,7 @@ const Header: React.FC = () => {
               {isAuthenticated && user?.role === 'admin' && (
                 <Link
                   to="/admin"
-                  className="hidden xl:inline-block text-xs font-grotesk font-semibold tracking-wider text-white hover:text-brand-300 ml-2"
+                  className="hidden xl:inline-block text-xs font-grotesk font-semibold tracking-wider text-black hover:opacity-70 transition-opacity ml-2"
                 >
                   ADMIN
                 </Link>
@@ -121,7 +121,7 @@ const Header: React.FC = () => {
 
       {/* Search bar */}
       {isSearchOpen && (
-        <div className="absolute top-full left-0 right-0 bg-black/70 backdrop-blur-md border-b-2 border-brand-500 shadow-xl">
+        <div className="absolute top-full left-0 right-0 bg-black/70 backdrop-blur-md border-b-2 border-[#B53BEA] shadow-xl">
           <div className="max-w-7xl mx-auto px-4 py-8">
             <form onSubmit={handleSearch} className="max-w-3xl mx-auto">
               <div className="relative">
@@ -130,14 +130,14 @@ const Header: React.FC = () => {
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   placeholder="Search for products..."
-                  className="w-full px-6 py-4 pl-14 border-2 border-brand-300 focus:outline-none focus:border-brand-500 bg-brand-50 text-lg font-grotesk rounded-lg transition-all"
+                  className="w-full px-6 py-4 pl-14 border-2 border-[#B53BEA] focus:outline-none bg-brand-50 text-lg font-grotesk rounded-lg transition-all"
                   autoFocus
                 />
-                <FiSearch className="absolute left-4 top-1/2 -translate-y-1/2 text-brand-500" size={24} strokeWidth={2.5} />
+                <FiSearch className="absolute left-4 top-1/2 -translate-y-1/2 text-[#B53BEA]" size={24} strokeWidth={2.5} />
                 <button
                   type="button"
                   onClick={() => setIsSearchOpen(false)}
-                  className="absolute right-4 top-1/2 -translate-y-1/2 p-2 text-white hover:text-brand-300"
+                  className="absolute right-4 top-1/2 -translate-y-1/2 p-2 text-[#B53BEA] hover:opacity-70"
                 >
                   <FiX size={24} strokeWidth={2.5} />
                 </button>
@@ -147,7 +147,7 @@ const Header: React.FC = () => {
         </div>
       )}
 
-      {/* Mobile menu */}
+      {/* Mobile menu — always purple since it's mobile-only */}
       {isMobileMenuOpen && (
         <div className="lg:hidden absolute top-full left-0 right-0 bg-black/95 backdrop-blur-md border-b border-white/20 z-50 overflow-y-auto max-h-[calc(100vh-5rem)]">
           <nav className="flex flex-col p-4">
@@ -155,9 +155,9 @@ const Header: React.FC = () => {
               <Link
                 key={item.label}
                 to={item.path}
-                className="px-6 py-5 text-base font-grotesk font-semibold tracking-wide text-white border-b border-white/20 hover:bg-brand-800 hover:pl-8 transition-all duration-300"
-                onClick={() => setIsMobileMenuOpen(false)}
+                className="px-6 py-5 text-base font-grotesk font-semibold tracking-wide text-[#B53BEA] border-b border-white/20 hover:pl-8 transition-all duration-300"
                 style={{ animationDelay: `${index * 50}ms` }}
+                onClick={() => setIsMobileMenuOpen(false)}
               >
                 {item.label} →
               </Link>
@@ -167,7 +167,7 @@ const Header: React.FC = () => {
                 <>
                   <Link
                     to="/account"
-                    className="px-6 py-4 text-sm font-grotesk text-white/90 block hover:bg-white/10 hover:text-white transition-all"
+                    className="px-6 py-4 text-sm font-grotesk text-[#B53BEA] block hover:bg-white/10 transition-all"
                     onClick={() => setIsMobileMenuOpen(false)}
                   >
                     MY ACCOUNT
@@ -175,7 +175,7 @@ const Header: React.FC = () => {
                   {user?.role === 'admin' && (
                     <Link
                       to="/admin"
-                      className="px-6 py-4 text-sm font-grotesk text-white/90 block hover:bg-white/10 hover:text-white transition-all"
+                      className="px-6 py-4 text-sm font-grotesk text-[#B53BEA] block hover:bg-white/10 transition-all"
                       onClick={() => setIsMobileMenuOpen(false)}
                     >
                       ADMIN DASHBOARD
@@ -185,7 +185,7 @@ const Header: React.FC = () => {
               ) : (
                 <Link
                   to="/login"
-                  className="px-6 py-4 text-sm font-grotesk text-white/90 block hover:bg-white/10 hover:text-white transition-all"
+                  className="px-6 py-4 text-sm font-grotesk text-[#B53BEA] block hover:bg-white/10 transition-all"
                   onClick={() => setIsMobileMenuOpen(false)}
                 >
                   SIGN IN

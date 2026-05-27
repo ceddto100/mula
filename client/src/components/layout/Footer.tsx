@@ -19,36 +19,36 @@ const Footer: React.FC = () => {
   };
 
   return (
-    <footer className="bg-black/60 backdrop-blur-md border-t border-gray-200">
+    <footer className="bg-black/60 backdrop-blur-md border-t border-white/20">
       {/* Main Footer */}
       <div className="max-w-7xl mx-auto px-4 py-12 lg:py-16">
         <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-8">
           {/* Customer Service */}
           <div>
-            <h4 className="text-xs tracking-wider font-medium mb-4">CUSTOMER SERVICE</h4>
-            <ul className="space-y-3 text-sm text-gray-600">
+            <h4 className="text-xs tracking-wider font-medium mb-4 text-white">CUSTOMER SERVICE</h4>
+            <ul className="space-y-3 text-sm text-white/80">
               <li>
-                <Link to="/contact" className="hover:text-gray-900 transition-colors">
+                <Link to="/contact" className="hover:text-white transition-colors">
                   Contact Us
                 </Link>
               </li>
               <li>
-                <Link to="/shipping" className="hover:text-gray-900 transition-colors">
+                <Link to="/shipping" className="hover:text-white transition-colors">
                   Shipping
                 </Link>
               </li>
               <li>
-                <Link to="/returns" className="hover:text-gray-900 transition-colors">
+                <Link to="/returns" className="hover:text-white transition-colors">
                   Returns & Exchanges
                 </Link>
               </li>
               <li>
-                <Link to="/faq" className="hover:text-gray-900 transition-colors">
+                <Link to="/faq" className="hover:text-white transition-colors">
                   FAQ
                 </Link>
               </li>
               <li>
-                <Link to="/size-guide" className="hover:text-gray-900 transition-colors">
+                <Link to="/size-guide" className="hover:text-white transition-colors">
                   Size Guide
                 </Link>
               </li>
@@ -57,25 +57,25 @@ const Footer: React.FC = () => {
 
           {/* Company */}
           <div>
-            <h4 className="text-xs tracking-wider font-medium mb-4">COMPANY</h4>
-            <ul className="space-y-3 text-sm text-gray-600">
+            <h4 className="text-xs tracking-wider font-medium mb-4 text-white">COMPANY</h4>
+            <ul className="space-y-3 text-sm text-white/80">
               <li>
-                <Link to="/about" className="hover:text-gray-900 transition-colors">
+                <Link to="/about" className="hover:text-white transition-colors">
                   About Us
                 </Link>
               </li>
               <li>
-                <Link to="/careers" className="hover:text-gray-900 transition-colors">
+                <Link to="/careers" className="hover:text-white transition-colors">
                   Careers
                 </Link>
               </li>
               <li>
-                <Link to="/stores" className="hover:text-gray-900 transition-colors">
+                <Link to="/stores" className="hover:text-white transition-colors">
                   Store Locator
                 </Link>
               </li>
               <li>
-                <Link to="/sustainability" className="hover:text-gray-900 transition-colors">
+                <Link to="/sustainability" className="hover:text-white transition-colors">
                   Sustainability
                 </Link>
               </li>
@@ -84,30 +84,30 @@ const Footer: React.FC = () => {
 
           {/* Shop */}
           <div>
-            <h4 className="text-xs tracking-wider font-medium mb-4">SHOP</h4>
-            <ul className="space-y-3 text-sm text-gray-600">
+            <h4 className="text-xs tracking-wider font-medium mb-4 text-white">SHOP</h4>
+            <ul className="space-y-3 text-sm text-white/80">
               <li>
-                <Link to="/category/men" className="hover:text-gray-900 transition-colors">
+                <Link to="/category/men" className="hover:text-white transition-colors">
                   Men
                 </Link>
               </li>
               <li>
-                <Link to="/category/women" className="hover:text-gray-900 transition-colors">
+                <Link to="/category/women" className="hover:text-white transition-colors">
                   Women
                 </Link>
               </li>
               <li>
-                <Link to="/category/kids" className="hover:text-gray-900 transition-colors">
+                <Link to="/category/kids" className="hover:text-white transition-colors">
                   Kids & Baby
                 </Link>
               </li>
               <li>
-                <Link to="/category/home" className="hover:text-gray-900 transition-colors">
+                <Link to="/category/home" className="hover:text-white transition-colors">
                   Home
                 </Link>
               </li>
               <li>
-                <Link to="/category/sale" className="hover:text-gray-900 transition-colors">
+                <Link to="/category/sale" className="hover:text-white transition-colors">
                   Sale
                 </Link>
               </li>
@@ -116,20 +116,20 @@ const Footer: React.FC = () => {
 
           {/* Legal */}
           <div>
-            <h4 className="text-xs tracking-wider font-medium mb-4">LEGAL</h4>
-            <ul className="space-y-3 text-sm text-gray-600">
+            <h4 className="text-xs tracking-wider font-medium mb-4 text-white">LEGAL</h4>
+            <ul className="space-y-3 text-sm text-white/80">
               <li>
-                <Link to="/privacy" className="hover:text-gray-900 transition-colors">
+                <Link to="/privacy" className="hover:text-white transition-colors">
                   Privacy Policy
                 </Link>
               </li>
               <li>
-                <Link to="/terms" className="hover:text-gray-900 transition-colors">
+                <Link to="/terms" className="hover:text-white transition-colors">
                   Terms of Use
                 </Link>
               </li>
               <li>
-                <Link to="/accessibility" className="hover:text-gray-900 transition-colors">
+                <Link to="/accessibility" className="hover:text-white transition-colors">
                   Accessibility
                 </Link>
               </li>
@@ -138,39 +138,39 @@ const Footer: React.FC = () => {
 
           {/* Connect */}
           <div className="col-span-2 md:col-span-4 lg:col-span-1">
-            <h4 className="text-xs tracking-wider font-medium mb-4">CONNECT WITH US</h4>
+            <h4 className="text-xs tracking-wider font-medium mb-4 text-white">CONNECT WITH US</h4>
             <div className="flex space-x-4 mb-6">
               <a
                 href="#"
-                className="text-gray-600 hover:text-gray-900 transition-colors"
+                className="text-white/80 hover:text-white transition-colors"
                 aria-label="Instagram"
               >
                 <FiInstagram size={20} />
               </a>
               <a
                 href="#"
-                className="text-gray-600 hover:text-gray-900 transition-colors"
+                className="text-white/80 hover:text-white transition-colors"
                 aria-label="Facebook"
               >
                 <FiFacebook size={20} />
               </a>
               <a
                 href="#"
-                className="text-gray-600 hover:text-gray-900 transition-colors"
+                className="text-white/80 hover:text-white transition-colors"
                 aria-label="Twitter"
               >
                 <FiTwitter size={20} />
               </a>
               <a
                 href="#"
-                className="text-gray-600 hover:text-gray-900 transition-colors"
+                className="text-white/80 hover:text-white transition-colors"
                 aria-label="YouTube"
               >
                 <FiYoutube size={20} />
               </a>
             </div>
 
-            <h4 className="text-xs tracking-wider font-medium mb-3">SIGN UP FOR EMAILS</h4>
+            <h4 className="text-xs tracking-wider font-medium mb-3 text-white">SIGN UP FOR EMAILS</h4>
             <form className="flex" onSubmit={handleNewsletterSubmit}>
               <input
                 type="email"
@@ -191,13 +191,13 @@ const Footer: React.FC = () => {
       </div>
 
       {/* Bottom Footer */}
-      <div className="border-t border-gray-200 bg-black/70 backdrop-blur-sm">
+      <div className="border-t border-white/20 bg-black/70 backdrop-blur-sm">
         <div className="max-w-7xl mx-auto px-4 py-6">
           <div className="flex flex-col md:flex-row justify-between items-center gap-4">
-            <p className="text-xs text-gray-500">
-              &copy; {new Date().getFullYear()} Cualquier. All Rights Reserved.
+            <p className="text-xs text-white/70">
+              &copy; 2026 Cualquier Cosa no.9. All Rights Reserved.
             </p>
-            <div className="flex items-center gap-6 text-xs text-gray-500">
+            <div className="flex items-center gap-6 text-xs text-white/70">
               <span>United States</span>
               <span>English</span>
             </div>
