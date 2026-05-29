@@ -48,6 +48,18 @@ const HERO_FALLBACKS: Record<string, CategoryHeroMedia> = {
     title: 'ALL PRODUCTS',
     subtitle: 'The full collection. Nothing held back.',
   },
+  'new-arrivals': {
+    mediaUrl: '',
+    mediaType: 'image',
+    title: 'JUST DROPPED',
+    subtitle: 'The freshest pieces. Just landed.',
+  },
+  'new-out': {
+    mediaUrl: '',
+    mediaType: 'image',
+    title: 'NEW OUT',
+    subtitle: 'All the new clothes. Just dropped.',
+  },
 };
 
 const DEFAULT_FALLBACK: Omit<CategoryHeroMedia, 'title'> = {
@@ -199,6 +211,12 @@ const CategoryPage: React.FC = () => {
   const sort = searchParams.get('sort') || '-createdAt';
   const normalizedCategory = category?.toLowerCase().trim() || 'all';
 
+  const categoryTitle =
+    normalizedCategory === 'all' ? 'All Products'
+    : normalizedCategory === 'new-arrivals' ? 'Just Dropped'
+    : normalizedCategory === 'new-out' ? 'New Out'
+    : capitalizeFirst(normalizedCategory);
+
   // Fetch dynamic hero config — silently falls back to hardcoded if unavailable
   useEffect(() => {
     productsApi.getCategoryHeroes().then(setHeroConfig).catch(() => {});
@@ -206,8 +224,10 @@ const CategoryPage: React.FC = () => {
 
 
   useSeo({
-    title: `${capitalizeFirst(normalizedCategory)} Collection | Cualquier`,
-    description: `Shop ${capitalizeFirst(normalizedCategory)} apparel and streetwear from Cualquier.`,
+    title: `${categoryTitle} | Cualquier`,
+    description: normalizedCategory === 'new-arrivals' || normalizedCategory === 'new-out'
+      ? 'The freshest drops. All new clothes, just landed at Cualquier.'
+      : `Shop ${capitalizeFirst(normalizedCategory)} apparel and streetwear from Cualquier.`,
     canonicalPath: `/category/${normalizedCategory}`,
     ogType: 'website',
     image: ((heroConfig?.[normalizedCategory as keyof CategoryHeroConfig] as CategoryHeroMedia | undefined)?.mediaUrl) || '/images/Cualquier_logo.png',
@@ -259,9 +279,6 @@ const CategoryPage: React.FC = () => {
     (filters.colors?.length || 0) +
     (filters.minPrice ? 1 : 0) +
     (filters.maxPrice ? 1 : 0);
-
-  const categoryTitle =
-    normalizedCategory === 'all' ? 'All Products' : capitalizeFirst(normalizedCategory);
 
   return (
     <Layout>
