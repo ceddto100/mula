@@ -211,6 +211,12 @@ const CategoryPage: React.FC = () => {
   const sort = searchParams.get('sort') || '-createdAt';
   const normalizedCategory = category?.toLowerCase().trim() || 'all';
 
+  const categoryTitle =
+    normalizedCategory === 'all' ? 'All Products'
+    : normalizedCategory === 'new-arrivals' ? 'Just Dropped'
+    : normalizedCategory === 'new-out' ? 'New Out'
+    : capitalizeFirst(normalizedCategory);
+
   // Fetch dynamic hero config — silently falls back to hardcoded if unavailable
   useEffect(() => {
     productsApi.getCategoryHeroes().then(setHeroConfig).catch(() => {});
@@ -273,12 +279,6 @@ const CategoryPage: React.FC = () => {
     (filters.colors?.length || 0) +
     (filters.minPrice ? 1 : 0) +
     (filters.maxPrice ? 1 : 0);
-
-  const categoryTitle =
-    normalizedCategory === 'all' ? 'All Products'
-    : normalizedCategory === 'new-arrivals' ? 'Just Dropped'
-    : normalizedCategory === 'new-out' ? 'New Out'
-    : capitalizeFirst(normalizedCategory);
 
   return (
     <Layout>
