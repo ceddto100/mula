@@ -3,8 +3,50 @@ import Product from '../models/Product';
 import HomePageImages from '../models/HomePageImages';
 import HomePageContent from '../models/HomePageContent';
 import CategoryHeroes from '../models/CategoryHeroes';
-import { ProductFilter } from '../types';
 import { getPriceRange, getTotalInventory, isInStock } from '../utils/product.utils';
+
+
+const escapeRegex = (value: string): string => value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+
+const exactStringRegex = (value: string): RegExp => new RegExp(`^${escapeRegex(value)}$`, 'i');
+
+const slugify = (value: string): string => value
+  .toString()
+  .toLowerCase()
+  .trim()
+  .replace(/\s+/g, '-')
+  .replace(/[^\w-]+/g, '')
+  .replace(/--+/g, '-')
+  .replace(/^-+/, '')
+  .replace(/-+$/, '');
+
+const applyCategoryFilter = (filter: any, category?: string): void => {
+  if (!category) return;
+
+  const normalizedCategory = String(category).toLowerCase().trim();
+  const genderCategories = ['men', 'women', 'unisex'];
+  // new-arrivals and new-out show all active products sorted by newest — no tag filter
+  const allProductsCategories = ['all', 'new-arrivals', 'new-out'];
+
+  if (genderCategories.includes(normalizedCategory)) {
+    filter.$or = [
+      { gender: normalizedCategory },
+      { tags: { $in: [exactStringRegex(normalizedCategory)] } },
+    ];
+  } else if (!allProductsCategories.includes(normalizedCategory)) {
+    filter.tags = { $in: [exactStringRegex(normalizedCategory)] };
+  }
+};
+
+const findProductTypeForSlug = async (productType: string, baseFilter: any): Promise<string | null> => {
+  const productTypes = await Product.distinct('productType', {
+    ...baseFilter,
+    productType: { $ne: '' },
+  });
+
+  const normalizedProductType = slugify(productType);
+  return productTypes.find((type) => slugify(type) === normalizedProductType) || null;
+};
 
 
 
@@ -83,7 +125,9 @@ export const getProducts = async (req: Request, res: Response): Promise<void> =>
       maxPrice,
       tags,
       colorFamily,
+      colors,
       size,
+      sizes,
       gender,
       fit,
       collection,
@@ -91,26 +135,17 @@ export const getProducts = async (req: Request, res: Response): Promise<void> =>
       sort = '-publishedAt',
     } = req.query;
 
-    // Build filter - only active products for public
+    // Build filter - only active products for public. Product-type routes use
+    // the parent category only for page chrome/hero content; the grid itself is
+    // filtered by productType so products do not disappear when they are not
+    // also tagged with the parent navigation category.
     const filter: any = { status: 'active' };
 
     if (productType) {
-      filter.productType = productType as string;
-    }
-
-    if (category) {
-      const normalizedCategory = String(category).toLowerCase().trim();
-      const genderCategories = ['men', 'women', 'unisex'];
-      // new-arrivals and new-out show all active products sorted by newest — no tag filter
-      const allProductsCategories = ['new-arrivals', 'new-out'];
-      if (genderCategories.includes(normalizedCategory)) {
-        filter.$or = [
-          { gender: normalizedCategory },
-          { tags: { $in: [normalizedCategory] } },
-        ];
-      } else if (!allProductsCategories.includes(normalizedCategory)) {
-        filter.tags = { $in: [normalizedCategory] };
-      }
+      const matchedProductType = await findProductTypeForSlug(productType as string, { status: 'active' });
+      filter.productType = matchedProductType || '__invalid_product_type__';
+    } else {
+      applyCategoryFilter(filter, category as string | undefined);
     }
 
     if (vendor) {
@@ -130,19 +165,21 @@ export const getProducts = async (req: Request, res: Response): Promise<void> =>
       const normalizedTags = tagArray.map(t => t.toLowerCase().trim());
 
       if (filter.tags?.$in) {
-        filter.tags = { $all: [...filter.tags.$in, ...normalizedTags] };
+        filter.tags = { $all: [...filter.tags.$in, ...normalizedTags.map(exactStringRegex)] };
       } else {
-        filter.tags = { $in: normalizedTags };
+        filter.tags = { $in: normalizedTags.map(exactStringRegex) };
       }
     }
 
-    if (colorFamily) {
-      const colorArray = Array.isArray(colorFamily) ? colorFamily : (colorFamily as string).split(',');
+    const selectedColors = colorFamily || colors;
+    if (selectedColors) {
+      const colorArray = Array.isArray(selectedColors) ? selectedColors : (selectedColors as string).split(',');
       filter.colorFamily = { $in: colorArray };
     }
 
-    if (size) {
-      const sizeArray = Array.isArray(size) ? size : (size as string).split(',');
+    const selectedSizes = size || sizes;
+    if (selectedSizes) {
+      const sizeArray = Array.isArray(selectedSizes) ? selectedSizes : (selectedSizes as string).split(',');
       filter['options'] = {
         $elemMatch: {
           name: { $regex: /size/i },
@@ -305,8 +342,9 @@ export const getProductsByType = async (req: Request, res: Response): Promise<vo
 
     const skip = (Number(page) - 1) * Number(limit);
 
+    const matchedProductType = await findProductTypeForSlug(type, { status: 'active' });
     const filter = {
-      productType: { $regex: new RegExp(type, 'i') },
+      productType: matchedProductType || '__invalid_product_type__',
       status: 'active',
     };
 
@@ -459,13 +497,17 @@ export const getProductsByVendor = async (req: Request, res: Response): Promise<
   }
 };
 
-// Get all product types (categories)
+// Get all product types, optionally scoped to a header category
 export const getProductTypes = async (req: Request, res: Response): Promise<void> => {
   try {
-    const productTypes = await Product.distinct('productType', {
+    const filter: any = {
       status: 'active',
       productType: { $ne: '' },
-    });
+    };
+
+    applyCategoryFilter(filter, req.query.category as string | undefined);
+
+    const productTypes = await Product.distinct('productType', filter);
 
     res.json({
       success: true,
