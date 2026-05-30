@@ -67,10 +67,6 @@ const App: React.FC = () => {
           <Suspense fallback={<RouteFallback />}>
             <Routes>
               <Route path="/" element={<Home />} />
-              <Route path="/category/:category" element={<CategoryPage />} />
-              <Route path="/category/:category/:productType" element={<CategoryPage />} />
-              <Route path="/:category/:productType" element={<CategoryPage />} />
-              <Route path="/:category" element={<CategoryPage />} />
               <Route path="/product/:id" element={<ProductPage />} />
               <Route path="/products/:handle" element={<ProductPage />} />
               <Route path="/cart" element={<CartPage />} />
@@ -149,6 +145,12 @@ const App: React.FC = () => {
                   </ProtectedRoute>
                 }
               />
+
+              {/* Dynamic category routes stay after all fixed app routes so product/cart/auth/search/admin pages continue to win. */}
+              <Route path="/category/:category" element={<CategoryPage />} />
+              <Route path="/category/:category/:productType" element={<CategoryPage />} />
+              <Route path="/:category/:productType" element={<CategoryPage />} />
+              <Route path="/:category" element={<CategoryPage />} />
 
               <Route
                 path="*"
