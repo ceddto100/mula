@@ -5,6 +5,44 @@ import HomePageContent from '../models/HomePageContent';
 import CategoryHeroes from '../models/CategoryHeroes';
 import { getPriceRange, getTotalInventory, isInStock } from '../utils/product.utils';
 
+const slugify = (value: string): string => value
+  .toString()
+  .toLowerCase()
+  .trim()
+  .replace(/\s+/g, '-')
+  .replace(/[^\w-]+/g, '')
+  .replace(/--+/g, '-')
+  .replace(/^-+/, '')
+  .replace(/-+$/, '');
+
+const applyCategoryFilter = (filter: any, category?: string): void => {
+  if (!category) return;
+
+  const normalizedCategory = String(category).toLowerCase().trim();
+  const genderCategories = ['men', 'women', 'unisex'];
+  // new-arrivals and new-out show all active products sorted by newest — no tag filter
+  const allProductsCategories = ['all', 'new-arrivals', 'new-out'];
+
+  if (genderCategories.includes(normalizedCategory)) {
+    filter.$or = [
+      { gender: normalizedCategory },
+      { tags: { $in: [normalizedCategory] } },
+    ];
+  } else if (!allProductsCategories.includes(normalizedCategory)) {
+    filter.tags = { $in: [normalizedCategory] };
+  }
+};
+
+const findProductTypeForSlug = async (productType: string, baseFilter: any): Promise<string | null> => {
+  const productTypes = await Product.distinct('productType', {
+    ...baseFilter,
+    productType: { $ne: '' },
+  });
+
+  const normalizedProductType = slugify(productType);
+  return productTypes.find((type) => slugify(type) === normalizedProductType) || null;
+};
+
 
 const escapeRegex = (value: string): string => value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 
