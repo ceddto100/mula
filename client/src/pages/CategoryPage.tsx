@@ -228,7 +228,6 @@ const CategoryPage: React.FC = () => {
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [heroConfig, setHeroConfig] = useState<CategoryHeroConfig | null>(null);
   const [productTypes, setProductTypes] = useState<string[]>([]);
-  const [isProductTypesLoading, setIsProductTypesLoading] = useState(true);
 
   const [filters, setFilters] = useState({
     sizes: searchParams.get('sizes')?.split(',').filter(Boolean),
@@ -255,7 +254,6 @@ const CategoryPage: React.FC = () => {
     ? `${getCategoryPath(parentCategory)}/${normalizedProductType}`
     : getCategoryPath(parentCategory);
   const heroImage = ((heroConfig?.[parentCategory as keyof CategoryHeroConfig] as CategoryHeroMedia | undefined)?.mediaUrl) || '/images/Cualquier_logo.png';
-  const isInvalidProductType = Boolean(normalizedProductType && !isProductTypesLoading && !selectedProductType);
 
   // Fetch dynamic hero config — silently falls back to hardcoded if unavailable
   useEffect(() => {
@@ -264,18 +262,13 @@ const CategoryPage: React.FC = () => {
 
   useEffect(() => {
     let isMounted = true;
-    setIsProductTypesLoading(true);
-
     productsApi
-      .getProductTypes(parentCategory !== 'all' ? parentCategory : undefined)
+      .getProductTypes()
       .then((types) => {
         if (isMounted) setProductTypes(types);
       })
       .catch(() => {
         if (isMounted) setProductTypes([]);
-      })
-      .finally(() => {
-        if (isMounted) setIsProductTypesLoading(false);
       });
 
     return () => {
@@ -307,13 +300,15 @@ const CategoryPage: React.FC = () => {
   });
 
   const { products, isLoading, pagination } = useProducts({
-    category: parentCategory !== 'all' ? parentCategory : undefined,
+    category: normalizedProductType || parentCategory === 'all' ? undefined : parentCategory,
     productType: selectedProductType || normalizedProductType,
     page,
     limit: 12,
     sort,
     ...filters,
   });
+
+  const isInvalidProductType = Boolean(normalizedProductType && !isLoading && pagination.total === 0);
 
   if (isInvalidProductType) {
     return <NotFoundCategoryPage />;

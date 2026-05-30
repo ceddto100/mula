@@ -44,6 +44,49 @@ const findProductTypeForSlug = async (productType: string, baseFilter: any): Pro
 };
 
 
+const escapeRegex = (value: string): string => value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+
+const exactStringRegex = (value: string): RegExp => new RegExp(`^${escapeRegex(value)}$`, 'i');
+
+const slugify = (value: string): string => value
+  .toString()
+  .toLowerCase()
+  .trim()
+  .replace(/\s+/g, '-')
+  .replace(/[^\w-]+/g, '')
+  .replace(/--+/g, '-')
+  .replace(/^-+/, '')
+  .replace(/-+$/, '');
+
+const applyCategoryFilter = (filter: any, category?: string): void => {
+  if (!category) return;
+
+  const normalizedCategory = String(category).toLowerCase().trim();
+  const genderCategories = ['men', 'women', 'unisex'];
+  // new-arrivals and new-out show all active products sorted by newest — no tag filter
+  const allProductsCategories = ['all', 'new-arrivals', 'new-out'];
+
+  if (genderCategories.includes(normalizedCategory)) {
+    filter.$or = [
+      { gender: normalizedCategory },
+      { tags: { $in: [exactStringRegex(normalizedCategory)] } },
+    ];
+  } else if (!allProductsCategories.includes(normalizedCategory)) {
+    filter.tags = { $in: [exactStringRegex(normalizedCategory)] };
+  }
+};
+
+const findProductTypeForSlug = async (productType: string, baseFilter: any): Promise<string | null> => {
+  const productTypes = await Product.distinct('productType', {
+    ...baseFilter,
+    productType: { $ne: '' },
+  });
+
+  const normalizedProductType = slugify(productType);
+  return productTypes.find((type) => slugify(type) === normalizedProductType) || null;
+};
+
+
 
 // Get home page image configuration
 export const getHomePageImages = async (req: Request, res: Response): Promise<void> => {
@@ -130,14 +173,17 @@ export const getProducts = async (req: Request, res: Response): Promise<void> =>
       sort = '-publishedAt',
     } = req.query;
 
-    // Build filter - only active products for public
+    // Build filter - only active products for public. Product-type routes use
+    // the parent category only for page chrome/hero content; the grid itself is
+    // filtered by productType so products do not disappear when they are not
+    // also tagged with the parent navigation category.
     const filter: any = { status: 'active' };
 
-    applyCategoryFilter(filter, category as string | undefined);
-
     if (productType) {
-      const matchedProductType = await findProductTypeForSlug(productType as string, filter);
+      const matchedProductType = await findProductTypeForSlug(productType as string, { status: 'active' });
       filter.productType = matchedProductType || '__invalid_product_type__';
+    } else {
+      applyCategoryFilter(filter, category as string | undefined);
     }
 
     if (vendor) {
@@ -157,9 +203,9 @@ export const getProducts = async (req: Request, res: Response): Promise<void> =>
       const normalizedTags = tagArray.map(t => t.toLowerCase().trim());
 
       if (filter.tags?.$in) {
-        filter.tags = { $all: [...filter.tags.$in, ...normalizedTags] };
+        filter.tags = { $all: [...filter.tags.$in, ...normalizedTags.map(exactStringRegex)] };
       } else {
-        filter.tags = { $in: normalizedTags };
+        filter.tags = { $in: normalizedTags.map(exactStringRegex) };
       }
     }
 
