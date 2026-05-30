@@ -5,6 +5,7 @@ export interface ProductFilters {
   page?: number;
   limit?: number;
   category?: string;
+  productType?: string;
   minPrice?: number;
   maxPrice?: number;
   sizes?: string[];
@@ -55,6 +56,7 @@ export const productsApi = {
     if (filters.page) params.append('page', String(filters.page));
     if (filters.limit) params.append('limit', String(filters.limit));
     if (filters.category) params.append('category', filters.category);
+    if (filters.productType) params.append('productType', filters.productType);
     if (filters.minPrice) params.append('minPrice', String(filters.minPrice));
     if (filters.maxPrice) params.append('maxPrice', String(filters.maxPrice));
     if (filters.sizes?.length) params.append('sizes', filters.sizes.join(','));
@@ -101,6 +103,17 @@ export const productsApi = {
       const response = await api.get<ApiResponse<string[]>>('/api/products/categories');
       return response.data.data!;
     }),
+
+  getProductTypes: (category?: string): Promise<string[]> => {
+    const params = new URLSearchParams();
+    if (category) params.set('category', category);
+    const query = params.toString();
+
+    return cached(`product-types:${category || 'all'}`, async () => {
+      const response = await api.get<ApiResponse<string[]>>(`/api/products/types${query ? `?${query}` : ''}`);
+      return response.data.data!;
+    });
+  },
 
   getHomePageImages: (): Promise<HomePageImages> =>
     cached('homepage-images', async () => {

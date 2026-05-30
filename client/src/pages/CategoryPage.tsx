@@ -7,6 +7,7 @@ import ProductFilters from '../components/product/ProductFilters';
 import { useProducts } from '../hooks/useProducts';
 import { productsApi } from '../api/products.api';
 import { capitalizeFirst } from '../utils/formatters';
+import { slugify } from '../utils/constants';
 import { CategoryHeroConfig, CategoryHeroMedia } from '../types';
 import { useSeo } from '../hooks/useSeo';
 
@@ -68,27 +69,30 @@ const DEFAULT_FALLBACK: Omit<CategoryHeroMedia, 'title'> = {
   subtitle: 'Drop season is now.',
 };
 
-// ─── SubCategory Config ───────────────────────────────────────────────────────
-type SubPill = { label: string; href: string };
+const PARENT_CATEGORY_PATHS: Record<string, string> = {
+  all: '/category/all',
+  men: '/men',
+  women: '/women',
+  sale: '/sale',
+  'new-arrivals': '/new-arrivals',
+  'new-out': '/new-out',
+  collections: '/collections',
+};
 
-const SUBCATEGORIES: Record<string, SubPill[]> = {
-  men: [
-    { label: 'Graphic Tees', href: '/category/graphic-tees' },
-    { label: 'Cargos', href: '/category/cargos' },
-    { label: 'Denim', href: '/category/denim' },
-    { label: 'Hoodies', href: '/category/hoodies' },
-  ],
-  women: [
-    { label: 'Dresses', href: '/category/dresses' },
-    { label: 'Matching Sets', href: '/category/matching-sets' },
-    { label: 'Basics', href: '/category/basics' },
-    { label: 'Swim', href: '/category/swim' },
-  ],
-  sale: [
-    { label: 'Under $20', href: '/category/sale?maxPrice=20' },
-    { label: 'Last Chance', href: '/category/sale?sort=-createdAt' },
-    { label: '50% Off', href: '/category/sale' },
-  ],
+const getCategoryPath = (category: string): string => PARENT_CATEGORY_PATHS[category] || `/category/${category}`;
+
+const formatRouteLabel = (value: string): string => value
+  .split('-')
+  .filter(Boolean)
+  .map(capitalizeFirst)
+  .join(' ');
+
+const getProductTypePath = (category: string, productType: string): string => {
+  const productTypeSlug = slugify(productType);
+  const parentPath = getCategoryPath(category);
+  return parentPath.startsWith('/category/')
+    ? `/category/${category}/${productTypeSlug}`
+    : `${parentPath}/${productTypeSlug}`;
 };
 
 const HERO_TRANSFORMS = 'w_2400,h_1200,c_fill,g_auto,f_auto,q_auto';
@@ -165,40 +169,66 @@ const CategoryHero: React.FC<CategoryHeroProps> = ({ category, breadcrumbLabel, 
   );
 };
 
-// ─── SubCategoryBar ───────────────────────────────────────────────────────────
-interface SubCategoryBarProps {
+// ─── ProductTypeBar ───────────────────────────────────────────────────────────
+interface ProductTypeBarProps {
   category: string;
+  productTypes: string[];
+  activeProductType?: string;
 }
 
-const SubCategoryBar: React.FC<SubCategoryBarProps> = ({ category }) => {
-  const pills = SUBCATEGORIES[category];
-  if (!pills) return null;
+const ProductTypeBar: React.FC<ProductTypeBarProps> = ({ category, productTypes, activeProductType }) => {
+  if (!productTypes.length) return null;
 
   return (
     <div className="bg-brand-900/70 backdrop-blur-sm border-b border-brand-700/60">
       <div className="max-w-7xl mx-auto px-6">
         <div className="flex items-center gap-3 overflow-x-auto py-4 scrollbar-hide">
-          {pills.map((pill) => (
-            <Link
-              key={pill.label}
-              to={pill.href}
-              className="flex-shrink-0 px-5 py-2 rounded-full border border-brand-600 text-brand-300 font-grotesk text-sm tracking-wide whitespace-nowrap transition-all duration-200 hover:border-accent-electric hover:text-accent-electric hover:shadow-[0_0_10px_rgba(0,229,255,0.25)]"
-            >
-              {pill.label}
-            </Link>
-          ))}
+          {productTypes.map((productType) => {
+            const productTypeSlug = slugify(productType);
+            const isActive = activeProductType === productTypeSlug;
+
+            return (
+              <Link
+                key={productType}
+                to={getProductTypePath(category, productType)}
+                className={`flex-shrink-0 px-5 py-2 rounded-full border font-grotesk text-sm tracking-wide whitespace-nowrap transition-all duration-200 ${
+                  isActive
+                    ? 'border-accent-electric text-accent-electric shadow-[0_0_10px_rgba(0,229,255,0.25)]'
+                    : 'border-brand-600 text-brand-300 hover:border-accent-electric hover:text-accent-electric hover:shadow-[0_0_10px_rgba(0,229,255,0.25)]'
+                }`}
+              >
+                {productType}
+              </Link>
+            );
+          })}
         </div>
       </div>
     </div>
   );
 };
 
+const NotFoundCategoryPage: React.FC = () => (
+  <Layout>
+    <div className="min-h-screen flex items-center justify-center">
+      <div className="text-center px-6">
+        <h1 className="text-4xl font-bold mb-4 text-white">404</h1>
+        <p className="text-brand-300 mb-6">This category could not be found.</p>
+        <Link to="/" className="text-accent-electric hover:underline">
+          Return home
+        </Link>
+      </div>
+    </div>
+  </Layout>
+);
+
 // ─── CategoryPage ─────────────────────────────────────────────────────────────
 const CategoryPage: React.FC = () => {
-  const { category } = useParams<{ category: string }>();
+  const { category, productType } = useParams<{ category: string; productType?: string }>();
   const [searchParams, setSearchParams] = useSearchParams();
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [heroConfig, setHeroConfig] = useState<CategoryHeroConfig | null>(null);
+  const [productTypes, setProductTypes] = useState<string[]>([]);
+  const [isProductTypesLoading, setIsProductTypesLoading] = useState(true);
 
   const [filters, setFilters] = useState({
     sizes: searchParams.get('sizes')?.split(',').filter(Boolean),
@@ -210,44 +240,84 @@ const CategoryPage: React.FC = () => {
   const page = Number(searchParams.get('page')) || 1;
   const sort = searchParams.get('sort') || '-createdAt';
   const normalizedCategory = category?.toLowerCase().trim() || 'all';
+  const normalizedProductType = productType?.toLowerCase().trim();
+  const parentCategory = normalizedCategory;
+  const selectedProductType = productTypes.find((type) => slugify(type) === normalizedProductType);
+  const productTypeTitle = selectedProductType || (normalizedProductType ? formatRouteLabel(normalizedProductType) : undefined);
 
   const categoryTitle =
     normalizedCategory === 'all' ? 'All Products'
     : normalizedCategory === 'new-arrivals' ? 'Just Dropped'
     : normalizedCategory === 'new-out' ? 'New Out'
-    : capitalizeFirst(normalizedCategory);
+    : formatRouteLabel(normalizedCategory);
+  const pageTitle = productTypeTitle || categoryTitle;
+  const canonicalPath = normalizedProductType
+    ? `${getCategoryPath(parentCategory)}/${normalizedProductType}`
+    : getCategoryPath(parentCategory);
+  const heroImage = ((heroConfig?.[parentCategory as keyof CategoryHeroConfig] as CategoryHeroMedia | undefined)?.mediaUrl) || '/images/Cualquier_logo.png';
+  const isInvalidProductType = Boolean(normalizedProductType && !isProductTypesLoading && !selectedProductType);
 
   // Fetch dynamic hero config — silently falls back to hardcoded if unavailable
   useEffect(() => {
     productsApi.getCategoryHeroes().then(setHeroConfig).catch(() => {});
   }, []);
 
+  useEffect(() => {
+    let isMounted = true;
+    setIsProductTypesLoading(true);
+
+    productsApi
+      .getProductTypes(parentCategory !== 'all' ? parentCategory : undefined)
+      .then((types) => {
+        if (isMounted) setProductTypes(types);
+      })
+      .catch(() => {
+        if (isMounted) setProductTypes([]);
+      })
+      .finally(() => {
+        if (isMounted) setIsProductTypesLoading(false);
+      });
+
+    return () => {
+      isMounted = false;
+    };
+  }, [parentCategory]);
 
   useSeo({
-    title: `${categoryTitle} | Cualquier`,
-    description: normalizedCategory === 'new-arrivals' || normalizedCategory === 'new-out'
-      ? 'The freshest drops. All new clothes, just landed at Cualquier.'
-      : `Shop ${capitalizeFirst(normalizedCategory)} apparel and streetwear from Cualquier.`,
-    canonicalPath: `/category/${normalizedCategory}`,
+    title: `${pageTitle} | Cualquier`,
+    description: normalizedProductType
+      ? `Shop ${productTypeTitle} for ${categoryTitle} from Cualquier.`
+      : normalizedCategory === 'new-arrivals' || normalizedCategory === 'new-out'
+        ? 'The freshest drops. All new clothes, just landed at Cualquier.'
+        : `Shop ${categoryTitle} apparel and streetwear from Cualquier.`,
+    canonicalPath,
     ogType: 'website',
-    image: ((heroConfig?.[normalizedCategory as keyof CategoryHeroConfig] as CategoryHeroMedia | undefined)?.mediaUrl) || '/images/Cualquier_logo.png',
+    image: heroImage,
     jsonLd: {
       '@context': 'https://schema.org',
       '@type': 'BreadcrumbList',
       itemListElement: [
         { '@type': 'ListItem', position: 1, name: 'Home', item: `${window.location.origin}/` },
-        { '@type': 'ListItem', position: 2, name: capitalizeFirst(normalizedCategory), item: `${window.location.origin}/category/${normalizedCategory}` },
+        { '@type': 'ListItem', position: 2, name: categoryTitle, item: `${window.location.origin}${getCategoryPath(parentCategory)}` },
+        ...(normalizedProductType ? [
+          { '@type': 'ListItem', position: 3, name: productTypeTitle, item: `${window.location.origin}${canonicalPath}` },
+        ] : []),
       ],
     },
   });
 
   const { products, isLoading, pagination } = useProducts({
-    category: normalizedCategory !== 'all' ? normalizedCategory : undefined,
+    category: parentCategory !== 'all' ? parentCategory : undefined,
+    productType: selectedProductType || normalizedProductType,
     page,
     limit: 12,
     sort,
     ...filters,
   });
+
+  if (isInvalidProductType) {
+    return <NotFoundCategoryPage />;
+  }
 
   const handleFilterChange = (newFilters: typeof filters) => {
     setFilters(newFilters);
@@ -284,13 +354,17 @@ const CategoryPage: React.FC = () => {
     <Layout>
       {/* Full-width cinematic hero */}
       <CategoryHero
-        category={normalizedCategory}
-        breadcrumbLabel={categoryTitle}
+        category={parentCategory}
+        breadcrumbLabel={normalizedProductType ? `${categoryTitle} / ${productTypeTitle}` : categoryTitle}
         heroConfig={heroConfig}
       />
 
-      {/* Horizontal subcategory pills */}
-      <SubCategoryBar category={normalizedCategory} />
+      {/* Product-type navigation is generated from active product data for this parent category. */}
+      <ProductTypeBar
+        category={parentCategory}
+        productTypes={productTypes}
+        activeProductType={normalizedProductType}
+      />
 
       {/* Product section — transparent so space background shows through */}
       <div className="min-h-screen">
