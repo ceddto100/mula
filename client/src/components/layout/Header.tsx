@@ -5,11 +5,11 @@ import { useAuth } from '../../context/AuthContext';
 import { useCart } from '../../context/CartContext';
 
 const NAV_ITEMS = [
-  { label: 'NEW', path: '/category/new-arrivals' },
-  { label: 'MEN', path: '/category/men' },
-  { label: 'WOMEN', path: '/category/women' },
-  { label: 'COLLECTIONS', path: '/category/collections' },
-  { label: 'SALE', path: '/category/sale' },
+  { label: 'NEW', path: '/new-arrivals' },
+  { label: 'MEN', path: '/men' },
+  { label: 'WOMEN', path: '/women' },
+  { label: 'COLLECTIONS', path: '/collections' },
+  { label: 'SALE', path: '/sale' },
 ];
 
 const Header: React.FC = () => {
