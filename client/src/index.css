@@ -123,6 +123,19 @@ input[type="number"] {
   contain-intrinsic-size: 1px 800px;
 }
 
+/*
+ * Mobile Safari/Chrome can defer painting tall product grids for too long when
+ * content-visibility is combined with scroll-triggered opacity transitions.
+ * Keep mobile sections in normal paint/layout flow so homepage products are
+ * visible as soon as the user scrolls to them.
+ */
+@media (max-width: 767px) {
+  .cv-auto {
+    content-visibility: visible;
+    contain-intrinsic-size: none;
+  }
+}
+
 /* Contemporary brand typography */
 .font-display {
   font-family: var(--site-heading-font);

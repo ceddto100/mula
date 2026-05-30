@@ -268,7 +268,7 @@ const Home: React.FC = () => {
       </section>
 
       {/* Shop By Style — full-bleed horizontal strip, no outer padding */}
-      <section className="relative bg-transparent animate-on-scroll opacity-0 translate-y-12 transition-all duration-1000 cv-auto">
+      <section className="relative bg-transparent animate-on-scroll opacity-100 translate-y-0 md:opacity-0 md:translate-y-12 transition-all duration-1000 cv-auto">
         {/* Section label — constrained to readable width */}
         <div className="py-14 text-center max-w-7xl mx-auto px-4">
           <h2 className="text-6xl md:text-7xl font-display text-gray-900 mb-4">{content.shopByStyle.sectionTitle}</h2>
@@ -338,7 +338,7 @@ const Home: React.FC = () => {
       </section>
 
       {/* Featured Products with Bold Header */}
-      <section className="py-24 bg-transparent animate-on-scroll opacity-0 translate-y-12 transition-all duration-1000 cv-auto">
+      <section className="py-24 bg-transparent animate-on-scroll opacity-100 translate-y-0 md:opacity-0 md:translate-y-12 transition-all duration-1000 cv-auto">
         <div className="max-w-7xl mx-auto px-4">
           <div className="mb-16 flex flex-col lg:flex-row lg:items-end lg:justify-between gap-6">
             <div>
@@ -361,7 +361,7 @@ const Home: React.FC = () => {
       </section>
 
       {/* Bold Brand Statement Section */}
-      <section className="relative py-32 bg-brand-900 overflow-hidden animate-on-scroll opacity-0 translate-y-12 transition-all duration-1000 cv-auto">
+      <section className="relative py-32 bg-brand-900 overflow-hidden animate-on-scroll opacity-100 translate-y-0 md:opacity-0 md:translate-y-12 transition-all duration-1000 cv-auto">
         <div className="absolute inset-0 bg-gradient-to-r from-brand-900 via-brand-800/80 to-brand-900" />
 
         {/* Large Background Text */}
@@ -389,7 +389,7 @@ const Home: React.FC = () => {
       </section>
 
       {/* Newsletter - Bold CTA */}
-      <section className="py-20 bg-transparent animate-on-scroll opacity-0 translate-y-12 transition-all duration-1000 cv-auto">
+      <section className="py-20 bg-transparent animate-on-scroll opacity-100 translate-y-0 md:opacity-0 md:translate-y-12 transition-all duration-1000 cv-auto">
         <div className="max-w-4xl mx-auto px-4">
           <div
             className="p-12 lg:p-16 relative overflow-hidden"
