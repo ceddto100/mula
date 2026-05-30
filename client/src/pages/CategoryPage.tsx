@@ -110,11 +110,12 @@ function getOptimizedHeroUrl(url: string): string {
 // ─── CategoryHero ─────────────────────────────────────────────────────────────
 interface CategoryHeroProps {
   category: string;
-  breadcrumbLabel: string;
+  categoryLabel: string;
+  productTypeLabel?: string;
   heroConfig: CategoryHeroConfig | null;
 }
 
-const CategoryHero: React.FC<CategoryHeroProps> = ({ category, breadcrumbLabel, heroConfig }) => {
+const CategoryHero: React.FC<CategoryHeroProps> = ({ category, categoryLabel, productTypeLabel, heroConfig }) => {
   // Use API data if available; otherwise fall back to text-only defaults with no media URL
   const config: CategoryHeroMedia =
     (heroConfig?.[category as keyof CategoryHeroConfig] as CategoryHeroMedia | undefined) ??
@@ -152,7 +153,15 @@ const CategoryHero: React.FC<CategoryHeroProps> = ({ category, breadcrumbLabel, 
             Home
           </Link>
           <FiChevronRight size={11} className="opacity-50" />
-          <span className="text-brand-300 uppercase">{breadcrumbLabel}</span>
+          <Link to={getCategoryPath(category)} className="hover:text-accent-electric transition-colors uppercase">
+            {categoryLabel}
+          </Link>
+          {productTypeLabel && (
+            <>
+              <FiChevronRight size={11} className="opacity-50" />
+              <span className="text-brand-300 uppercase">{productTypeLabel}</span>
+            </>
+          )}
         </nav>
 
         {/* Hero text — bottom-anchored */}
@@ -228,6 +237,7 @@ const CategoryPage: React.FC = () => {
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [heroConfig, setHeroConfig] = useState<CategoryHeroConfig | null>(null);
   const [productTypes, setProductTypes] = useState<string[]>([]);
+  const [productTypesLoaded, setProductTypesLoaded] = useState(false);
 
   const [filters, setFilters] = useState({
     sizes: searchParams.get('sizes')?.split(',').filter(Boolean),
@@ -238,8 +248,8 @@ const CategoryPage: React.FC = () => {
 
   const page = Number(searchParams.get('page')) || 1;
   const sort = searchParams.get('sort') || '-createdAt';
-  const normalizedCategory = category?.toLowerCase().trim() || 'all';
-  const normalizedProductType = productType?.toLowerCase().trim();
+  const normalizedCategory = category ? slugify(category) : 'all';
+  const normalizedProductType = productType ? slugify(productType) : undefined;
   const parentCategory = normalizedCategory;
   const selectedProductType = productTypes.find((type) => slugify(type) === normalizedProductType);
   const productTypeTitle = selectedProductType || (normalizedProductType ? formatRouteLabel(normalizedProductType) : undefined);
@@ -262,6 +272,7 @@ const CategoryPage: React.FC = () => {
 
   useEffect(() => {
     let isMounted = true;
+    setProductTypesLoaded(false);
     productsApi
       .getProductTypes()
       .then((types) => {
@@ -269,12 +280,15 @@ const CategoryPage: React.FC = () => {
       })
       .catch(() => {
         if (isMounted) setProductTypes([]);
+      })
+      .finally(() => {
+        if (isMounted) setProductTypesLoaded(true);
       });
 
     return () => {
       isMounted = false;
     };
-  }, [parentCategory]);
+  }, []);
 
   useSeo({
     title: `${pageTitle} | Cualquier`,
@@ -308,7 +322,13 @@ const CategoryPage: React.FC = () => {
     ...filters,
   });
 
-  const isInvalidProductType = Boolean(normalizedProductType && !isLoading && pagination.total === 0);
+  const isInvalidProductType = Boolean(
+    normalizedProductType &&
+    productTypesLoaded &&
+    !isLoading &&
+    !selectedProductType &&
+    pagination.total === 0
+  );
 
   if (isInvalidProductType) {
     return <NotFoundCategoryPage />;
@@ -316,7 +336,12 @@ const CategoryPage: React.FC = () => {
 
   const handleFilterChange = (newFilters: typeof filters) => {
     setFilters(newFilters);
-    const params = new URLSearchParams();
+    const params = new URLSearchParams(searchParams);
+    params.delete('sizes');
+    params.delete('colors');
+    params.delete('minPrice');
+    params.delete('maxPrice');
+    params.delete('page');
     if (newFilters.sizes?.length) params.set('sizes', newFilters.sizes.join(','));
     if (newFilters.colors?.length) params.set('colors', newFilters.colors.join(','));
     if (newFilters.minPrice) params.set('minPrice', String(newFilters.minPrice));
@@ -350,7 +375,8 @@ const CategoryPage: React.FC = () => {
       {/* Full-width cinematic hero */}
       <CategoryHero
         category={parentCategory}
-        breadcrumbLabel={normalizedProductType ? `${categoryTitle} / ${productTypeTitle}` : categoryTitle}
+        categoryLabel={categoryTitle}
+        productTypeLabel={normalizedProductType ? productTypeTitle : undefined}
         heroConfig={heroConfig}
       />
 
