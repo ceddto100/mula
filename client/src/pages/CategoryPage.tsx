@@ -273,8 +273,10 @@ const CategoryPage: React.FC = () => {
   useEffect(() => {
     let isMounted = true;
     setProductTypesLoaded(false);
+    // Scope product types to the parent category so the nav bar shows only
+    // relevant types (e.g. only men's types on /men).
     productsApi
-      .getProductTypes()
+      .getProductTypes(normalizedCategory)
       .then((types) => {
         if (isMounted) setProductTypes(types);
       })
@@ -288,7 +290,7 @@ const CategoryPage: React.FC = () => {
     return () => {
       isMounted = false;
     };
-  }, []);
+  }, [normalizedCategory]);
 
   useSeo({
     title: `${pageTitle} | Cualquier`,
@@ -314,8 +316,16 @@ const CategoryPage: React.FC = () => {
   });
 
   const { products, isLoading, pagination } = useProducts({
-    category: normalizedProductType || parentCategory === 'all' ? undefined : parentCategory,
-    productType: selectedProductType || normalizedProductType,
+    // When a productType is present the backend filters by productType alone;
+    // sending category too would be redundant and the backend ignores it.
+    // For parent-category pages pass the category; skip it for "all" / new-arrivals / new-out.
+    category: normalizedProductType
+      ? undefined
+      : parentCategory === 'all' ? undefined : parentCategory,
+    // Use the raw slug — the backend resolves it to the canonical productType
+    // via findProductTypeForSlug so we never need a separate round-trip to get
+    // the canonical casing before the product fetch can start.
+    productType: normalizedProductType,
     page,
     limit: 12,
     sort,
