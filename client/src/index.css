@@ -136,8 +136,18 @@ input[type="number"] {
   }
 }
 
-/* Contemporary brand typography */
-.font-display {
+/* ── Main content paragraphs ──────────────────────────────────────────────────
+ * The site background is white (logo image). p elements that sit on that
+ * white surface need black text to be readable.
+ * Scope to <main> so the header and footer are unaffected.
+ * Hero, nav-bar, and dark-card p elements already carry explicit Tailwind
+ * color utilities (text-white, text-brand-300, etc.) whose class-level
+ * specificity (0,1,0,0) beats this element-level rule (0,0,1,1), so those
+ * colours are preserved automatically without needing any overrides here.
+ */
+main p {
+  color: #000;
+}
   font-family: var(--site-heading-font);
   letter-spacing: 0.05em;
 }
