@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { FiShoppingBag, FiUser, FiMenu, FiX, FiSearch, FiHeart } from 'react-icons/fi';
 import { useAuth } from '../../context/AuthContext';
@@ -19,6 +19,31 @@ const Header: React.FC = () => {
   const { isAuthenticated, user } = useAuth();
   const { itemCount } = useCart();
   const navigate = useNavigate();
+
+  // Lock background scroll while the mobile menu is open, and close the menu
+  // or search overlay on Escape.
+  useEffect(() => {
+    const lock = isMobileMenuOpen;
+    if (lock) {
+      const prevOverflow = document.body.style.overflow;
+      document.body.style.overflow = 'hidden';
+      return () => {
+        document.body.style.overflow = prevOverflow;
+      };
+    }
+  }, [isMobileMenuOpen]);
+
+  useEffect(() => {
+    if (!isMobileMenuOpen && !isSearchOpen) return;
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        setIsMobileMenuOpen(false);
+        setIsSearchOpen(false);
+      }
+    };
+    window.addEventListener('keydown', onKeyDown);
+    return () => window.removeEventListener('keydown', onKeyDown);
+  }, [isMobileMenuOpen, isSearchOpen]);
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();

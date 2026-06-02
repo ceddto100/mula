@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { FiX, FiChevronDown } from 'react-icons/fi';
 import { SIZES, COLORS } from '../../utils/constants';
 
@@ -21,6 +21,21 @@ const ProductFilters: React.FC<ProductFiltersProps> = ({
   onClose,
 }) => {
   const [openSections, setOpenSections] = useState<string[]>(['size', 'color', 'price']);
+
+  // Lock background scroll and enable Escape-to-close while the drawer is open.
+  useEffect(() => {
+    if (!isOpen) return;
+    const prevOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') onClose();
+    };
+    window.addEventListener('keydown', onKeyDown);
+    return () => {
+      document.body.style.overflow = prevOverflow;
+      window.removeEventListener('keydown', onKeyDown);
+    };
+  }, [isOpen, onClose]);
 
   const toggleSection = (section: string) => {
     setOpenSections((prev) =>

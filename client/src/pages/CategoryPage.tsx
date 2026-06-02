@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useParams, useSearchParams, Link } from 'react-router-dom';
 import { FiFilter, FiChevronRight } from 'react-icons/fi';
 import Layout from '../components/layout/Layout';
@@ -157,8 +157,11 @@ const CategoryHero: React.FC<CategoryHeroProps> = ({ category, categoryLabel, pr
       ) : bgUrl ? (
         <img
           src={getOptimizedHeroUrl(bgUrl)}
-          alt={config.title}
+          alt={config.title || 'Category hero'}
           className="absolute inset-0 w-full h-full object-cover object-center"
+          loading="eager"
+          fetchPriority="high"
+          decoding="async"
         />
       ) : null}
 
@@ -257,12 +260,14 @@ const CategoryPage: React.FC = () => {
   const [productTypes, setProductTypes] = useState<string[]>([]);
   const [productTypesLoaded, setProductTypesLoaded] = useState(false);
 
-  const [filters, setFilters] = useState({
+  // Filters are derived directly from the URL so back/forward navigation and
+  // programmatic URL changes always stay in sync — no separate state to drift.
+  const filters = useMemo(() => ({
     sizes: searchParams.get('sizes')?.split(',').filter(Boolean),
     colors: searchParams.get('colors')?.split(',').filter(Boolean),
     minPrice: searchParams.get('minPrice') ? Number(searchParams.get('minPrice')) : undefined,
     maxPrice: searchParams.get('maxPrice') ? Number(searchParams.get('maxPrice')) : undefined,
-  });
+  }), [searchParams]);
 
   const page = Number(searchParams.get('page')) || 1;
   const sort = searchParams.get('sort') || '-createdAt';
@@ -383,7 +388,6 @@ const CategoryPage: React.FC = () => {
   }
 
   const handleFilterChange = (newFilters: typeof filters) => {
-    setFilters(newFilters);
     const params = new URLSearchParams(searchParams);
     params.delete('sizes');
     params.delete('colors');
@@ -417,6 +421,21 @@ const CategoryPage: React.FC = () => {
     (filters.colors?.length || 0) +
     (filters.minPrice ? 1 : 0) +
     (filters.maxPrice ? 1 : 0);
+
+  // Truncated page list (first, last, and a window around current) so large
+  // catalogs don't render hundreds of buttons. `'…'` marks a gap.
+  const pageItems = useMemo<(number | '…')[]>(() => {
+    const total = pagination.pages;
+    if (total <= 7) return Array.from({ length: total }, (_, i) => i + 1);
+    const items: (number | '…')[] = [1];
+    const start = Math.max(2, page - 1);
+    const end = Math.min(total - 1, page + 1);
+    if (start > 2) items.push('…');
+    for (let p = start; p <= end; p++) items.push(p);
+    if (end < total - 1) items.push('…');
+    items.push(total);
+    return items;
+  }, [pagination.pages, page]);
 
   return (
     <Layout>
@@ -497,19 +516,25 @@ const CategoryPage: React.FC = () => {
                 Prev
               </button>
 
-              {[...Array(pagination.pages)].map((_, i) => (
-                <button
-                  key={i + 1}
-                  onClick={() => handlePageChange(i + 1)}
-                  className={`w-9 h-9 font-grotesk text-sm tracking-wider transition-all ${
-                    page === i + 1
-                      ? 'bg-accent-electric text-brand-900 font-bold shadow-[0_0_18px_rgba(0,229,255,0.5)]'
-                      : 'border border-brand-600 text-brand-400 hover:border-accent-electric hover:text-accent-electric'
-                  }`}
-                >
-                  {i + 1}
-                </button>
-              ))}
+              {pageItems.map((item, i) =>
+                item === '…' ? (
+                  <span key={`gap-${i}`} className="w-9 h-9 flex items-center justify-center text-brand-500 font-grotesk text-sm">
+                    …
+                  </span>
+                ) : (
+                  <button
+                    key={item}
+                    onClick={() => handlePageChange(item)}
+                    className={`w-9 h-9 font-grotesk text-sm tracking-wider transition-all ${
+                      page === item
+                        ? 'bg-accent-electric text-brand-900 font-bold shadow-[0_0_18px_rgba(0,229,255,0.5)]'
+                        : 'border border-brand-600 text-brand-400 hover:border-accent-electric hover:text-accent-electric'
+                    }`}
+                  >
+                    {item}
+                  </button>
+                )
+              )}
 
               <button
                 onClick={() => handlePageChange(page + 1)}
