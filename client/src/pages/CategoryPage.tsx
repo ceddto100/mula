@@ -95,6 +95,13 @@ const getProductTypePath = (category: string, productType: string): string => {
     : `${parentPath}/${productTypeSlug}`;
 };
 
+// Parent-category slugs that use gender/tag filtering on the backend.
+// Any slug NOT in this set and not paired with a nested :productType param
+// is treated as a flat product-type URL (e.g. /category/pants).
+const KNOWN_PARENT_CATEGORIES = new Set([
+  'all', 'men', 'women', 'sale', 'new-arrivals', 'new-out', 'collections', 'denim', 'hoodies',
+]);
+
 const HERO_TRANSFORMS = 'w_2400,h_1200,c_fill,g_auto,f_auto,q_auto';
 
 function getOptimizedHeroUrl(url: string): string {
@@ -251,8 +258,21 @@ const CategoryPage: React.FC = () => {
   const normalizedCategory = category ? slugify(category) : 'all';
   const normalizedProductType = productType ? slugify(productType) : undefined;
   const parentCategory = normalizedCategory;
-  const selectedProductType = productTypes.find((type) => slugify(type) === normalizedProductType);
-  const productTypeTitle = selectedProductType || (normalizedProductType ? formatRouteLabel(normalizedProductType) : undefined);
+
+  // Flat product-type mode: /category/pants has no known parent category in the URL.
+  // Treat the category slug itself as a productType filter so the backend uses
+  // productType matching instead of tag filtering.
+  const isKnownParent = KNOWN_PARENT_CATEGORIES.has(normalizedCategory);
+  const flatProductTypeSlug = !isKnownParent && !normalizedProductType ? normalizedCategory : undefined;
+  // The slug used for backend filtering — prefers the explicit :productType param,
+  // then the flat slug, then nothing (parent-category page).
+  const effectiveProductType = normalizedProductType || flatProductTypeSlug;
+
+  // Find the canonical casing (e.g. "Pants") from the loaded list for display purposes.
+  const selectedProductType = productTypes.find(
+    (type) => slugify(type) === effectiveProductType
+  );
+  const productTypeTitle = selectedProductType || (effectiveProductType ? formatRouteLabel(effectiveProductType) : undefined);
 
   const categoryTitle =
     normalizedCategory === 'all' ? 'All Products'
@@ -274,9 +294,11 @@ const CategoryPage: React.FC = () => {
     let isMounted = true;
     setProductTypesLoaded(false);
     // Scope product types to the parent category so the nav bar shows only
-    // relevant types (e.g. only men's types on /men).
+    // relevant types (e.g. only men's types on /men). In flat product-type
+    // mode there is no meaningful parent, so fetch without a category filter
+    // (the bar is hidden in that mode anyway).
     productsApi
-      .getProductTypes(normalizedCategory)
+      .getProductTypes(isKnownParent ? normalizedCategory : undefined)
       .then((types) => {
         if (isMounted) setProductTypes(types);
       })
@@ -294,8 +316,8 @@ const CategoryPage: React.FC = () => {
 
   useSeo({
     title: `${pageTitle} | Cualquier`,
-    description: normalizedProductType
-      ? `Shop ${productTypeTitle} for ${categoryTitle} from Cualquier.`
+    description: effectiveProductType
+      ? `Shop ${productTypeTitle} from Cualquier.`
       : normalizedCategory === 'new-arrivals' || normalizedCategory === 'new-out'
         ? 'The freshest drops. All new clothes, just landed at Cualquier.'
         : `Shop ${categoryTitle} apparel and streetwear from Cualquier.`,
@@ -307,25 +329,28 @@ const CategoryPage: React.FC = () => {
       '@type': 'BreadcrumbList',
       itemListElement: [
         { '@type': 'ListItem', position: 1, name: 'Home', item: `${window.location.origin}/` },
-        { '@type': 'ListItem', position: 2, name: categoryTitle, item: `${window.location.origin}${getCategoryPath(parentCategory)}` },
-        ...(normalizedProductType ? [
-          { '@type': 'ListItem', position: 3, name: productTypeTitle, item: `${window.location.origin}${canonicalPath}` },
+        // Flat product-type mode (/category/pants) has no parent category level.
+        ...(isKnownParent ? [
+          { '@type': 'ListItem', position: 2, name: categoryTitle, item: `${window.location.origin}${getCategoryPath(parentCategory)}` },
+        ] : []),
+        ...(effectiveProductType ? [
+          { '@type': 'ListItem', position: isKnownParent ? 3 : 2, name: productTypeTitle, item: `${window.location.origin}${canonicalPath}` },
         ] : []),
       ],
     },
   });
 
   const { products, isLoading, pagination } = useProducts({
-    // When a productType is present the backend filters by productType alone;
-    // sending category too would be redundant and the backend ignores it.
-    // For parent-category pages pass the category; skip it for "all" / new-arrivals / new-out.
-    category: normalizedProductType
+    // When filtering by productType the backend ignores the category param,
+    // so only send category for parent-category pages.
+    category: effectiveProductType
       ? undefined
-      : parentCategory === 'all' ? undefined : parentCategory,
-    // Use the raw slug — the backend resolves it to the canonical productType
-    // via findProductTypeForSlug so we never need a separate round-trip to get
-    // the canonical casing before the product fetch can start.
-    productType: normalizedProductType,
+      : isKnownParent && normalizedCategory !== 'all'
+        ? normalizedCategory
+        : undefined,
+    // Backend resolves slugs (e.g. "pants" → "Pants") via findProductTypeForSlug,
+    // so the raw slug is sufficient — no second fetch needed.
+    productType: effectiveProductType,
     page,
     limit: 12,
     sort,
@@ -333,7 +358,7 @@ const CategoryPage: React.FC = () => {
   });
 
   const isInvalidProductType = Boolean(
-    normalizedProductType &&
+    effectiveProductType &&
     productTypesLoaded &&
     !isLoading &&
     !selectedProductType &&
@@ -382,20 +407,27 @@ const CategoryPage: React.FC = () => {
 
   return (
     <Layout>
-      {/* Full-width cinematic hero */}
+      {/* Full-width cinematic hero.
+          Flat mode (/category/pants): passes the product-type slug as `category`
+          so the fallback chain generates "THE PANTS SHOP" when no heroConfig key exists.
+          Parent-scoped mode (/men/pants): passes the parent slug so the men/women/etc.
+          hero config/fallback is used. */}
       <CategoryHero
-        category={parentCategory}
-        categoryLabel={categoryTitle}
+        category={flatProductTypeSlug ? normalizedCategory : parentCategory}
+        categoryLabel={flatProductTypeSlug ? (productTypeTitle ?? categoryTitle) : categoryTitle}
         productTypeLabel={normalizedProductType ? productTypeTitle : undefined}
         heroConfig={heroConfig}
       />
 
-      {/* Product-type navigation is generated from active product data for this parent category. */}
-      <ProductTypeBar
-        category={parentCategory}
-        productTypes={productTypes}
-        activeProductType={normalizedProductType}
-      />
+      {/* Product-type navigation — hidden in flat mode because there is no parent
+          category context to anchor the links to. */}
+      {isKnownParent && (
+        <ProductTypeBar
+          category={parentCategory}
+          productTypes={productTypes}
+          activeProductType={normalizedProductType}
+        />
+      )}
 
       {/* Product section — transparent so space background shows through */}
       <div className="min-h-screen">
