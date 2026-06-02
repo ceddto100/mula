@@ -120,10 +120,17 @@ interface CategoryHeroProps {
   categoryLabel: string;
   productTypeLabel?: string;
   heroConfig: CategoryHeroConfig | null;
+  /** Homepage hero image/video URL — used as the background on every category page. */
+  homeHeroUrl: string;
 }
 
-const CategoryHero: React.FC<CategoryHeroProps> = ({ category, categoryLabel, productTypeLabel, heroConfig }) => {
-  // Use API data if available; otherwise fall back to text-only defaults with no media URL
+const isVideoUrl = (url: string): boolean =>
+  /\.(mp4|mov|webm|avi)(\?.*)?$/i.test(url) || url.includes('/video/upload/');
+
+const CategoryHero: React.FC<CategoryHeroProps> = ({ category, categoryLabel, productTypeLabel, heroConfig, homeHeroUrl }) => {
+  // Text (title + subtitle) comes from the category config/fallback.
+  // Background always uses the homepage hero media so every page shares
+  // the same strong visual without hardcoding per-category images.
   const config: CategoryHeroMedia =
     (heroConfig?.[category as keyof CategoryHeroConfig] as CategoryHeroMedia | undefined) ??
     HERO_FALLBACKS[category] ?? {
@@ -131,10 +138,13 @@ const CategoryHero: React.FC<CategoryHeroProps> = ({ category, categoryLabel, pr
       title: `THE ${(category || 'SHOP').toUpperCase()} SHOP`,
     };
 
+  const bgUrl = homeHeroUrl || config.mediaUrl;
+  const bgIsVideo = bgUrl ? isVideoUrl(bgUrl) : false;
+
   return (
     <div className="relative -mt-20 lg:-mt-24 h-[calc(50vh+5rem)] min-h-[calc(380px+5rem)] lg:h-[calc(50vh+6rem)] lg:min-h-[calc(380px+6rem)] overflow-hidden">
       {/* Background — video or image */}
-      {config.mediaType === 'video' ? (
+      {bgIsVideo ? (
         <video
           autoPlay
           muted
@@ -142,11 +152,11 @@ const CategoryHero: React.FC<CategoryHeroProps> = ({ category, categoryLabel, pr
           playsInline
           className="absolute inset-0 w-full h-full object-cover object-center"
         >
-          <source src={config.mediaUrl} />
+          <source src={bgUrl} />
         </video>
-      ) : config.mediaUrl ? (
+      ) : bgUrl ? (
         <img
-          src={getOptimizedHeroUrl(config.mediaUrl)}
+          src={getOptimizedHeroUrl(bgUrl)}
           alt={config.title}
           className="absolute inset-0 w-full h-full object-cover object-center"
         />
@@ -243,6 +253,7 @@ const CategoryPage: React.FC = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [heroConfig, setHeroConfig] = useState<CategoryHeroConfig | null>(null);
+  const [homeHeroUrl, setHomeHeroUrl] = useState('');
   const [productTypes, setProductTypes] = useState<string[]>([]);
   const [productTypesLoaded, setProductTypesLoaded] = useState(false);
 
@@ -285,9 +296,11 @@ const CategoryPage: React.FC = () => {
     : getCategoryPath(parentCategory);
   const heroImage = ((heroConfig?.[parentCategory as keyof CategoryHeroConfig] as CategoryHeroMedia | undefined)?.mediaUrl) || '/images/Cualquier_logo.png';
 
-  // Fetch dynamic hero config — silently falls back to hardcoded if unavailable
+  // Fetch dynamic hero config and the homepage hero image. Both endpoints are
+  // cached in productsApi so these are free re-uses of already-warm data.
   useEffect(() => {
     productsApi.getCategoryHeroes().then(setHeroConfig).catch(() => {});
+    productsApi.getHomePageImages().then((imgs) => setHomeHeroUrl(imgs.heroImage || '')).catch(() => {});
   }, []);
 
   useEffect(() => {
@@ -417,6 +430,7 @@ const CategoryPage: React.FC = () => {
         categoryLabel={flatProductTypeSlug ? (productTypeTitle ?? categoryTitle) : categoryTitle}
         productTypeLabel={normalizedProductType ? productTypeTitle : undefined}
         heroConfig={heroConfig}
+        homeHeroUrl={homeHeroUrl}
       />
 
       {/* Product-type navigation — hidden in flat mode because there is no parent
