@@ -34,6 +34,26 @@ export const getProductDescription = (product: Product): string =>
 
 export const getProductCategory = (product: Product): string => product.productType || 'Uncategorized';
 
+// Header categories a product can belong to, in priority order for the fallback.
+const HEADER_CATEGORY_TAGS = ['men', 'women', 'collections', 'sale'];
+
+/**
+ * Resolves the header category a single product belongs to, using the product's
+ * OWN context — gender first, then its header-category tags. This is not a
+ * "dominant category" guess across products: it reflects this one product, so a
+ * men's item resolves to `men` and a women's item to `women`.
+ * Returns null when the product has no resolvable header category.
+ */
+export const getProductHeaderCategory = (product: Product): string | null => {
+  if (product.gender === 'men' || product.gender === 'women') {
+    return product.gender;
+  }
+  const tag = (product.tags || [])
+    .map((t) => t.toLowerCase())
+    .find((t) => HEADER_CATEGORY_TAGS.includes(t));
+  return tag || null;
+};
+
 export const getProductColors = (product: Product): string[] => {
   if (product.colorFamily?.length) {
     return product.colorFamily;
