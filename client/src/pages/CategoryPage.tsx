@@ -219,7 +219,7 @@ const ProductTypeBar: React.FC<ProductTypeBarProps> = ({ category, productTypes,
   if (!productTypes.length) return null;
 
   return (
-    <div className="bg-brand-900/70 backdrop-blur-sm border-b border-brand-700/60">
+    <div className="bg-brand-900 border-b border-brand-700">
       <div className="max-w-7xl mx-auto px-6">
         <div className="flex items-center gap-3 overflow-x-auto py-4 scrollbar-hide">
           {productTypes.map((productType) => {
@@ -230,10 +230,10 @@ const ProductTypeBar: React.FC<ProductTypeBarProps> = ({ category, productTypes,
               <Link
                 key={productType}
                 to={getProductTypePath(category, productType)}
-                className={`flex-shrink-0 px-5 py-2 rounded-full border font-grotesk text-sm tracking-wide whitespace-nowrap transition-all duration-200 ${
+                className={`flex-shrink-0 px-5 py-2 rounded-full font-grotesk font-semibold text-sm tracking-wide whitespace-nowrap transition-all duration-200 ${
                   isActive
-                    ? 'border-accent-electric text-accent-electric shadow-[0_0_10px_rgba(0,229,255,0.25)]'
-                    : 'border-brand-600 text-brand-300 hover:border-accent-electric hover:text-accent-electric hover:shadow-[0_0_10px_rgba(0,229,255,0.25)]'
+                    ? 'bg-accent-electric text-brand-900 shadow-[0_0_16px_rgba(0,229,255,0.5)]'
+                    : 'bg-white text-brand-900 shadow-sm hover:bg-accent-electric hover:shadow-[0_0_16px_rgba(0,229,255,0.45)]'
                 }`}
               >
                 {productType}
