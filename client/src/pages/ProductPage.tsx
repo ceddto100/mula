@@ -11,6 +11,7 @@ import {
   getProductCategory,
   getProductColors,
   getProductDescription,
+  getProductHeaderCategory,
   getProductMedia,
   getProductName,
   getProductPrice,
@@ -19,7 +20,17 @@ import {
 } from '../utils/productView';
 import toast from 'react-hot-toast';
 import { wishlistStore } from '../utils/wishlist';
+import { slugify } from '../utils/constants';
+import { capitalizeFirst } from '../utils/formatters';
 import { useSeo } from '../hooks/useSeo';
+
+// Builds the product-type URL scoped to the product's own header category, e.g.
+// a men's "Pants" → /category/men/pants. Falls back to the flat /category/pants
+// only when the product has no resolvable header category.
+const getProductTypeHref = (headerCategory: string | null, productType: string): string => {
+  const typeSlug = slugify(productType);
+  return headerCategory ? `/category/${headerCategory}/${typeSlug}` : `/category/${typeSlug}`;
+};
 
 const ProductPage: React.FC = () => {
   const { id, handle } = useParams<{ id?: string; handle?: string }>();
@@ -79,6 +90,8 @@ const ProductPage: React.FC = () => {
   const productName = product ? getProductName(product) : 'Product';
   const productDescription = product ? getProductDescription(product) : '';
   const productCategoryForSeo = product ? getProductCategory(product) : 'shop';
+  const productHeaderCategoryForSeo = product ? getProductHeaderCategory(product) : null;
+  const productTypeHrefForSeo = getProductTypeHref(productHeaderCategoryForSeo, productCategoryForSeo);
   useSeo({
     title: product ? `${productName} | Cualquier` : 'Product | Cualquier',
     description:
@@ -112,8 +125,11 @@ const ProductPage: React.FC = () => {
             '@type': 'BreadcrumbList',
             itemListElement: [
               { '@type': 'ListItem', position: 1, name: 'Home', item: `${window.location.origin}/` },
-              { '@type': 'ListItem', position: 2, name: productCategoryForSeo, item: `${window.location.origin}/category/${productCategoryForSeo.toLowerCase()}` },
-              { '@type': 'ListItem', position: 3, name: productName, item: `${window.location.origin}/products/${product.handle}` },
+              ...(productHeaderCategoryForSeo
+                ? [{ '@type': 'ListItem', position: 2, name: capitalizeFirst(productHeaderCategoryForSeo), item: `${window.location.origin}/${productHeaderCategoryForSeo}` }]
+                : []),
+              { '@type': 'ListItem', position: productHeaderCategoryForSeo ? 3 : 2, name: productCategoryForSeo, item: `${window.location.origin}${productTypeHrefForSeo}` },
+              { '@type': 'ListItem', position: productHeaderCategoryForSeo ? 4 : 3, name: productName, item: `${window.location.origin}/products/${product.handle}` },
             ],
           },
         ]
@@ -153,6 +169,8 @@ const ProductPage: React.FC = () => {
   const productPrice = getProductPrice(product);
   const productStock = getProductStock(product);
   const productCategory = getProductCategory(product);
+  const productHeaderCategory = getProductHeaderCategory(product);
+  const productTypeHref = getProductTypeHref(productHeaderCategory, productCategory);
   const productMedia = getProductMedia(product);
   const productSizes = getProductSizes(product);
   const productColors = getProductColors(product);
@@ -160,11 +178,21 @@ const ProductPage: React.FC = () => {
   return (
     <Layout>
       <div className="max-w-7xl mx-auto px-4 py-8">
-        {/* Breadcrumb */}
+        {/* Breadcrumb — Home / {Header category} / {Product type} / {Product name}.
+            The product-type crumb links to the category-scoped page (e.g.
+            /category/men/pants) so it lists only that category's products. */}
         <nav className="text-sm text-gray-500 mb-6">
           <Link to="/" className="hover:text-gray-900">Home</Link>
           <span className="mx-2">/</span>
-          <Link to={`/category/${productCategory.toLowerCase()}`} className="hover:text-gray-900">
+          {productHeaderCategory && (
+            <>
+              <Link to={`/${productHeaderCategory}`} className="hover:text-gray-900 capitalize">
+                {productHeaderCategory}
+              </Link>
+              <span className="mx-2">/</span>
+            </>
+          )}
+          <Link to={productTypeHref} className="hover:text-gray-900">
             {productCategory}
           </Link>
           <span className="mx-2">/</span>
