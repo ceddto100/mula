@@ -9,6 +9,7 @@ import {
   getProductsByVendor,
   getCategories,
   getProductTypes,
+  getProductTypeCategory,
   getCollections,
   getVendors,
   getFeaturedProducts,
@@ -39,6 +40,7 @@ router.get('/category-heroes', getCategoryHeroesPublic);
 // Taxonomy
 router.get('/categories', getCategories);
 router.get('/types', getProductTypes);
+router.get('/types/:type/category', getProductTypeCategory);
 router.get('/collections', getCollections);
 router.get('/vendors', getVendors);
 

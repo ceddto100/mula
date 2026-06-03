@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { useParams, useSearchParams, Link } from 'react-router-dom';
+import { useParams, useSearchParams, useNavigate, Link } from 'react-router-dom';
 import { FiFilter, FiChevronRight } from 'react-icons/fi';
 import Layout from '../components/layout/Layout';
 import ProductGrid from '../components/product/ProductGrid';
@@ -253,6 +253,7 @@ const NotFoundCategoryPage: React.FC = () => (
 // ─── CategoryPage ─────────────────────────────────────────────────────────────
 const CategoryPage: React.FC = () => {
   const { category, productType } = useParams<{ category: string; productType?: string }>();
+  const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [heroConfig, setHeroConfig] = useState<CategoryHeroConfig | null>(null);
@@ -332,6 +333,27 @@ const CategoryPage: React.FC = () => {
     };
   }, [normalizedCategory]);
 
+  // Flat product-type mode (e.g. /pants or /category/pants): resolve which header
+  // category the product type belongs to and redirect to the category-scoped URL
+  // (e.g. /men/pants) so the page adopts that category's hero, product-type bar,
+  // and category-scoped product list. If it can't be resolved, stay flat.
+  useEffect(() => {
+    if (!flatProductTypeSlug) return;
+    let isMounted = true;
+    productsApi
+      .getProductTypeCategory(flatProductTypeSlug)
+      .then((res) => {
+        if (isMounted && res.category) {
+          navigate(getProductTypePath(res.category, flatProductTypeSlug), { replace: true });
+        }
+      })
+      .catch(() => {});
+
+    return () => {
+      isMounted = false;
+    };
+  }, [flatProductTypeSlug, navigate]);
+
   useSeo({
     title: `${pageTitle} | Cualquier`,
     description: effectiveProductType
@@ -359,13 +381,13 @@ const CategoryPage: React.FC = () => {
   });
 
   const { products, isLoading, pagination } = useProducts({
-    // When filtering by productType the backend ignores the category param,
-    // so only send category for parent-category pages.
-    category: effectiveProductType
-      ? undefined
-      : isKnownParent && normalizedCategory !== 'all'
-        ? normalizedCategory
-        : undefined,
+    // Send the header category whenever there is a real parent in the URL so a
+    // product-type page nested under a category (e.g. /men/pants) is scoped to
+    // BOTH the category and the product type. Flat mode (/category/pants) has no
+    // known parent, so only the product type is sent.
+    category: isKnownParent && normalizedCategory !== 'all'
+      ? normalizedCategory
+      : undefined,
     // Backend resolves slugs (e.g. "pants" → "Pants") via findProductTypeForSlug,
     // so the raw slug is sufficient — no second fetch needed.
     productType: effectiveProductType,

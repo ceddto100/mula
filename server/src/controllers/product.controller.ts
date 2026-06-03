@@ -134,18 +134,21 @@ export const getProducts = async (req: Request, res: Response): Promise<void> =>
       sort = '-publishedAt',
     } = req.query;
 
-    // Build filter - only active products for public. Product-type routes use
-    // the parent category only for page chrome/hero content; the grid itself is
-    // filtered by productType so products do not disappear when they are not
-    // also tagged with the parent navigation category.
+    // Build filter - only active products for public. A product-type page that
+    // also carries a header category (e.g. /men/pants) is scoped by BOTH the
+    // productType and the category, so it shows only that category's products of
+    // that type. A bare product-type request (no category) still matches across
+    // all categories.
     const filter: any = { status: 'active' };
 
     if (productType) {
       const matchedProductType = await findProductTypeForSlug(productType as string, { status: 'active' });
       filter.productType = matchedProductType || '__invalid_product_type__';
-    } else {
-      applyCategoryFilter(filter, category as string | undefined);
     }
+
+    // Always scope by the header category when one is supplied — this applies on
+    // both parent-category pages and product-type pages nested under a category.
+    applyCategoryFilter(filter, category as string | undefined);
 
     if (vendor) {
       filter.vendor = vendor;
@@ -516,6 +519,70 @@ export const getProductTypes = async (req: Request, res: Response): Promise<void
     res.status(500).json({
       success: false,
       message: error.message || 'Error fetching product types',
+    });
+  }
+};
+
+// Resolve which header category a product type belongs to.
+// Used so a bare product-type link (e.g. /pants) can redirect to the
+// category-scoped page (e.g. /men/pants) and adopt that category's hero.
+// Resolution is gender-first (the product's gender field), falling back to
+// header-category tags when no gender is set.
+const HEADER_CATEGORY_TAGS = ['men', 'women', 'collections', 'sale', 'new'];
+
+export const getProductTypeCategory = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { type } = req.params;
+
+    const matchedProductType = await findProductTypeForSlug(type, { status: 'active' });
+    if (!matchedProductType) {
+      res.json({ success: true, data: { category: null, productType: null } });
+      return;
+    }
+
+    const products = await Product.find(
+      { status: 'active', productType: matchedProductType },
+      { gender: 1, tags: 1 }
+    );
+
+    // 1) Gender-first: pick the dominant men/women gender among matching products.
+    const genderCounts: Record<string, number> = {};
+    for (const product of products) {
+      if (product.gender === 'men' || product.gender === 'women') {
+        genderCounts[product.gender] = (genderCounts[product.gender] || 0) + 1;
+      }
+    }
+
+    let category: string | null = null;
+    const topGender = Object.entries(genderCounts).sort((a, b) => b[1] - a[1])[0];
+    if (topGender) {
+      category = topGender[0];
+    } else {
+      // 2) Fallback: dominant header-category tag.
+      const tagCounts: Record<string, number> = {};
+      for (const product of products) {
+        for (const tag of product.tags || []) {
+          const normalized = tag.toLowerCase();
+          if (HEADER_CATEGORY_TAGS.includes(normalized)) {
+            tagCounts[normalized] = (tagCounts[normalized] || 0) + 1;
+          }
+        }
+      }
+      const topTag = Object.entries(tagCounts).sort((a, b) => b[1] - a[1])[0];
+      if (topTag) {
+        // The "new" header tag maps to the /new-arrivals landing page.
+        category = topTag[0] === 'new' ? 'new-arrivals' : topTag[0];
+      }
+    }
+
+    res.json({
+      success: true,
+      data: { category, productType: matchedProductType },
+    });
+  } catch (error: any) {
+    res.status(500).json({
+      success: false,
+      message: error.message || 'Error resolving product type category',
     });
   }
 };
