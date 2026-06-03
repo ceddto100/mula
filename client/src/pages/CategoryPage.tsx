@@ -359,13 +359,13 @@ const CategoryPage: React.FC = () => {
   });
 
   const { products, isLoading, pagination } = useProducts({
-    // When filtering by productType the backend ignores the category param,
-    // so only send category for parent-category pages.
-    category: effectiveProductType
-      ? undefined
-      : isKnownParent && normalizedCategory !== 'all'
-        ? normalizedCategory
-        : undefined,
+    // Send the header category whenever there is a real parent in the URL so a
+    // product-type page nested under a category (e.g. /men/pants) is scoped to
+    // BOTH the category and the product type. Flat mode (/category/pants) has no
+    // known parent, so only the product type is sent.
+    category: isKnownParent && normalizedCategory !== 'all'
+      ? normalizedCategory
+      : undefined,
     // Backend resolves slugs (e.g. "pants" → "Pants") via findProductTypeForSlug,
     // so the raw slug is sufficient — no second fetch needed.
     productType: effectiveProductType,

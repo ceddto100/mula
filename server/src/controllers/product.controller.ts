@@ -134,18 +134,21 @@ export const getProducts = async (req: Request, res: Response): Promise<void> =>
       sort = '-publishedAt',
     } = req.query;
 
-    // Build filter - only active products for public. Product-type routes use
-    // the parent category only for page chrome/hero content; the grid itself is
-    // filtered by productType so products do not disappear when they are not
-    // also tagged with the parent navigation category.
+    // Build filter - only active products for public. A product-type page that
+    // also carries a header category (e.g. /men/pants) is scoped by BOTH the
+    // productType and the category, so it shows only that category's products of
+    // that type. A bare product-type request (no category) still matches across
+    // all categories.
     const filter: any = { status: 'active' };
 
     if (productType) {
       const matchedProductType = await findProductTypeForSlug(productType as string, { status: 'active' });
       filter.productType = matchedProductType || '__invalid_product_type__';
-    } else {
-      applyCategoryFilter(filter, category as string | undefined);
     }
+
+    // Always scope by the header category when one is supplied — this applies on
+    // both parent-category pages and product-type pages nested under a category.
+    applyCategoryFilter(filter, category as string | undefined);
 
     if (vendor) {
       filter.vendor = vendor;
