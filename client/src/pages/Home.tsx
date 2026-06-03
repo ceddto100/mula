@@ -173,15 +173,37 @@ const Home: React.FC = () => {
           }
         });
       },
-      { threshold: 0.1, rootMargin: '0px 0px -100px 0px' }
+      // threshold 0 fires as soon as ANY part of the section crosses into view.
+      // A non-zero threshold can never be met by sections taller than the
+      // viewport (e.g. the Fresh Drops grid with many products), which would
+      // leave them stuck at opacity-0 — visible space, no content.
+      { threshold: 0, rootMargin: '0px 0px -100px 0px' }
     );
 
-    document.querySelectorAll('.animate-on-scroll').forEach((el) => {
-      observerRef.current?.observe(el);
-    });
+    const animatedSections = Array.from(
+      document.querySelectorAll<HTMLElement>('.animate-on-scroll')
+    );
+    animatedSections.forEach((el) => observerRef.current?.observe(el));
+
+    // Safety net: if a section is already in (or scrolled past) the viewport on
+    // load — or the observer otherwise misses it — reveal it directly so content
+    // is never left permanently hidden behind the entrance animation.
+    const revealVisibleSections = () => {
+      animatedSections.forEach((el) => {
+        if (el.classList.contains('animate-in')) return;
+        const rect = el.getBoundingClientRect();
+        if (rect.top < window.innerHeight && rect.bottom > 0) {
+          el.classList.add('animate-in');
+          observerRef.current?.unobserve(el);
+        }
+      });
+    };
+    revealVisibleSections();
+    const revealFallback = window.setTimeout(revealVisibleSections, 1200);
 
     return () => {
       cancelled = true;
+      window.clearTimeout(revealFallback);
       observerRef.current?.disconnect();
     };
   }, []);
