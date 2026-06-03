@@ -115,16 +115,6 @@ export const productsApi = {
     });
   },
 
-  // Resolve the header category a product type belongs to (gender-first, then
-  // header-category tags). Returns { category: null } when it can't be resolved.
-  getProductTypeCategory: (type: string): Promise<{ category: string | null; productType: string | null }> =>
-    cached(`product-type-category:${type}`, async () => {
-      const response = await api.get<ApiResponse<{ category: string | null; productType: string | null }>>(
-        `/api/products/types/${encodeURIComponent(type)}/category`
-      );
-      return response.data.data!;
-    }),
-
   getHomePageImages: (): Promise<HomePageImages> =>
     cached('homepage-images', async () => {
       const response = await api.get<ApiResponse<HomePageImages>>('/api/products/homepage-images');
