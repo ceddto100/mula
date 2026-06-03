@@ -181,6 +181,7 @@ export interface CategoryHeroConfig {
   _id?: string;
   men: CategoryHeroMedia;
   women: CategoryHeroMedia;
+  collections: CategoryHeroMedia;
   denim: CategoryHeroMedia;
   sale: CategoryHeroMedia;
   hoodies: CategoryHeroMedia;

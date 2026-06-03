@@ -7,6 +7,7 @@ import { CategoryHeroConfig, CategoryHeroMedia } from '../../types';
 const CATEGORY_TABS = [
   { key: 'men', label: 'Men' },
   { key: 'women', label: 'Women' },
+  { key: 'collections', label: 'Collections' },
   { key: 'denim', label: 'Denim' },
   { key: 'sale', label: 'Sale' },
   { key: 'hoodies', label: 'Hoodies' },

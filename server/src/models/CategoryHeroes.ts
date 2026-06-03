@@ -10,6 +10,7 @@ export interface ICategoryHeroMedia {
 export interface ICategoryHeroes {
   men: ICategoryHeroMedia;
   women: ICategoryHeroMedia;
+  collections: ICategoryHeroMedia;
   denim: ICategoryHeroMedia;
   sale: ICategoryHeroMedia;
   hoodies: ICategoryHeroMedia;
@@ -28,6 +29,12 @@ export const DEFAULT_CATEGORY_HEROES: ICategoryHeroes = {
     mediaType: 'image',
     title: "THE WOMEN'S SHOP",
     subtitle: 'Trending fits for your soft-life era.',
+  },
+  collections: {
+    mediaUrl: '',
+    mediaType: 'image',
+    title: 'THE COLLECTIONS',
+    subtitle: 'Curated drops. Shop the full edits.',
   },
   denim: {
     mediaUrl: '',
@@ -69,6 +76,7 @@ const categoryHeroesSchema = new Schema<ICategoryHeroes>(
   {
     men: { type: heroMediaSchema, default: () => ({ ...DEFAULT_CATEGORY_HEROES.men }) },
     women: { type: heroMediaSchema, default: () => ({ ...DEFAULT_CATEGORY_HEROES.women }) },
+    collections: { type: heroMediaSchema, default: () => ({ ...DEFAULT_CATEGORY_HEROES.collections }) },
     denim: { type: heroMediaSchema, default: () => ({ ...DEFAULT_CATEGORY_HEROES.denim }) },
     sale: { type: heroMediaSchema, default: () => ({ ...DEFAULT_CATEGORY_HEROES.sale }) },
     hoodies: { type: heroMediaSchema, default: () => ({ ...DEFAULT_CATEGORY_HEROES.hoodies }) },

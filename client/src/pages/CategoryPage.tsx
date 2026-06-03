@@ -37,6 +37,12 @@ const HERO_FALLBACKS: Record<string, CategoryHeroMedia> = {
     title: 'THE SALE',
     subtitle: "Last call. Major steals. Shop before it's gone.",
   },
+  collections: {
+    mediaUrl: '',
+    mediaType: 'image',
+    title: 'THE COLLECTIONS',
+    subtitle: 'Curated drops. Shop the full edits.',
+  },
   hoodies: {
     mediaUrl: '',
     mediaType: 'image',
@@ -138,8 +144,12 @@ const CategoryHero: React.FC<CategoryHeroProps> = ({ category, categoryLabel, pr
       title: `THE ${(category || 'SHOP').toUpperCase()} SHOP`,
     };
 
-  const bgUrl = homeHeroUrl || config.mediaUrl;
-  const bgIsVideo = bgUrl ? isVideoUrl(bgUrl) : false;
+  // Background prefers the admin-managed per-category hero media (saved in the
+  // Category Hero Manager). It falls back to the homepage hero only when this
+  // category has no saved media, so every page still has a strong visual.
+  const usingConfigMedia = Boolean(config.mediaUrl);
+  const bgUrl = config.mediaUrl || homeHeroUrl;
+  const bgIsVideo = usingConfigMedia ? config.mediaType === 'video' : bgUrl ? isVideoUrl(bgUrl) : false;
 
   return (
     <div className="relative -mt-20 lg:-mt-24 h-[calc(50vh+5rem)] min-h-[calc(380px+5rem)] lg:h-[calc(50vh+6rem)] lg:min-h-[calc(380px+6rem)] overflow-hidden">
