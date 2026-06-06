@@ -75,6 +75,8 @@ const initialFormState: ProductFormState = {
 
 const HEADER_CATEGORY_OPTIONS = ['new', 'men', 'women', 'collections', 'sale'] as const;
 
+// Number of products fetched per page in the admin list. Matches the API default.
+const PRODUCTS_PER_PAGE = 20;
 
 const toImageList = (media: ProductMedia[]): ProductImage[] =>
   media
@@ -88,6 +90,12 @@ const toImageList = (media: ProductMedia[]): ProductImage[] =>
 const AdminProducts: React.FC = () => {
   const [products, setProducts] = useState<Product[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [pagination, setPagination] = useState({
+    page: 1,
+    limit: PRODUCTS_PER_PAGE,
+    total: 0,
+    pages: 1,
+  });
   const [showForm, setShowForm] = useState(false);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const [formData, setFormData] = useState<ProductFormState>(initialFormState);
@@ -125,15 +133,22 @@ const AdminProducts: React.FC = () => {
     return () => window.removeEventListener('beforeunload', handleBeforeUnload);
   }, [hasUnsavedChanges]);
 
-  const fetchProducts = async () => {
+  const fetchProducts = async (page = 1) => {
+    setIsLoading(true);
     try {
-      const data = await adminApi.getProducts();
+      const data = await adminApi.getProducts(page, PRODUCTS_PER_PAGE);
       setProducts(data.products);
+      setPagination(data.pagination);
     } catch {
       toast.error('Failed to load products');
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const goToPage = (nextPage: number) => {
+    if (nextPage < 1 || nextPage > pagination.pages || nextPage === pagination.page) return;
+    fetchProducts(nextPage);
   };
 
   const resetForm = useCallback(() => {
@@ -185,7 +200,9 @@ const AdminProducts: React.FC = () => {
     if (!confirm('Are you sure you want to archive this product?')) return;
     try {
       await adminApi.deleteProduct(id);
-      setProducts(products.filter((p) => p._id !== id));
+      // Re-sync the current page so pagination totals stay accurate and the
+      // archived product shows with its updated status.
+      fetchProducts(pagination.page);
       toast.success('Product archived');
     } catch {
       toast.error('Failed to archive product');
@@ -372,8 +389,9 @@ const AdminProducts: React.FC = () => {
         setProducts(products.map((p) => (p._id === updated._id ? updated : p)));
         toast.success('Product updated');
       } else {
-        const created = await adminApi.createProduct(productData);
-        setProducts([created, ...products]);
+        await adminApi.createProduct(productData);
+        // New products sort to the top (newest first), so jump to the first page.
+        fetchProducts(1);
         toast.success('Product created');
       }
       setHasUnsavedChanges(false);
@@ -550,6 +568,37 @@ const AdminProducts: React.FC = () => {
             )}
           </div>
         </div>
+
+        {/* Pagination */}
+        {!isLoading && pagination.total > 0 && (
+          <div className="flex items-center justify-between flex-wrap gap-3">
+            <p className="text-sm text-gray-600">
+              Showing {(pagination.page - 1) * pagination.limit + 1}
+              –{Math.min(pagination.page * pagination.limit, pagination.total)} of {pagination.total} products
+            </p>
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={() => goToPage(pagination.page - 1)}
+                disabled={pagination.page <= 1}
+                className="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                Previous
+              </button>
+              <span className="text-sm text-gray-600">
+                Page {pagination.page} of {pagination.pages}
+              </span>
+              <button
+                type="button"
+                onClick={() => goToPage(pagination.page + 1)}
+                disabled={pagination.page >= pagination.pages}
+                className="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                Next
+              </button>
+            </div>
+          </div>
+        )}
 
         {/* Product Form Modal */}
         {showForm && (
