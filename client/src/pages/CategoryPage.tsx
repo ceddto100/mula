@@ -152,7 +152,7 @@ const CategoryHero: React.FC<CategoryHeroProps> = ({ category, categoryLabel, pr
   const bgIsVideo = usingConfigMedia ? config.mediaType === 'video' : bgUrl ? isVideoUrl(bgUrl) : false;
 
   return (
-    <div className="relative -mt-20 lg:-mt-24 h-[calc(50vh+5rem)] min-h-[calc(380px+5rem)] lg:h-[calc(50vh+6rem)] lg:min-h-[calc(380px+6rem)] overflow-hidden">
+    <div className="relative -mt-[116px] lg:-mt-[132px] h-[calc(50vh+116px)] min-h-[calc(380px+116px)] lg:h-[calc(50vh+132px)] lg:min-h-[calc(380px+132px)] overflow-hidden">
       {/* Background — video or image */}
       {bgIsVideo ? (
         <video
@@ -176,7 +176,7 @@ const CategoryHero: React.FC<CategoryHeroProps> = ({ category, categoryLabel, pr
       ) : null}
 
       {/* Content */}
-      <div className="relative h-full flex flex-col justify-between max-w-7xl mx-auto px-6 pt-20 pb-6 lg:pt-24">
+      <div className="relative h-full flex flex-col justify-between max-w-7xl mx-auto px-6 pt-[116px] pb-6 lg:pt-[132px]">
         {/* Breadcrumb — small, muted, top-left */}
         <nav className="flex items-center gap-1.5 text-xs text-brand-400 font-grotesk tracking-widest">
           <Link to="/" className="hover:text-accent-electric transition-colors uppercase">

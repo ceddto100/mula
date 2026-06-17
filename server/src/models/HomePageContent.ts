@@ -1,5 +1,10 @@
 import { Schema, model } from 'mongoose';
 
+export interface IAnnouncementBarContent {
+  enabled: boolean;
+  text: string;
+}
+
 export interface IHeroContent {
   badge: string;
   headline1: string;
@@ -8,6 +13,26 @@ export interface IHeroContent {
   ctaPrimary: string;
   ctaSecondary: string;
   scrollLabel: string;
+}
+
+export interface IPromoTile {
+  title: string;
+  linkText: string;
+}
+
+export interface IPromoSplitContent {
+  left: IPromoTile;
+  right: IPromoTile;
+}
+
+export interface IServiceItem {
+  title: string;
+  linkText: string;
+}
+
+export interface IServicesContent {
+  sectionTitle: string;
+  items: IServiceItem[];
 }
 
 export interface ICategoryCard {
@@ -55,13 +80,24 @@ export interface IBrandThemeContent {
 }
 
 export interface IHomePageContent {
+  announcementBar: IAnnouncementBarContent;
   hero: IHeroContent;
   shopByStyle: IShopByStyleContent;
+  promoSplit: IPromoSplitContent;
   freshDrops: IFreshDropsContent;
   brandStatement: IBrandStatementContent;
+  services: IServicesContent;
   newsletter: INewsletterContent;
   brandTheme: IBrandThemeContent;
 }
+
+const announcementBarSchema = new Schema<IAnnouncementBarContent>(
+  {
+    enabled: { type: Boolean, default: true },
+    text: { type: String, default: 'COMPLIMENTARY SHIPPING ON ALL ORDERS' },
+  },
+  { _id: false }
+);
 
 const heroSchema = new Schema<IHeroContent>(
   {
@@ -199,12 +235,60 @@ const brandThemeSchema = new Schema<IBrandThemeContent>(
   { _id: false }
 );
 
+const promoTileSchema = new Schema<IPromoTile>(
+  {
+    title: { type: String, default: '' },
+    linkText: { type: String, default: 'SHOP NOW' },
+  },
+  { _id: false }
+);
+
+const promoSplitSchema = new Schema<IPromoSplitContent>(
+  {
+    left: {
+      type: promoTileSchema,
+      default: () => ({ title: 'NEW ARRIVALS', linkText: 'SHOP NOW' }),
+    },
+    right: {
+      type: promoTileSchema,
+      default: () => ({ title: 'SALE', linkText: 'SHOP NOW' }),
+    },
+  },
+  { _id: false }
+);
+
+const serviceItemSchema = new Schema<IServiceItem>(
+  {
+    title: { type: String, default: '' },
+    linkText: { type: String, default: '' },
+  },
+  { _id: false }
+);
+
+const servicesSchema = new Schema<IServicesContent>(
+  {
+    sectionTitle: { type: String, default: 'OUR SERVICES' },
+    items: {
+      type: [serviceItemSchema],
+      default: () => ([
+        { title: 'BOOK AN APPOINTMENT', linkText: 'Reserve a personal styling session.' },
+        { title: 'PERSONALIZATION', linkText: 'Make it uniquely yours.' },
+        { title: 'COLLECT IN STORE', linkText: 'Order online, pick up nearby.' },
+      ]),
+    },
+  },
+  { _id: false }
+);
+
 const homePageContentSchema = new Schema<IHomePageContent>(
   {
+    announcementBar: { type: announcementBarSchema, default: () => ({}) },
     hero: { type: heroSchema, default: () => ({}) },
     shopByStyle: { type: shopByStyleSchema, default: () => ({}) },
+    promoSplit: { type: promoSplitSchema, default: () => ({}) },
     freshDrops: { type: freshDropsSchema, default: () => ({}) },
     brandStatement: { type: brandStatementSchema, default: () => ({}) },
+    services: { type: servicesSchema, default: () => ({}) },
     newsletter: { type: newsletterSchema, default: () => ({}) },
     brandTheme: { type: brandThemeSchema, default: () => ({}) },
   },

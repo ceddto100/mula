@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { FiArrowRight, FiArrowUpRight } from 'react-icons/fi';
+import { FiArrowRight } from 'react-icons/fi';
 import Layout from '../components/layout/Layout';
 import ProductGrid from '../components/product/ProductGrid';
 import { useFeaturedProducts } from '../hooks/useProducts';
@@ -16,7 +16,15 @@ const defaultHomePageImages: HomePageImages = {
   collectionImage: '',
   accessoryImage: '',
   saleImage: '',
+  promoLeftImage: '',
+  promoRightImage: '',
+  serviceImage1: '',
+  serviceImage2: '',
+  serviceImage3: '',
 };
+
+const HERO_TEXT_SHADOW = '0 2px 16px rgba(0,0,0,0.85)';
+const TILE_TEXT_SHADOW = '0 1px 12px rgba(0,0,0,0.9)';
 
 
 const isVideoUrl = (url?: string): boolean => {
@@ -85,15 +93,31 @@ const renderHomeMedia = (url: string, alt: string, className: string, options: H
 };
 
 export const defaultHomePageContent: HomePageContent = {
+  announcementBar: {
+    enabled: true,
+    text: 'COMPLIMENTARY SHIPPING ON ALL ORDERS',
+  },
   hero: {
     badge: 'NEW COLLECTION 2025',
     headline1: 'URBAN',
     headline2: 'EVOLUTION',
     subheading:
       'Street-inspired designs meet contemporary fashion. Bold statements for the modern individual.',
-    ctaPrimary: 'SHOP NOW',
-    ctaSecondary: 'EXPLORE',
+    ctaPrimary: 'FOR HER',
+    ctaSecondary: 'FOR HIM',
     scrollLabel: 'SCROLL',
+  },
+  promoSplit: {
+    left: { title: 'NEW ARRIVALS', linkText: 'SHOP NOW' },
+    right: { title: 'SALE', linkText: 'SHOP NOW' },
+  },
+  services: {
+    sectionTitle: 'OUR SERVICES',
+    items: [
+      { title: 'BOOK AN APPOINTMENT', linkText: 'Reserve a personal styling session.' },
+      { title: 'PERSONALIZATION', linkText: 'Make it uniquely yours.' },
+      { title: 'COLLECT IN STORE', linkText: 'Order online, pick up nearby.' },
+    ],
   },
   shopByStyle: {
     sectionTitle: 'SHOP BY STYLE',
@@ -212,146 +236,94 @@ const Home: React.FC = () => {
     applyAccentColor(content.brandTheme?.accentColor);
   }, [content.brandTheme?.accentColor]);
 
+  // New sections fall back to defaults so the page renders correctly even if an
+  // older content document (saved before these fields existed) is returned.
+  const promoSplit = content.promoSplit ?? defaultHomePageContent.promoSplit;
+  const services = content.services ?? defaultHomePageContent.services;
+
+  // 4-up category grid — titles come from the editable Shop By Style slots.
+  const categoryTiles = [
+    { title: content.shopByStyle.women.title || "WOMEN'S", img: homePageImages.womenImage, href: '/category/women' },
+    { title: content.shopByStyle.men.title || "MEN'S", img: homePageImages.menImage, href: '/category/men' },
+    { title: content.shopByStyle.accessories.title || 'ACCESSORIES', img: homePageImages.accessoryImage, href: '/category/accessories' },
+    { title: content.shopByStyle.collections.title || 'COLLECTIONS', img: homePageImages.collectionImage, href: '/category/collections' },
+  ];
+
+  // 2-up promo split — dedicated images fall back to existing slots until uploaded.
+  const promoTiles = [
+    { ...promoSplit.left, img: homePageImages.promoLeftImage || homePageImages.menImage, href: '/category/new-arrivals' },
+    { ...promoSplit.right, img: homePageImages.promoRightImage || homePageImages.saleImage, href: '/category/sale' },
+  ];
+
+  // 3-up services row.
+  const serviceHrefs = ['/contact', '/contact', '/stores'];
+  const serviceImages = [
+    homePageImages.serviceImage1 || homePageImages.collectionImage,
+    homePageImages.serviceImage2 || homePageImages.accessoryImage,
+    homePageImages.serviceImage3 || homePageImages.womenImage,
+  ];
+  const serviceItems = (services.items && services.items.length ? services.items : defaultHomePageContent.services.items)
+    .slice(0, 3);
+
   return (
     <Layout>
-      {/* Hero Section — extends behind the transparent header so the image fills
-          the full viewport from top to bottom (Gucci-style full-bleed hero) */}
-      <section className="relative min-h-screen overflow-hidden -mt-20 lg:-mt-24">
+      {/* Hero Section — full-bleed image behind the transparent header. The negative
+          margin pulls it up under the header fragment (announcement bar h-9 + nav
+          h-20/h-24), so keep these values in sync with Header.tsx. */}
+      <section className="relative min-h-screen overflow-hidden -mt-[116px] lg:-mt-[132px]">
         <div className="absolute inset-0">
-          {/* Full-width hero media — no tint or overlay, image shows at full clarity */}
           {renderHomeMedia(homePageImages.heroImage, 'Fashion', 'absolute inset-0 w-full h-full object-cover', { eager: true, preload: 'metadata', hero: true, sizes: '100vw' })}
+          {/* Subtle bottom gradient so the centred title and buttons stay legible */}
+          <div className="absolute inset-x-0 bottom-0 h-2/3 bg-gradient-to-t from-black/55 via-black/15 to-transparent pointer-events-none" />
         </div>
 
-        {/* Decorative Arrows */}
-        <div className="absolute inset-0 overflow-hidden pointer-events-none" aria-hidden="true">
-          <div className="absolute top-20 left-10 text-accent-electric opacity-20 text-9xl">→</div>
-          <div className="absolute bottom-40 right-20 text-accent-neon opacity-20 text-9xl rotate-45">→</div>
-          <div className="absolute top-1/2 left-1/3 text-white opacity-10 text-9xl -rotate-12">→</div>
-        </div>
+        {/* Hero Content — anchored to the bottom centre (Gucci-style) */}
+        <div className="relative z-10 min-h-screen flex flex-col items-center justify-end text-center px-4 pt-[116px] lg:pt-[132px] pb-16 lg:pb-24">
+          {content.hero.badge && (
+            <span className="font-grotesk text-xs sm:text-sm tracking-[0.3em] uppercase text-white mb-4" style={{ textShadow: HERO_TEXT_SHADOW }}>
+              {content.hero.badge}
+            </span>
+          )}
 
-        {/* Hero Content — pt offsets the transparent header so text never hides behind it */}
-        <div className="relative z-10 max-w-7xl mx-auto px-4 min-h-screen flex items-center pt-20 lg:pt-24">
-          <div className="lg:w-1/2">
-            <div className="mb-6">
-              <div className="inline-block bg-accent-electric text-brand-900 px-6 py-2 font-grotesk font-bold text-sm tracking-wider animate-slide-up">
-                {content.hero.badge}
-              </div>
-            </div>
+          <h1 className="font-display text-5xl md:text-6xl lg:text-7xl text-white leading-none mb-4" style={{ textShadow: HERO_TEXT_SHADOW }}>
+            {content.hero.headline1} <span className="text-accent-electric">{content.hero.headline2}</span>
+          </h1>
 
-            <div className="mb-4">
-              <h1 className="text-7xl md:text-8xl lg:text-9xl font-display text-white leading-none animate-slide-up-delayed" style={{ textShadow: '0 2px 16px rgba(0,0,0,0.85)' }}>
-                {content.hero.headline1}
-              </h1>
-            </div>
+          {content.hero.subheading && (
+            <p className="font-grotesk text-sm md:text-base text-white/90 max-w-xl mb-8 leading-relaxed whitespace-pre-line" style={{ textShadow: '0 1px 8px rgba(0,0,0,0.8)' }}>
+              {content.hero.subheading}
+            </p>
+          )}
 
-            <div className="mb-8">
-              <h2 className="text-6xl md:text-7xl lg:text-8xl font-display text-accent-electric leading-none animate-slide-up-more-delayed" style={{ textShadow: '0 2px 16px rgba(0,0,0,0.85)' }}>
-                {content.hero.headline2}
-              </h2>
-            </div>
-
-            <div className="mb-12">
-              <p className="text-xl md:text-2xl text-white font-grotesk max-w-lg leading-relaxed animate-fade-in-delayed whitespace-pre-line" style={{ textShadow: '0 1px 8px rgba(0,0,0,0.8)' }}>
-                {content.hero.subheading}
-              </p>
-            </div>
-
-            <div className="flex flex-col sm:flex-row gap-4 animate-fade-in-more-delayed">
-              <Link
-                to="/category/new-arrivals"
-                className="group relative px-10 py-5 bg-white text-brand-900 font-grotesk font-bold text-lg tracking-wide overflow-hidden rounded-full transform hover:scale-105 transition-all duration-300"
-              >
-                <span className="relative z-10 flex items-center gap-2">
-                  {content.hero.ctaPrimary}
-                  <FiArrowRight className="group-hover:translate-x-2 transition-transform" size={24} />
-                </span>
-              </Link>
-
-              <Link
-                to="/category/collections"
-                className="group px-10 py-5 border-2 border-white text-white font-grotesk font-bold text-lg tracking-wide rounded-full hover:bg-white hover:text-brand-900 transition-all duration-300 transform hover:scale-105"
-              >
-                <span className="flex items-center gap-2">
-                  {content.hero.ctaSecondary}
-                  <FiArrowUpRight className="group-hover:rotate-45 transition-transform" size={24} />
-                </span>
-              </Link>
-            </div>
-          </div>
-        </div>
-
-        {/* Scroll Indicator */}
-        <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 text-white animate-bounce">
-          <div className="flex flex-col items-center gap-2">
-            <span className="text-xs font-grotesk tracking-widest">{content.hero.scrollLabel}</span>
-            <div className="w-0.5 h-12 bg-white/50" />
+          <div className="flex flex-col sm:flex-row gap-4">
+            <Link
+              to="/category/women"
+              className="px-10 py-4 bg-white text-brand-900 font-grotesk font-bold text-sm tracking-widest uppercase rounded-full transform hover:scale-105 transition-all duration-300"
+            >
+              {content.hero.ctaPrimary}
+            </Link>
+            <Link
+              to="/category/men"
+              className="px-10 py-4 border-2 border-white text-white font-grotesk font-bold text-sm tracking-widest uppercase rounded-full hover:bg-white hover:text-brand-900 transition-all duration-300 transform hover:scale-105"
+            >
+              {content.hero.ctaSecondary}
+            </Link>
           </div>
         </div>
       </section>
 
-      {/* Shop By Style — full-bleed horizontal strip, no outer padding */}
-      <section className="relative bg-transparent animate-on-scroll opacity-100 translate-y-0 md:opacity-0 md:translate-y-12 transition-all duration-1000 cv-auto">
-        {/* Section label — constrained to readable width */}
-        <div className="py-14 text-center max-w-7xl mx-auto px-4">
-          <h2 className="text-6xl md:text-7xl font-display text-gray-900 mb-4">{content.shopByStyle.sectionTitle}</h2>
-          <div className="w-24 h-1 bg-accent-electric mx-auto" />
-        </div>
-
-        {/* Mobile: 2:3 portrait cards stacked (grid-cols-1, no lg: override on grid).
-            Desktop: each card is a full-viewport-width section with a 16:9 frame,
-            content beautifully centred via lg: prefixed utilities only. */}
-        <div className="grid grid-cols-1 gap-8 lg:gap-6">
-          {[
-            { panel: content.shopByStyle.women,       img: homePageImages.womenImage,      href: '/category/women' },
-            { panel: content.shopByStyle.accessories, img: homePageImages.accessoryImage,  href: '/category/accessories' },
-            { panel: content.shopByStyle.men,         img: homePageImages.menImage,        href: '/category/men' },
-            { panel: content.shopByStyle.sale,        img: homePageImages.saleImage,       href: '/category/sale' },
-            { panel: content.shopByStyle.collections, img: homePageImages.collectionImage, href: '/category/collections' },
-          ].map(({ panel, img, href }) => (
-            <Link
-              key={panel.title}
-              to={href}
-              className="relative group overflow-hidden bg-brand-900 aspect-[2/3] lg:aspect-[16/9] block"
-            >
-              {img && (
-                <div className="absolute inset-0">
-                  {renderHomeMedia(img, panel.title, 'w-full h-full object-cover lg:transition-transform lg:duration-700 lg:group-hover:scale-105', { sizes: '100vw' })}
-                </div>
-              )}
-
-              {/* Mobile content: anchored bottom-left — no lg: classes here */}
-              <div className="absolute bottom-0 left-0 p-6 lg:hidden">
-                {panel.badge && (
-                  <div className="inline-block bg-accent-electric text-brand-900 px-3 py-1 text-xs font-grotesk font-bold mb-3 tracking-wider">
-                    {panel.badge}
-                  </div>
-                )}
-                <h3 className="text-3xl font-display text-white mb-1" style={{ textShadow: '0 1px 8px rgba(0,0,0,0.9)' }}>
-                  {panel.title}
-                </h3>
-                {panel.description && (
-                  <p className="text-sm text-white/80 font-grotesk mb-3">{panel.description}</p>
-                )}
-                <span className="inline-flex items-center gap-2 text-accent-electric font-grotesk font-semibold text-sm tracking-wider group-hover:gap-4 transition-all">
-                  {panel.linkText} <FiArrowRight size={16} />
-                </span>
+      {/* Category Grid — 4-up tiles with captions underneath (2-up on mobile) */}
+      <section className="bg-transparent animate-on-scroll opacity-100 translate-y-0 md:opacity-0 md:translate-y-12 transition-all duration-1000 cv-auto">
+        <div className="grid grid-cols-2 lg:grid-cols-4">
+          {categoryTiles.map((tile) => (
+            <Link key={tile.title} to={tile.href} className="group block">
+              <div className="relative aspect-[3/4] overflow-hidden bg-brand-900">
+                {tile.img &&
+                  renderHomeMedia(tile.img, tile.title, 'w-full h-full object-cover transition-transform duration-700 group-hover:scale-105', { sizes: '(min-width: 1024px) 25vw, 50vw' })}
               </div>
-
-              {/* Desktop content: centred inside the 16:9 frame — all lg: prefixed */}
-              <div className="hidden lg:absolute lg:inset-0 lg:flex lg:flex-col lg:items-center lg:justify-center lg:text-center lg:px-16">
-                {panel.badge && (
-                  <div className="lg:inline-block lg:bg-accent-electric lg:text-brand-900 lg:px-4 lg:py-1 lg:text-sm lg:font-grotesk lg:font-bold lg:mb-6 lg:tracking-widest">
-                    {panel.badge}
-                  </div>
-                )}
-                <h3 className="lg:text-7xl lg:font-display lg:text-white lg:mb-4" style={{ textShadow: '0 2px 20px rgba(0,0,0,0.9)' }}>
-                  {panel.title}
-                </h3>
-                {panel.description && (
-                  <p className="lg:text-xl lg:text-white/90 lg:font-grotesk lg:mb-8 lg:max-w-lg">{panel.description}</p>
-                )}
-                <span className="lg:inline-flex lg:items-center lg:gap-3 lg:text-accent-electric lg:font-grotesk lg:font-semibold lg:text-base lg:tracking-widest lg:border-b lg:border-accent-electric lg:pb-1 lg:group-hover:gap-5 lg:transition-all">
-                  {panel.linkText} <FiArrowRight size={18} />
+              <div className="py-5 text-center">
+                <span className="font-grotesk text-xs sm:text-sm font-semibold tracking-[0.2em] uppercase text-gray-900 group-hover:text-accent-electric transition-colors">
+                  {tile.title}
                 </span>
               </div>
             </Link>
@@ -359,7 +331,32 @@ const Home: React.FC = () => {
         </div>
       </section>
 
-      {/* Featured Products with Bold Header */}
+      {/* Promo Split — two large side-by-side promotional tiles */}
+      <section className="grid grid-cols-1 lg:grid-cols-2 animate-on-scroll opacity-100 translate-y-0 md:opacity-0 md:translate-y-12 transition-all duration-1000 cv-auto">
+        {promoTiles.map((tile) => (
+          <Link
+            key={tile.href}
+            to={tile.href}
+            className="relative group overflow-hidden bg-brand-900 h-[60vh] lg:h-[82vh] block"
+          >
+            {tile.img &&
+              renderHomeMedia(tile.img, tile.title, 'absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105', { sizes: '(min-width: 1024px) 50vw, 100vw' })}
+            <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent pointer-events-none" />
+            <div className="absolute inset-0 flex flex-col items-center justify-end text-center px-6 pb-12 lg:pb-16">
+              <h3 className="font-display text-4xl md:text-5xl text-white mb-5" style={{ textShadow: TILE_TEXT_SHADOW }}>
+                {tile.title}
+              </h3>
+              {tile.linkText && (
+                <span className="inline-block bg-white text-brand-900 px-8 py-3 rounded-full font-grotesk font-bold text-xs tracking-widest uppercase group-hover:bg-accent-electric transition-colors">
+                  {tile.linkText}
+                </span>
+              )}
+            </div>
+          </Link>
+        ))}
+      </section>
+
+      {/* Featured Products */}
       <section className="py-24 bg-transparent animate-on-scroll opacity-100 translate-y-0 md:opacity-0 md:translate-y-12 transition-all duration-1000 cv-auto">
         <div className="max-w-7xl mx-auto px-4">
           <div className="mb-16 flex flex-col lg:flex-row lg:items-end lg:justify-between gap-6">
@@ -382,31 +379,49 @@ const Home: React.FC = () => {
         </div>
       </section>
 
-      {/* Bold Brand Statement Section */}
-      <section className="relative py-32 bg-brand-900 overflow-hidden animate-on-scroll opacity-100 translate-y-0 md:opacity-0 md:translate-y-12 transition-all duration-1000 cv-auto">
-        <div className="absolute inset-0 bg-gradient-to-r from-brand-900 via-brand-800/80 to-brand-900" />
-
-        {/* Large Background Text */}
-        <div className="absolute inset-0 flex items-center justify-center opacity-10 overflow-hidden pointer-events-none" aria-hidden="true">
-          <span className="font-display text-[20vw] text-white whitespace-nowrap">CUALQUIER</span>
-        </div>
-
-        <div className="relative z-10 max-w-5xl mx-auto px-4 text-center">
-          <h2 className="text-6xl md:text-8xl font-display text-white mb-8 leading-tight">
-            {content.brandStatement.headlineLine1}
-            <br />
+      {/* Campaign Block — centred editorial statement */}
+      <section className="py-24 lg:py-28 bg-transparent animate-on-scroll opacity-100 translate-y-0 md:opacity-0 md:translate-y-12 transition-all duration-1000 cv-auto">
+        <div className="max-w-2xl mx-auto px-4 text-center">
+          <h2 className="font-display text-4xl md:text-5xl text-gray-900 mb-6 leading-tight tracking-wide">
+            {content.brandStatement.headlineLine1}{' '}
             <span className="text-accent-electric">{content.brandStatement.headlineLine2}</span>
           </h2>
-          <p className="text-xl md:text-2xl text-brand-100 font-grotesk max-w-3xl mx-auto mb-12 leading-relaxed whitespace-pre-line">
+          <p className="font-grotesk text-base md:text-lg text-gray-700 mb-8 leading-relaxed whitespace-pre-line">
             {content.brandStatement.description}
           </p>
           <Link
             to="/about"
-            className="inline-flex items-center gap-3 bg-accent-electric text-brand-900 px-10 py-5 font-grotesk font-bold text-lg tracking-wide rounded-full hover:bg-white transition-all duration-300 transform hover:scale-105"
+            className="inline-block font-grotesk font-semibold text-sm tracking-widest uppercase text-gray-900 border-b-2 border-gray-900 pb-1 hover:text-accent-electric hover:border-accent-electric transition-all"
           >
             {content.brandStatement.ctaButton}
-            <FiArrowUpRight size={24} />
           </Link>
+        </div>
+      </section>
+
+      {/* Services — 3-up row */}
+      <section className="py-20 bg-transparent animate-on-scroll opacity-100 translate-y-0 md:opacity-0 md:translate-y-12 transition-all duration-1000 cv-auto">
+        <div className="max-w-7xl mx-auto px-4">
+          {services.sectionTitle && (
+            <h2 className="font-display text-3xl md:text-4xl text-gray-900 text-center mb-12 tracking-wide">
+              {services.sectionTitle}
+            </h2>
+          )}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 lg:gap-10">
+            {serviceItems.map((item, index) => (
+              <Link key={index} to={serviceHrefs[index] || '/contact'} className="group block text-center">
+                <div className="relative aspect-[4/3] overflow-hidden bg-brand-900 mb-5">
+                  {serviceImages[index] &&
+                    renderHomeMedia(serviceImages[index], item.title, 'w-full h-full object-cover transition-transform duration-700 group-hover:scale-105', { sizes: '(min-width: 768px) 33vw, 100vw' })}
+                </div>
+                <h3 className="font-grotesk font-bold text-sm tracking-[0.2em] uppercase text-gray-900 mb-2 group-hover:text-accent-electric transition-colors">
+                  {item.title}
+                </h3>
+                {item.linkText && (
+                  <p className="font-grotesk text-sm text-gray-600">{item.linkText}</p>
+                )}
+              </Link>
+            ))}
+          </div>
         </div>
       </section>
 
