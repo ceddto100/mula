@@ -1,8 +1,8 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { FiArrowRight, FiArrowUpRight } from 'react-icons/fi';
+import { FiArrowRight, FiChevronLeft, FiChevronRight } from 'react-icons/fi';
 import Layout from '../components/layout/Layout';
-import ProductGrid from '../components/product/ProductGrid';
+import ProductCard from '../components/product/ProductCard';
 import { useFeaturedProducts } from '../hooks/useProducts';
 import { useSeo } from '../hooks/useSeo';
 import { productsApi } from '../api/products.api';
@@ -74,7 +74,7 @@ const renderHomeMedia = (url: string, alt: string, className: string, options: H
     <img
       src={src}
       srcSet={srcSet}
-      sizes={sizes || (hero ? '60vw' : '(min-width: 1024px) 40vw, 100vw')}
+      sizes={sizes || (hero ? '100vw' : '(min-width: 1024px) 25vw, 50vw')}
       alt={alt}
       className={className}
       loading={eager ? 'eager' : 'lazy'}
@@ -83,6 +83,25 @@ const renderHomeMedia = (url: string, alt: string, className: string, options: H
     />
   );
 };
+
+/* Gucci-style minimal text link: uppercase, letter-spaced, thin underline. */
+const CTA_BASE =
+  'group inline-flex items-center gap-2 font-grotesk text-xs sm:text-sm font-medium tracking-[0.22em] uppercase pb-1.5 border-b transition-colors duration-300';
+const CTA_LIGHT = 'text-white border-white/60 hover:border-white';
+const CTA_DARK = 'text-gray-900 border-gray-900/40 hover:border-gray-900';
+
+const CtaLink: React.FC<{ to: string; light?: boolean; children: React.ReactNode }> = ({
+  to,
+  light,
+  children,
+}) => (
+  <Link to={to} className={`${CTA_BASE} ${light ? CTA_LIGHT : CTA_DARK}`}>
+    {children}
+    <FiArrowRight className="transition-transform duration-300 group-hover:translate-x-1" size={15} />
+  </Link>
+);
+
+const EYEBROW = 'font-grotesk text-xs sm:text-sm tracking-[0.3em] uppercase';
 
 export const defaultHomePageContent: HomePageContent = {
   hero: {
@@ -126,7 +145,7 @@ export const defaultHomePageContent: HomePageContent = {
     title: 'STAY CONNECTED',
     description: 'Get exclusive access to new drops, special offers, and style inspiration.',
     emailPlaceholder: 'Enter your email',
-    submitButton: 'SUBSCRIBE →',
+    submitButton: 'SUBSCRIBE',
   },
   brandTheme: {
     accentColor: '',
@@ -139,6 +158,7 @@ export const defaultHomePageContent: HomePageContent = {
 const Home: React.FC = () => {
   const { products: featuredProducts, isLoading } = useFeaturedProducts(100);
   const observerRef = useRef<IntersectionObserver | null>(null);
+  const carouselRef = useRef<HTMLDivElement>(null);
   const [homePageImages, setHomePageImages] = useState<HomePageImages>(defaultHomePageImages);
   const [content, setContent] = useState<HomePageContent>(defaultHomePageContent);
   useSeo({ title: 'Cualquier — Contemporary Urban Fashion', description: 'Street-inspired fashion drops and curated collections.', canonicalPath: '/', ogType: 'website', image: '/images/Cualquier_logo.png' });
@@ -212,324 +232,299 @@ const Home: React.FC = () => {
     applyAccentColor(content.brandTheme?.accentColor);
   }, [content.brandTheme?.accentColor]);
 
+  const scrollCarousel = (direction: -1 | 1) => {
+    const el = carouselRef.current;
+    if (!el) return;
+    el.scrollBy({ left: direction * el.clientWidth * 0.85, behavior: 'smooth' });
+  };
+
+  // Category tiles for the "Shop by Category" grid (Gucci-style labeled tiles).
+  const categoryTiles = [
+    { panel: content.shopByStyle.women, img: homePageImages.womenImage, href: '/category/women' },
+    { panel: content.shopByStyle.men, img: homePageImages.menImage, href: '/category/men' },
+    { panel: content.shopByStyle.accessories, img: homePageImages.accessoryImage, href: '/category/accessories' },
+    { panel: content.shopByStyle.sale, img: homePageImages.saleImage, href: '/category/sale' },
+  ];
+
   return (
     <Layout>
-      {/* Hero Section — extends behind the transparent header so the image fills
-          the full viewport from top to bottom (Gucci-style full-bleed hero) */}
+      {/* ───────────────────────── HERO ─────────────────────────
+          Full-bleed campaign media that extends behind the transparent
+          header. Minimal centered caption anchored toward the bottom with
+          understated underlined text links (Gucci editorial style). */}
       <section className="relative min-h-screen overflow-hidden -mt-20 lg:-mt-24">
         <div className="absolute inset-0">
-          {/* Full-width hero media — no tint or overlay, image shows at full clarity */}
           {renderHomeMedia(homePageImages.heroImage, 'Fashion', 'absolute inset-0 w-full h-full object-cover', { eager: true, preload: 'metadata', hero: true, sizes: '100vw' })}
         </div>
 
-        {/* Decorative Arrows */}
-        <div className="absolute inset-0 overflow-hidden pointer-events-none" aria-hidden="true">
-          <div className="absolute top-20 left-10 text-accent-electric opacity-20 text-9xl">→</div>
-          <div className="absolute bottom-40 right-20 text-accent-neon opacity-20 text-9xl rotate-45">→</div>
-          <div className="absolute top-1/2 left-1/3 text-white opacity-10 text-9xl -rotate-12">→</div>
-        </div>
+        {/* Soft gradient purely for caption legibility — keeps the image clean */}
+        <div className="absolute inset-0 bg-gradient-to-t from-black/55 via-black/5 to-black/15 pointer-events-none" aria-hidden="true" />
 
-        {/* Hero Content — pt offsets the transparent header so text never hides behind it */}
-        <div className="relative z-10 max-w-7xl mx-auto px-4 min-h-screen flex items-center pt-20 lg:pt-24">
-          <div className="lg:w-1/2">
-            <div className="mb-6">
-              <div className="inline-block bg-accent-electric text-brand-900 px-6 py-2 font-grotesk font-bold text-sm tracking-wider animate-slide-up">
+        {/* Hero caption — centered, anchored toward the bottom */}
+        <div className="relative z-10 min-h-screen flex flex-col items-center justify-end text-center px-4 pb-24 pt-28 lg:pb-28">
+          <div className="max-w-3xl">
+            {content.hero.badge && (
+              <p className={`${EYEBROW} text-white/90 mb-5 animate-fade-in-delayed`}>
                 {content.hero.badge}
-              </div>
-            </div>
+              </p>
+            )}
 
-            <div className="mb-4">
-              <h1 className="text-7xl md:text-8xl lg:text-9xl font-display text-white leading-none animate-slide-up-delayed" style={{ textShadow: '0 2px 16px rgba(0,0,0,0.85)' }}>
-                {content.hero.headline1}
-              </h1>
-            </div>
+            <h1 className="font-display text-white leading-[0.95] text-6xl md:text-7xl lg:text-8xl animate-slide-up" style={{ textShadow: '0 2px 18px rgba(0,0,0,0.55)' }}>
+              {content.hero.headline1}{' '}
+              <span className="text-accent-electric">{content.hero.headline2}</span>
+            </h1>
 
-            <div className="mb-8">
-              <h2 className="text-6xl md:text-7xl lg:text-8xl font-display text-accent-electric leading-none animate-slide-up-more-delayed" style={{ textShadow: '0 2px 16px rgba(0,0,0,0.85)' }}>
-                {content.hero.headline2}
-              </h2>
-            </div>
-
-            <div className="mb-12">
-              <p className="text-xl md:text-2xl text-white font-grotesk max-w-lg leading-relaxed animate-fade-in-delayed whitespace-pre-line" style={{ textShadow: '0 1px 8px rgba(0,0,0,0.8)' }}>
+            {content.hero.subheading && (
+              <p className="mt-6 text-base md:text-lg text-white/90 font-grotesk max-w-xl mx-auto leading-relaxed whitespace-pre-line animate-fade-in-delayed" style={{ textShadow: '0 1px 8px rgba(0,0,0,0.6)' }}>
                 {content.hero.subheading}
               </p>
-            </div>
+            )}
 
-            <div className="flex flex-col sm:flex-row gap-4 animate-fade-in-more-delayed">
-              <Link
-                to="/category/new-arrivals"
-                className="group relative px-10 py-5 bg-white text-brand-900 font-grotesk font-bold text-lg tracking-wide overflow-hidden rounded-full transform hover:scale-105 transition-all duration-300"
-              >
-                <span className="relative z-10 flex items-center gap-2">
-                  {content.hero.ctaPrimary}
-                  <FiArrowRight className="group-hover:translate-x-2 transition-transform" size={24} />
-                </span>
-              </Link>
-
-              <Link
-                to="/category/collections"
-                className="group px-10 py-5 border-2 border-white text-white font-grotesk font-bold text-lg tracking-wide rounded-full hover:bg-white hover:text-brand-900 transition-all duration-300 transform hover:scale-105"
-              >
-                <span className="flex items-center gap-2">
-                  {content.hero.ctaSecondary}
-                  <FiArrowUpRight className="group-hover:rotate-45 transition-transform" size={24} />
-                </span>
-              </Link>
+            <div className="mt-10 flex flex-wrap items-center justify-center gap-6 sm:gap-10 animate-fade-in-more-delayed">
+              <CtaLink to="/category/new-arrivals" light>
+                {content.hero.ctaPrimary}
+              </CtaLink>
+              <CtaLink to="/category/collections" light>
+                {content.hero.ctaSecondary}
+              </CtaLink>
             </div>
           </div>
-        </div>
 
-        {/* Scroll Indicator */}
-        <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 text-white animate-bounce">
-          <div className="flex flex-col items-center gap-2">
-            <span className="text-xs font-grotesk tracking-widest">{content.hero.scrollLabel}</span>
-            <div className="w-0.5 h-12 bg-white/50" />
-          </div>
+          {/* Minimal scroll cue */}
+          {content.hero.scrollLabel && (
+            <div className="mt-14 flex flex-col items-center gap-2 text-white/80">
+              <span className="text-[10px] font-grotesk tracking-[0.3em] uppercase">{content.hero.scrollLabel}</span>
+              <span className="w-px h-10 bg-white/40" />
+            </div>
+          )}
         </div>
       </section>
 
-      {/* Shop By Style — full-bleed horizontal strip, no outer padding */}
-      <section className="relative bg-transparent animate-on-scroll opacity-100 translate-y-0 md:opacity-0 md:translate-y-12 transition-all duration-1000 cv-auto">
-        {/* Section label — constrained to readable width */}
-        <div className="py-14 text-center max-w-7xl mx-auto px-4">
-          <h2 className="text-6xl md:text-7xl font-display text-gray-900 mb-4">{content.shopByStyle.sectionTitle}</h2>
-          <div className="w-24 h-1 bg-accent-electric mx-auto" />
-        </div>
-
-        {/* Mobile: 2:3 portrait cards stacked (grid-cols-1, no lg: override on grid).
-            Desktop: each card is a full-viewport-width section with a 16:9 frame,
-            content beautifully centred via lg: prefixed utilities only. */}
-        <div className="grid grid-cols-1 gap-8 lg:gap-6">
-          {[
-            { panel: content.shopByStyle.women,       img: homePageImages.womenImage,      href: '/category/women' },
-            { panel: content.shopByStyle.accessories, img: homePageImages.accessoryImage,  href: '/category/accessories' },
-            { panel: content.shopByStyle.men,         img: homePageImages.menImage,        href: '/category/men' },
-            { panel: content.shopByStyle.sale,        img: homePageImages.saleImage,       href: '/category/sale' },
-            { panel: content.shopByStyle.collections, img: homePageImages.collectionImage, href: '/category/collections' },
-          ].map(({ panel, img, href }) => (
-            <Link
-              key={panel.title}
-              to={href}
-              className="relative group overflow-hidden bg-brand-900 aspect-[2/3] lg:aspect-[16/9] block"
-            >
-              {img && (
-                <div className="absolute inset-0">
-                  {renderHomeMedia(img, panel.title, 'w-full h-full object-cover lg:transition-transform lg:duration-700 lg:group-hover:scale-105', { sizes: '100vw' })}
-                </div>
+      {/* ──────────────── EDITORIAL CAMPAIGN BLOCK ────────────────
+          One large full-bleed image with a centered overlay caption —
+          the recurring editorial unit on luxury homepages. */}
+      <section className="relative animate-on-scroll opacity-100 translate-y-0 md:opacity-0 md:translate-y-12 transition-all duration-1000 cv-auto">
+        <Link
+          to="/category/collections"
+          className="group relative block overflow-hidden bg-brand-900"
+        >
+          <div className="aspect-[3/4] sm:aspect-[16/10] lg:aspect-[16/8]">
+            {homePageImages.collectionImage &&
+              renderHomeMedia(
+                homePageImages.collectionImage,
+                content.shopByStyle.collections.title,
+                'w-full h-full object-cover transition-transform duration-[1200ms] ease-out group-hover:scale-105',
+                { sizes: '100vw' }
               )}
-
-              {/* Mobile content: anchored bottom-left — no lg: classes here */}
-              <div className="absolute bottom-0 left-0 p-6 lg:hidden">
-                {panel.badge && (
-                  <div className="inline-block bg-accent-electric text-brand-900 px-3 py-1 text-xs font-grotesk font-bold mb-3 tracking-wider">
-                    {panel.badge}
-                  </div>
-                )}
-                <h3 className="text-3xl font-display text-white mb-1" style={{ textShadow: '0 1px 8px rgba(0,0,0,0.9)' }}>
-                  {panel.title}
-                </h3>
-                {panel.description && (
-                  <p className="text-sm text-white/80 font-grotesk mb-3">{panel.description}</p>
-                )}
-                <span className="inline-flex items-center gap-2 text-accent-electric font-grotesk font-semibold text-sm tracking-wider group-hover:gap-4 transition-all">
-                  {panel.linkText} <FiArrowRight size={16} />
-                </span>
-              </div>
-
-              {/* Desktop content: centred inside the 16:9 frame — all lg: prefixed */}
-              <div className="hidden lg:absolute lg:inset-0 lg:flex lg:flex-col lg:items-center lg:justify-center lg:text-center lg:px-16">
-                {panel.badge && (
-                  <div className="lg:inline-block lg:bg-accent-electric lg:text-brand-900 lg:px-4 lg:py-1 lg:text-sm lg:font-grotesk lg:font-bold lg:mb-6 lg:tracking-widest">
-                    {panel.badge}
-                  </div>
-                )}
-                <h3 className="lg:text-7xl lg:font-display lg:text-white lg:mb-4" style={{ textShadow: '0 2px 20px rgba(0,0,0,0.9)' }}>
-                  {panel.title}
-                </h3>
-                {panel.description && (
-                  <p className="lg:text-xl lg:text-white/90 lg:font-grotesk lg:mb-8 lg:max-w-lg">{panel.description}</p>
-                )}
-                <span className="lg:inline-flex lg:items-center lg:gap-3 lg:text-accent-electric lg:font-grotesk lg:font-semibold lg:text-base lg:tracking-widest lg:border-b lg:border-accent-electric lg:pb-1 lg:group-hover:gap-5 lg:transition-all">
-                  {panel.linkText} <FiArrowRight size={18} />
-                </span>
-              </div>
-            </Link>
-          ))}
-        </div>
-      </section>
-
-      {/* Featured Products with Bold Header */}
-      <section className="py-24 bg-transparent animate-on-scroll opacity-100 translate-y-0 md:opacity-0 md:translate-y-12 transition-all duration-1000 cv-auto">
-        <div className="max-w-7xl mx-auto px-4">
-          <div className="mb-16 flex flex-col lg:flex-row lg:items-end lg:justify-between gap-6">
-            <div>
-              <div className="inline-block bg-accent-electric text-brand-900 px-4 py-1 text-sm font-grotesk font-bold mb-4">
-                {content.freshDrops.badge}
-              </div>
-              <h2 className="text-6xl md:text-7xl font-display text-gray-900">{content.freshDrops.sectionTitle}</h2>
-            </div>
-            <Link
-              to="/category/new-arrivals"
-              className="group inline-flex items-center gap-3 text-gray-900 font-grotesk font-bold text-lg border-b-2 border-gray-900 pb-2 hover:border-accent-electric hover:text-accent-electric transition-all"
-            >
-              {content.freshDrops.viewAllLink}
-              <FiArrowRight className="group-hover:translate-x-2 transition-transform" size={24} />
-            </Link>
           </div>
 
-          <ProductGrid products={featuredProducts} isLoading={isLoading} />
+          <div className="absolute inset-0 bg-black/25" aria-hidden="true" />
+
+          <div className="absolute inset-0 flex flex-col items-center justify-center text-center text-white px-6">
+            {content.shopByStyle.collections.badge && (
+              <p className={`${EYEBROW} text-white/90 mb-4`}>{content.shopByStyle.collections.badge}</p>
+            )}
+            <h2 className="font-display text-5xl md:text-7xl mb-4" style={{ textShadow: '0 2px 18px rgba(0,0,0,0.5)' }}>
+              {content.shopByStyle.collections.title}
+            </h2>
+            {content.shopByStyle.collections.description && (
+              <p className="text-base md:text-lg text-white/90 font-grotesk max-w-md mb-8">
+                {content.shopByStyle.collections.description}
+              </p>
+            )}
+            <span className={`${CTA_BASE} ${CTA_LIGHT}`}>
+              {content.shopByStyle.collections.linkText}
+              <FiArrowRight className="transition-transform duration-300 group-hover:translate-x-1" size={15} />
+            </span>
+          </div>
+        </Link>
+      </section>
+
+      {/* ──────────────── SHOP BY CATEGORY ────────────────
+          Clean grid of labeled tiles with the caption beneath the image. */}
+      <section className="py-20 lg:py-24 bg-transparent animate-on-scroll opacity-100 translate-y-0 md:opacity-0 md:translate-y-12 transition-all duration-1000 cv-auto">
+        <div className="max-w-7xl mx-auto px-4">
+          <div className="text-center mb-12 lg:mb-16">
+            <h2 className="font-display text-4xl md:text-6xl text-gray-900">{content.shopByStyle.sectionTitle}</h2>
+            <div className="w-16 h-px bg-gray-900/60 mx-auto mt-5" />
+          </div>
+
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-x-4 gap-y-10 lg:gap-x-6">
+            {categoryTiles.map(({ panel, img, href }) => (
+              <Link key={panel.title} to={href} className="group block text-center">
+                <div className="relative aspect-[3/4] overflow-hidden bg-brand-900 mb-5">
+                  {img &&
+                    renderHomeMedia(
+                      img,
+                      panel.title,
+                      'w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-105'
+                    )}
+                </div>
+                <h3 className="font-display text-2xl md:text-3xl text-gray-900 tracking-wide">{panel.title}</h3>
+                {panel.description && (
+                  <p className="mt-1 text-sm text-gray-600 font-grotesk">{panel.description}</p>
+                )}
+                <span className="inline-block mt-3 text-[11px] font-grotesk font-medium tracking-[0.22em] uppercase text-gray-900 border-b border-gray-900/40 pb-1 transition-colors group-hover:border-gray-900">
+                  {panel.linkText}
+                </span>
+              </Link>
+            ))}
+          </div>
         </div>
       </section>
 
-      {/* Bold Brand Statement Section */}
-      <section className="relative py-32 bg-brand-900 overflow-hidden animate-on-scroll opacity-100 translate-y-0 md:opacity-0 md:translate-y-12 transition-all duration-1000 cv-auto">
-        <div className="absolute inset-0 bg-gradient-to-r from-brand-900 via-brand-800/80 to-brand-900" />
+      {/* ──────────────── NEW IN — PRODUCT CAROUSEL ────────────────
+          Horizontal scroll-snap rail of featured products with arrow controls. */}
+      <section className="py-20 lg:py-24 bg-transparent animate-on-scroll opacity-100 translate-y-0 md:opacity-0 md:translate-y-12 transition-all duration-1000 cv-auto">
+        <div className="max-w-7xl mx-auto px-4">
+          <div className="mb-10 lg:mb-12 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+            <div>
+              {content.freshDrops.badge && (
+                <p className={`${EYEBROW} text-gray-500 mb-3`}>{content.freshDrops.badge}</p>
+              )}
+              <h2 className="font-display text-4xl md:text-6xl text-gray-900">{content.freshDrops.sectionTitle}</h2>
+            </div>
 
-        {/* Large Background Text */}
-        <div className="absolute inset-0 flex items-center justify-center opacity-10 overflow-hidden pointer-events-none" aria-hidden="true">
+            <div className="flex items-center gap-6">
+              <div className="hidden sm:flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => scrollCarousel(-1)}
+                  aria-label="Previous products"
+                  className="w-11 h-11 flex items-center justify-center border border-gray-900/30 text-gray-900 hover:bg-gray-900 hover:text-white transition-colors"
+                >
+                  <FiChevronLeft size={20} />
+                </button>
+                <button
+                  type="button"
+                  onClick={() => scrollCarousel(1)}
+                  aria-label="Next products"
+                  className="w-11 h-11 flex items-center justify-center border border-gray-900/30 text-gray-900 hover:bg-gray-900 hover:text-white transition-colors"
+                >
+                  <FiChevronRight size={20} />
+                </button>
+              </div>
+              <div className="hidden sm:block">
+                <CtaLink to="/category/new-arrivals">{content.freshDrops.viewAllLink}</CtaLink>
+              </div>
+            </div>
+          </div>
+
+          {isLoading ? (
+            <div className="flex gap-6 overflow-hidden">
+              {[...Array(5)].map((_, i) => (
+                <div key={i} className="shrink-0 w-[70%] sm:w-[44%] md:w-[30%] lg:w-[23%] animate-pulse">
+                  <div className="aspect-[3/4] bg-brand-700/40 rounded-2xl mb-3" />
+                  <div className="h-3.5 bg-brand-700/40 rounded mb-2 w-3/4" />
+                  <div className="h-3.5 bg-brand-700/40 rounded w-1/3" />
+                </div>
+              ))}
+            </div>
+          ) : featuredProducts.length === 0 ? (
+            <div className="text-center py-16">
+              <p className="text-gray-500 font-grotesk tracking-wide">No products found</p>
+            </div>
+          ) : (
+            <div
+              ref={carouselRef}
+              className="flex gap-6 overflow-x-auto scrollbar-hide snap-x snap-mandatory pb-2 -mx-4 px-4"
+            >
+              {featuredProducts.map((product) => (
+                <div
+                  key={product._id}
+                  className="snap-start shrink-0 w-[70%] sm:w-[44%] md:w-[30%] lg:w-[23%]"
+                >
+                  <ProductCard product={product} />
+                </div>
+              ))}
+            </div>
+          )}
+
+          {/* Mobile view-all */}
+          <div className="mt-10 text-center sm:hidden">
+            <CtaLink to="/category/new-arrivals">{content.freshDrops.viewAllLink}</CtaLink>
+          </div>
+        </div>
+      </section>
+
+      {/* ──────────────── BRAND STATEMENT (EDITORIAL) ──────────────── */}
+      <section className="relative py-28 lg:py-36 bg-brand-900 overflow-hidden animate-on-scroll opacity-100 translate-y-0 md:opacity-0 md:translate-y-12 transition-all duration-1000 cv-auto">
+        <div className="absolute inset-0 flex items-center justify-center opacity-[0.06] overflow-hidden pointer-events-none" aria-hidden="true">
           <span className="font-display text-[20vw] text-white whitespace-nowrap">CUALQUIER</span>
         </div>
 
-        <div className="relative z-10 max-w-5xl mx-auto px-4 text-center">
-          <h2 className="text-6xl md:text-8xl font-display text-white mb-8 leading-tight">
+        <div className="relative z-10 max-w-4xl mx-auto px-4 text-center">
+          <h2 className="font-display text-5xl md:text-7xl text-white mb-8 leading-tight">
             {content.brandStatement.headlineLine1}
             <br />
             <span className="text-accent-electric">{content.brandStatement.headlineLine2}</span>
           </h2>
-          <p className="text-xl md:text-2xl text-brand-100 font-grotesk max-w-3xl mx-auto mb-12 leading-relaxed whitespace-pre-line">
+          <p className="text-lg md:text-xl text-brand-100 font-grotesk max-w-2xl mx-auto mb-12 leading-relaxed whitespace-pre-line">
             {content.brandStatement.description}
           </p>
-          <Link
-            to="/about"
-            className="inline-flex items-center gap-3 bg-accent-electric text-brand-900 px-10 py-5 font-grotesk font-bold text-lg tracking-wide rounded-full hover:bg-white transition-all duration-300 transform hover:scale-105"
-          >
-            {content.brandStatement.ctaButton}
-            <FiArrowUpRight size={24} />
-          </Link>
+          <div className="flex justify-center">
+            <CtaLink to="/about" light>
+              {content.brandStatement.ctaButton}
+            </CtaLink>
+          </div>
         </div>
       </section>
 
-      {/* Newsletter - Bold CTA */}
-      <section className="py-20 bg-transparent animate-on-scroll opacity-100 translate-y-0 md:opacity-0 md:translate-y-12 transition-all duration-1000 cv-auto">
-        <div className="max-w-4xl mx-auto px-4">
-          <div
-            className="p-12 lg:p-16 relative overflow-hidden"
-            style={{
-              background:
-                'linear-gradient(135deg, color-mix(in srgb, var(--accent-electric, #00E5FF) 44%, #0f1f38 56%), color-mix(in srgb, var(--accent-electric, #00E5FF) 20%, #081121 80%))',
-            }}
+      {/* ──────────────── NEWSLETTER ──────────────── */}
+      <section className="py-20 lg:py-24 bg-transparent animate-on-scroll opacity-100 translate-y-0 md:opacity-0 md:translate-y-12 transition-all duration-1000 cv-auto">
+        <div className="max-w-2xl mx-auto px-4 text-center">
+          <h2 className="font-display text-4xl md:text-5xl text-gray-900 mb-4">{content.newsletter.title}</h2>
+          <p className="text-base md:text-lg text-gray-600 font-grotesk mb-10 whitespace-pre-line">
+            {content.newsletter.description}
+          </p>
+
+          <form
+            className="flex flex-col sm:flex-row gap-3 max-w-xl mx-auto"
+            onSubmit={(e) => e.preventDefault()}
           >
-            <div className="absolute inset-0 bg-[radial-gradient(circle_at_25%_30%,rgba(255,255,255,0.2),transparent_48%),radial-gradient(circle_at_80%_70%,rgba(255,255,255,0.14),transparent_42%)] opacity-60" />
-
-            {/* Arrow Pattern */}
-            <div className="absolute top-2 right-10 text-white/25 text-8xl orbit-float-slow select-none">→</div>
-            <div className="absolute bottom-3 left-8 text-white/20 text-8xl rotate-180 orbit-float-fast select-none">→</div>
-            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-2 h-2 bg-white/80 rounded-full shadow-[0_0_18px_rgba(255,255,255,0.8)] orbit-center-glow" />
-
-            <div className="relative z-10 text-center text-white">
-              <h2 className="text-5xl md:text-6xl font-display mb-6">{content.newsletter.title}</h2>
-              <p className="text-xl font-grotesk mb-8 opacity-90 whitespace-pre-line">
-                {content.newsletter.description}
-              </p>
-
-              <form className="flex flex-col sm:flex-row gap-4 max-w-2xl mx-auto">
-                <input
-                  type="email"
-                  placeholder={content.newsletter.emailPlaceholder}
-                  className="flex-1 px-6 py-4 bg-white text-brand-900 font-grotesk text-lg focus:outline-none focus:ring-4 focus:ring-accent-electric transition-all"
-                />
-                <button
-                  type="submit"
-                  className="px-10 py-4 bg-accent-electric text-brand-900 font-grotesk font-bold text-lg tracking-wide rounded-full hover:bg-white transition-all duration-300 transform hover:scale-105"
-                >
-                  {content.newsletter.submitButton}
-                </button>
-              </form>
-            </div>
-          </div>
+            <input
+              type="email"
+              placeholder={content.newsletter.emailPlaceholder}
+              className="flex-1 px-5 py-3.5 bg-white border border-gray-300 text-gray-900 font-grotesk focus:outline-none focus:border-gray-900 transition-colors"
+            />
+            <button
+              type="submit"
+              className="px-8 py-3.5 bg-gray-900 text-white font-grotesk text-sm font-medium tracking-[0.18em] uppercase hover:bg-gray-700 transition-colors"
+            >
+              {content.newsletter.submitButton}
+            </button>
+          </form>
         </div>
       </section>
 
       <style>{`
         @keyframes slide-up {
-          from { transform: translateY(100%); opacity: 0; }
+          from { transform: translateY(40px); opacity: 0; }
           to { transform: translateY(0); opacity: 1; }
         }
 
         @keyframes fade-in {
-          from { opacity: 0; transform: translateY(20px); }
+          from { opacity: 0; transform: translateY(16px); }
           to { opacity: 1; transform: translateY(0); }
         }
 
         .animate-slide-up {
-          animation: slide-up 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-        }
-
-        .animate-slide-up-delayed {
-          animation: slide-up 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0.2s forwards;
-          opacity: 0;
-        }
-
-        .animate-slide-up-more-delayed {
-          animation: slide-up 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0.4s forwards;
-          opacity: 0;
+          animation: slide-up 0.9s cubic-bezier(0.16, 1, 0.3, 1) forwards;
         }
 
         .animate-fade-in-delayed {
-          animation: fade-in 0.8s ease-out 0.6s forwards;
+          animation: fade-in 0.8s ease-out 0.35s forwards;
           opacity: 0;
         }
 
         .animate-fade-in-more-delayed {
-          animation: fade-in 0.8s ease-out 0.8s forwards;
+          animation: fade-in 0.8s ease-out 0.6s forwards;
           opacity: 0;
         }
 
         .animate-in {
           opacity: 1 !important;
           transform: translateY(0) !important;
-        }
-
-        .delay-300 {
-          animation-delay: 300ms;
-        }
-
-        .delay-700 {
-          animation-delay: 700ms;
-        }
-
-        @keyframes orbit-float-slow {
-          0% { transform: translate3d(0, 0, 0) rotate(0deg); }
-          25% { transform: translate3d(-6px, -12px, 0) rotate(-4deg); }
-          50% { transform: translate3d(0, -20px, 0) rotate(0deg); }
-          75% { transform: translate3d(6px, -10px, 0) rotate(4deg); }
-          100% { transform: translate3d(0, 0, 0) rotate(0deg); }
-        }
-
-        @keyframes orbit-float-fast {
-          0% { transform: rotate(180deg) translate3d(0, 0, 0); }
-          25% { transform: rotate(180deg) translate3d(8px, 10px, 0); }
-          50% { transform: rotate(180deg) translate3d(0, 18px, 0); }
-          75% { transform: rotate(180deg) translate3d(-8px, 10px, 0); }
-          100% { transform: rotate(180deg) translate3d(0, 0, 0); }
-        }
-
-        @keyframes orbit-center-glow {
-          0%, 100% { opacity: 0.65; transform: translate(-50%, -50%) scale(1); }
-          50% { opacity: 1; transform: translate(-50%, -50%) scale(1.35); }
-        }
-
-        .orbit-float-slow {
-          animation: orbit-float-slow 6.5s ease-in-out infinite;
-        }
-
-        .orbit-float-fast {
-          animation: orbit-float-fast 4.8s ease-in-out infinite;
-        }
-
-        .orbit-center-glow {
-          animation: orbit-center-glow 3s ease-in-out infinite;
         }
       `}</style>
     </Layout>

@@ -59,18 +59,38 @@ const Header: React.FC = () => {
       {/* Main header */}
       <div className="border-b-2 border-transparent">
         <div className="max-w-7xl mx-auto px-4">
-          <div className="flex items-center justify-between h-20 lg:h-24">
-            {/* Mobile menu button — only visible on mobile, stays purple */}
-            <button
-              className="lg:hidden p-2 -ml-2 text-[#B53BEA] transition-opacity hover:opacity-70"
-              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-              aria-label="Toggle menu"
-            >
-              {isMobileMenuOpen ? <FiX size={26} strokeWidth={2.5} /> : <FiMenu size={26} strokeWidth={2.5} />}
-            </button>
+          <div className="relative flex items-center h-20 lg:h-24">
+            {/* Left zone — mobile menu button + desktop navigation */}
+            <div className="flex items-center flex-1 min-w-0">
+              <button
+                className="lg:hidden p-2 -ml-2 text-[#B53BEA] transition-opacity hover:opacity-70"
+                onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+                aria-label="Toggle menu"
+              >
+                {isMobileMenuOpen ? <FiX size={26} strokeWidth={2.5} /> : <FiMenu size={26} strokeWidth={2.5} />}
+              </button>
 
-            {/* Logo */}
-            <Link to="/" className="flex items-center lg:mr-12">
+              {/* Desktop Navigation */}
+              <nav className="hidden lg:flex items-center space-x-6 xl:space-x-8">
+                {NAV_ITEMS.map((item) => (
+                  <Link
+                    key={item.label}
+                    to={item.path}
+                    className="text-sm xl:text-base font-grotesk font-semibold tracking-wide text-[#B53BEA] hover:opacity-70 transition-opacity relative group"
+                  >
+                    {item.label}
+                    <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-[#B53BEA] transition-all duration-300 group-hover:w-full" />
+                  </Link>
+                ))}
+              </nav>
+            </div>
+
+            {/* Center logo — absolutely centered (Gucci-style) */}
+            <Link
+              to="/"
+              className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 flex items-center"
+              aria-label="Cualquier home"
+            >
               <img
                 src="/Images/ccosa_logo.png"
                 alt="Cualquier"
@@ -78,22 +98,8 @@ const Header: React.FC = () => {
               />
             </Link>
 
-            {/* Desktop Navigation */}
-            <nav className="hidden lg:flex items-center space-x-8 xl:space-x-10 flex-1">
-              {NAV_ITEMS.map((item) => (
-                <Link
-                  key={item.label}
-                  to={item.path}
-                  className="text-sm xl:text-base font-grotesk font-semibold tracking-wide text-[#B53BEA] hover:opacity-70 transition-opacity relative group"
-                >
-                  {item.label}
-                  <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-[#B53BEA] transition-all duration-300 group-hover:w-full" />
-                </Link>
-              ))}
-            </nav>
-
-            {/* Right side icons */}
-            <div className="flex items-center space-x-3 lg:space-x-4">
+            {/* Right zone — utility icons */}
+            <div className="flex items-center justify-end flex-1 min-w-0 space-x-3 lg:space-x-4">
               <button
                 onClick={() => setIsSearchOpen(!isSearchOpen)}
                 className="p-2 text-[#B53BEA] hover:opacity-70 transition-opacity hover:scale-110 duration-300"

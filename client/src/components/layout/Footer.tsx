@@ -20,6 +20,38 @@ const Footer: React.FC = () => {
 
   return (
     <footer className="bg-black/60 backdrop-blur-md border-t border-white/20">
+      {/* Service band — "May We Help You?" (luxury-style contact prompt) */}
+      <div className="border-b border-white/20">
+        <div className="max-w-7xl mx-auto px-4 py-12 lg:py-14 text-center">
+          <h3 className="text-white text-sm tracking-[0.25em] font-grotesk font-semibold mb-2">
+            MAY WE HELP YOU?
+          </h3>
+          <p className="text-white/70 text-sm font-grotesk mb-7">
+            Our client advisors are available to assist you.
+          </p>
+          <div className="flex flex-wrap items-center justify-center gap-x-8 gap-y-3 text-sm font-grotesk">
+            <a
+              href="tel:+18000000000"
+              className="text-white/90 border-b border-white/40 pb-1 hover:border-white transition-colors"
+            >
+              Call Us
+            </a>
+            <Link
+              to="/contact"
+              className="text-white/90 border-b border-white/40 pb-1 hover:border-white transition-colors"
+            >
+              Email Us
+            </Link>
+            <Link
+              to="/faq"
+              className="text-white/90 border-b border-white/40 pb-1 hover:border-white transition-colors"
+            >
+              FAQ
+            </Link>
+          </div>
+        </div>
+      </div>
+
       {/* Main Footer */}
       <div className="max-w-7xl mx-auto px-4 py-12 lg:py-16">
         <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-8">
