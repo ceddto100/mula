@@ -11,6 +11,7 @@ type FieldDef = {
   label: string;
   multiline?: boolean;
   type?: 'text' | 'boolean';
+  checkboxLabel?: string;
 };
 
 type SectionDef = {
@@ -27,31 +28,53 @@ const sections: SectionDef[] = [
     description: 'Controls site accent color, hero turquoise overlay, and website heading font.',
     fields: [
       { path: 'brandTheme.accentColor', label: 'Accent color (hex)' },
-      { path: 'brandTheme.heroOverlayEnabled', label: 'Hero overlay enabled', type: 'boolean' },
+      { path: 'brandTheme.heroOverlayEnabled', label: 'Hero overlay enabled', type: 'boolean', checkboxLabel: 'Enable overlay tint on hero image' },
       { path: 'brandTheme.heroOverlayColor', label: 'Hero overlay color (hex)' },
       { path: 'brandTheme.headingFont', label: 'Website heading font' },
     ],
   },
   {
+    key: 'announcementBar',
+    title: 'Announcement Bar',
+    description: 'Slim message strip at the very top of every page.',
+    fields: [
+      { path: 'announcementBar.enabled', label: 'Show announcement bar', type: 'boolean', checkboxLabel: 'Display the bar at the top of the site' },
+      { path: 'announcementBar.text', label: 'Announcement text' },
+    ],
+  },
+  {
     key: 'hero',
     title: 'Hero Section',
-    description: 'Top-of-page banner copy.',
+    description: 'Full-screen banner. The two buttons link to Women and Men.',
     fields: [
-      { path: 'hero.badge', label: 'Badge' },
+      { path: 'hero.badge', label: 'Intro line (above headline)' },
       { path: 'hero.headline1', label: 'Headline (line 1)' },
-      { path: 'hero.headline2', label: 'Headline (line 2)' },
+      { path: 'hero.headline2', label: 'Headline (line 2, accent color)' },
       { path: 'hero.subheading', label: 'Subheading', multiline: true },
-      { path: 'hero.ctaPrimary', label: 'Primary button' },
-      { path: 'hero.ctaSecondary', label: 'Secondary button' },
-      { path: 'hero.scrollLabel', label: 'Scroll indicator' },
+      { path: 'hero.ctaPrimary', label: 'Left button (→ Women)' },
+      { path: 'hero.ctaSecondary', label: 'Right button (→ Men)' },
     ],
   },
   {
     key: 'shopByStyle',
-    title: 'Shop By Style',
-    description: 'Section heading and editable panels.',
+    title: 'Category Grid',
+    description: 'The four category tile captions below the hero.',
     fields: [
-      { path: 'shopByStyle.sectionTitle', label: 'Section title' },
+      { path: 'shopByStyle.women.title', label: 'Tile 1 caption (Women)' },
+      { path: 'shopByStyle.men.title', label: 'Tile 2 caption (Men)' },
+      { path: 'shopByStyle.accessories.title', label: 'Tile 3 caption (Accessories)' },
+      { path: 'shopByStyle.collections.title', label: 'Tile 4 caption (Collections)' },
+    ],
+  },
+  {
+    key: 'promoSplit',
+    title: 'Promo Split',
+    description: 'Two large promotional tiles. Left links to New Arrivals, right to Sale.',
+    fields: [
+      { path: 'promoSplit.left.title', label: 'Left tile title' },
+      { path: 'promoSplit.left.linkText', label: 'Left tile button' },
+      { path: 'promoSplit.right.title', label: 'Right tile title' },
+      { path: 'promoSplit.right.linkText', label: 'Right tile button' },
     ],
   },
   {
@@ -66,13 +89,21 @@ const sections: SectionDef[] = [
   },
   {
     key: 'brandStatement',
-    title: 'Brand Statement',
-    description: 'The "Define Your Style" mid-page section.',
+    title: 'Campaign Block',
+    description: 'Centered editorial statement with a link (links to the About page).',
     fields: [
       { path: 'brandStatement.headlineLine1', label: 'Headline (line 1)' },
       { path: 'brandStatement.headlineLine2', label: 'Headline (line 2, accent color)' },
       { path: 'brandStatement.description', label: 'Description', multiline: true },
-      { path: 'brandStatement.ctaButton', label: 'CTA button' },
+      { path: 'brandStatement.ctaButton', label: 'Link text' },
+    ],
+  },
+  {
+    key: 'services',
+    title: 'Services',
+    description: 'Three service tiles near the bottom of the page.',
+    fields: [
+      { path: 'services.sectionTitle', label: 'Section title' },
     ],
   },
   {
@@ -137,10 +168,13 @@ const HomePageContentEditor: React.FC = () => {
     try {
       setIsSaving(true);
       const updated = await adminApi.updateHomePageContent({
+        announcementBar: content.announcementBar,
         hero: content.hero,
         shopByStyle: content.shopByStyle,
+        promoSplit: content.promoSplit,
         freshDrops: content.freshDrops,
         brandStatement: content.brandStatement,
+        services: content.services,
         newsletter: content.newsletter,
         brandTheme: content.brandTheme,
       });
@@ -226,7 +260,7 @@ const HomePageContentEditor: React.FC = () => {
                             onChange={(e) => onChange(field.path, e.target.checked)}
                             className="h-4 w-4 rounded border-gray-300"
                           />
-                          <span className="text-gray-700">Enable overlay tint on hero image</span>
+                          <span className="text-gray-700">{field.checkboxLabel || 'Enabled'}</span>
                         </label>
                       ) : field.multiline ? (
                         <textarea
@@ -298,52 +332,21 @@ const HomePageContentEditor: React.FC = () => {
                     </label>
                   );
                 })}
-                {section.key === 'shopByStyle' && (
+                {section.key === 'services' && (
                   <div className="md:col-span-2 border-t pt-4 space-y-4">
-                    <div className="flex items-center justify-between">
-                      <h4 className="font-semibold text-gray-800">Panels</h4>
-                      <button
-                        type="button"
-                        className="px-3 py-1.5 text-sm border rounded-md"
-                        onClick={() =>
-                          setContent((prev) => ({
-                            ...prev,
-                            shopByStyle: {
-                              ...prev.shopByStyle,
-                              panels: [...(prev.shopByStyle.panels || []), { badge: '', title: '', description: '', linkText: '' }],
-                            },
-                          }))
-                        }
-                      >
-                        Add panel
-                      </button>
-                    </div>
-                    {(content.shopByStyle.panels || []).map((panel, index) => (
+                    <h4 className="font-semibold text-gray-800">Service tiles</h4>
+                    {(content.services?.items || []).slice(0, 3).map((item, index) => (
                       <div key={index} className="border rounded-lg p-3 grid grid-cols-1 md:grid-cols-2 gap-3">
-                        <input value={panel.badge || ''} onChange={(e) => {
-                          const panels = [...content.shopByStyle.panels];
-                          panels[index] = { ...panels[index], badge: e.target.value };
-                          setContent((prev) => ({ ...prev, shopByStyle: { ...prev.shopByStyle, panels } }));
-                        }} placeholder="Badge" className="px-3 py-2 border rounded-md" />
-                        <input value={panel.title || ''} onChange={(e) => {
-                          const panels = [...content.shopByStyle.panels];
-                          panels[index] = { ...panels[index], title: e.target.value };
-                          setContent((prev) => ({ ...prev, shopByStyle: { ...prev.shopByStyle, panels } }));
+                        <input value={item.title || ''} onChange={(e) => {
+                          const items = [...(content.services?.items || [])];
+                          items[index] = { ...items[index], title: e.target.value };
+                          setContent((prev) => ({ ...prev, services: { ...prev.services, items } }));
                         }} placeholder="Title" className="px-3 py-2 border rounded-md" />
-                        <textarea value={panel.description || ''} onChange={(e) => {
-                          const panels = [...content.shopByStyle.panels];
-                          panels[index] = { ...panels[index], description: e.target.value };
-                          setContent((prev) => ({ ...prev, shopByStyle: { ...prev.shopByStyle, panels } }));
-                        }} placeholder="Description" className="md:col-span-2 px-3 py-2 border rounded-md" rows={2} />
-                        <input value={panel.linkText || ''} onChange={(e) => {
-                          const panels = [...content.shopByStyle.panels];
-                          panels[index] = { ...panels[index], linkText: e.target.value };
-                          setContent((prev) => ({ ...prev, shopByStyle: { ...prev.shopByStyle, panels } }));
-                        }} placeholder="Link text" className="px-3 py-2 border rounded-md" />
-                        <button type="button" className="px-3 py-2 text-sm text-red-700 border border-red-300 rounded-md" onClick={() => {
-                          const panels = content.shopByStyle.panels.filter((_, i) => i !== index);
-                          setContent((prev) => ({ ...prev, shopByStyle: { ...prev.shopByStyle, panels } }));
-                        }}>Remove</button>
+                        <input value={item.linkText || ''} onChange={(e) => {
+                          const items = [...(content.services?.items || [])];
+                          items[index] = { ...items[index], linkText: e.target.value };
+                          setContent((prev) => ({ ...prev, services: { ...prev.services, items } }));
+                        }} placeholder="Description" className="px-3 py-2 border rounded-md" />
                       </div>
                     ))}
                   </div>

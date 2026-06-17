@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { FiShoppingBag, FiUser, FiMenu, FiX, FiSearch, FiHeart } from 'react-icons/fi';
 import { useAuth } from '../../context/AuthContext';
 import { useCart } from '../../context/CartContext';
+import { productsApi } from '../../api/products.api';
 
 const NAV_ITEMS = [
   { label: 'NEW', path: '/new-arrivals' },
@@ -12,13 +13,49 @@ const NAV_ITEMS = [
   { label: 'SALE', path: '/sale' },
 ];
 
+const DEFAULT_ANNOUNCEMENT = 'COMPLIMENTARY SHIPPING ON ALL ORDERS';
+
 const Header: React.FC = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+  const [scrolled, setScrolled] = useState(false);
+  const [announcement, setAnnouncement] = useState<{ enabled: boolean; text: string }>({
+    enabled: true,
+    text: DEFAULT_ANNOUNCEMENT,
+  });
   const { isAuthenticated, user } = useAuth();
   const { itemCount } = useCart();
   const navigate = useNavigate();
+
+  // Toggle the header background: transparent while at the top (over the hero),
+  // solid white once the page is scrolled.
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 24);
+    onScroll();
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => window.removeEventListener('scroll', onScroll);
+  }, []);
+
+  // Announcement bar copy is editable via the admin Home Page content.
+  useEffect(() => {
+    let cancelled = false;
+    productsApi
+      .getHomePageContent()
+      .then((content) => {
+        if (cancelled || !content?.announcementBar) return;
+        setAnnouncement({
+          enabled: content.announcementBar.enabled !== false,
+          text: content.announcementBar.text ?? DEFAULT_ANNOUNCEMENT,
+        });
+      })
+      .catch(() => {
+        /* keep the default announcement on failure */
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   // Lock background scroll while the mobile menu is open, and close the menu
   // or search overlay on Escape.
@@ -55,7 +92,26 @@ const Header: React.FC = () => {
   };
 
   return (
-    <header className="sticky top-0 z-50 bg-transparent">
+    <>
+      {/* Announcement bar — slim strip above the nav. Its fixed height (h-9) is
+          part of the hero offset in Home.tsx, so keep them in sync. It scrolls
+          away with the page while the nav below stays sticky. */}
+      <div className="relative z-50 h-9 flex items-center justify-center px-4 text-center">
+        {announcement.enabled && announcement.text && (
+          <span
+            className="font-grotesk text-[10px] sm:text-xs font-semibold tracking-[0.2em] uppercase text-[#B53BEA] truncate"
+            style={{ textShadow: '0 1px 6px rgba(0,0,0,0.25)' }}
+          >
+            {announcement.text}
+          </span>
+        )}
+      </div>
+
+      <header
+        className={`sticky top-0 z-50 transition-colors duration-300 ${
+          scrolled ? 'bg-white/95 backdrop-blur shadow-sm' : 'bg-transparent'
+        }`}
+      >
       {/* Main header */}
       <div className="border-b-2 border-transparent">
         <div className="max-w-7xl mx-auto px-4">
@@ -221,6 +277,7 @@ const Header: React.FC = () => {
         </div>
       )}
     </header>
+    </>
   );
 };
 

@@ -168,6 +168,11 @@ export interface HomePageImages {
   collectionImage: string;
   accessoryImage: string;
   saleImage: string;
+  promoLeftImage: string;
+  promoRightImage: string;
+  serviceImage1: string;
+  serviceImage2: string;
+  serviceImage3: string;
 }
 
 export interface CategoryHeroMedia {
@@ -188,6 +193,11 @@ export interface CategoryHeroConfig {
   all: CategoryHeroMedia;
 }
 
+export interface AnnouncementBarContent {
+  enabled: boolean;
+  text: string;
+}
+
 export interface HeroContent {
   badge: string;
   headline1: string;
@@ -196,6 +206,26 @@ export interface HeroContent {
   ctaPrimary: string;
   ctaSecondary: string;
   scrollLabel: string;
+}
+
+export interface PromoTile {
+  title: string;
+  linkText: string;
+}
+
+export interface PromoSplitContent {
+  left: PromoTile;
+  right: PromoTile;
+}
+
+export interface ServiceItem {
+  title: string;
+  linkText: string;
+}
+
+export interface ServicesContent {
+  sectionTitle: string;
+  items: ServiceItem[];
 }
 
 export interface CategoryCardContent {
@@ -244,10 +274,13 @@ export interface BrandThemeContent {
 
 export interface HomePageContent {
   _id?: string;
+  announcementBar: AnnouncementBarContent;
   hero: HeroContent;
   shopByStyle: ShopByStyleContent;
+  promoSplit: PromoSplitContent;
   freshDrops: FreshDropsContent;
   brandStatement: BrandStatementContent;
+  services: ServicesContent;
   newsletter: NewsletterContent;
   brandTheme: BrandThemeContent;
 }

@@ -11,11 +11,16 @@ import { formatPrice, formatDate } from '../utils/formatters';
 
 const imageFieldConfig: Array<{ key: keyof HomePageImages; label: string }> = [
   { key: 'heroImage', label: 'Hero Section Image' },
-  { key: 'menImage', label: "Men's Image" },
-  { key: 'womenImage', label: "Women's Image" },
-  { key: 'collectionImage', label: 'Collection Image' },
-  { key: 'accessoryImage', label: 'Accessory Image' },
-  { key: 'saleImage', label: 'Sale Image' },
+  { key: 'womenImage', label: "Women's Image (grid tile 1)" },
+  { key: 'menImage', label: "Men's Image (grid tile 2)" },
+  { key: 'accessoryImage', label: 'Accessory Image (grid tile 3)' },
+  { key: 'collectionImage', label: 'Collection Image (grid tile 4)' },
+  { key: 'promoLeftImage', label: 'Promo Split — Left' },
+  { key: 'promoRightImage', label: 'Promo Split — Right' },
+  { key: 'saleImage', label: 'Sale Image (promo fallback)' },
+  { key: 'serviceImage1', label: 'Service Image 1' },
+  { key: 'serviceImage2', label: 'Service Image 2' },
+  { key: 'serviceImage3', label: 'Service Image 3' },
 ];
 
 const isVideoUrl = (url?: string): boolean => {
@@ -86,6 +91,11 @@ const AdminDashboard: React.FC = () => {
         collectionImage: homePageImages.collectionImage,
         accessoryImage: homePageImages.accessoryImage,
         saleImage: homePageImages.saleImage,
+        promoLeftImage: homePageImages.promoLeftImage,
+        promoRightImage: homePageImages.promoRightImage,
+        serviceImage1: homePageImages.serviceImage1,
+        serviceImage2: homePageImages.serviceImage2,
+        serviceImage3: homePageImages.serviceImage3,
       });
       setHomePageImages(updated);
       toast.success('Home page images updated');
