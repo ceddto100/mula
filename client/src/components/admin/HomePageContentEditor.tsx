@@ -58,12 +58,12 @@ const sections: SectionDef[] = [
   {
     key: 'shopByStyle',
     title: 'Category Grid',
-    description: 'The four category tile captions below the hero.',
+    description: "The four category tile captions below the hero — link to Women's/Men's Pants & Shirts.",
     fields: [
-      { path: 'shopByStyle.women.title', label: 'Tile 1 caption (Women)' },
-      { path: 'shopByStyle.men.title', label: 'Tile 2 caption (Men)' },
-      { path: 'shopByStyle.accessories.title', label: 'Tile 3 caption (Accessories)' },
-      { path: 'shopByStyle.collections.title', label: 'Tile 4 caption (Collections)' },
+      { path: 'shopByStyle.womenPants.title', label: "Tile 1 caption (Women's Pants)" },
+      { path: 'shopByStyle.womenShirts.title', label: "Tile 2 caption (Women's Shirts)" },
+      { path: 'shopByStyle.menPants.title', label: "Tile 3 caption (Men's Pants)" },
+      { path: 'shopByStyle.menShirts.title', label: "Tile 4 caption (Men's Shirts)" },
     ],
   },
   {

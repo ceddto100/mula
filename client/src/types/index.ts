@@ -168,6 +168,10 @@ export interface HomePageImages {
   collectionImage: string;
   accessoryImage: string;
   saleImage: string;
+  womenPantsImage: string;
+  womenShirtsImage: string;
+  menPantsImage: string;
+  menShirtsImage: string;
   promoLeftImage: string;
   promoRightImage: string;
   serviceImage1: string;
@@ -243,6 +247,10 @@ export interface ShopByStyleContent {
   accessories: CategoryCardContent;
   sale: CategoryCardContent;
   collections: CategoryCardContent;
+  womenPants: CategoryCardContent;
+  womenShirts: CategoryCardContent;
+  menPants: CategoryCardContent;
+  menShirts: CategoryCardContent;
 }
 
 export interface FreshDropsContent {
