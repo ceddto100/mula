@@ -7,6 +7,11 @@ export interface IHomePageImages {
   collectionImage: string;
   accessoryImage: string;
   saleImage: string;
+  // Category grid (four tiles: women's/men's pants & shirts)
+  womenPantsImage: string;
+  womenShirtsImage: string;
+  menPantsImage: string;
+  menShirtsImage: string;
   // Promo split (two large side-by-side tiles)
   promoLeftImage: string;
   promoRightImage: string;
@@ -46,6 +51,22 @@ const homePageImagesSchema = new Schema<IHomePageImages>(
     saleImage: {
       type: String,
       required: true,
+      default: '',
+    },
+    womenPantsImage: {
+      type: String,
+      default: '',
+    },
+    womenShirtsImage: {
+      type: String,
+      default: '',
+    },
+    menPantsImage: {
+      type: String,
+      default: '',
+    },
+    menShirtsImage: {
+      type: String,
       default: '',
     },
     promoLeftImage: {

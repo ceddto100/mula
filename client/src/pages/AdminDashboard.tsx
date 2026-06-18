@@ -11,10 +11,14 @@ import { formatPrice, formatDate } from '../utils/formatters';
 
 const imageFieldConfig: Array<{ key: keyof HomePageImages; label: string }> = [
   { key: 'heroImage', label: 'Hero Section Image' },
-  { key: 'womenImage', label: "Women's Image (grid tile 1)" },
-  { key: 'menImage', label: "Men's Image (grid tile 2)" },
-  { key: 'accessoryImage', label: 'Accessory Image (grid tile 3)' },
-  { key: 'collectionImage', label: 'Collection Image (grid tile 4)' },
+  { key: 'womenPantsImage', label: "Women's Pants Image (grid tile 1)" },
+  { key: 'womenShirtsImage', label: "Women's Shirts Image (grid tile 2)" },
+  { key: 'menPantsImage', label: "Men's Pants Image (grid tile 3)" },
+  { key: 'menShirtsImage', label: "Men's Shirts Image (grid tile 4)" },
+  { key: 'womenImage', label: "Women's Image (service row fallback)" },
+  { key: 'menImage', label: "Men's Image (promo split fallback)" },
+  { key: 'accessoryImage', label: 'Accessory Image (service row fallback)' },
+  { key: 'collectionImage', label: 'Collection Image (service row fallback)' },
   { key: 'promoLeftImage', label: 'Promo Split — Left' },
   { key: 'promoRightImage', label: 'Promo Split — Right' },
   { key: 'saleImage', label: 'Sale Image (promo fallback)' },
@@ -91,6 +95,10 @@ const AdminDashboard: React.FC = () => {
         collectionImage: homePageImages.collectionImage,
         accessoryImage: homePageImages.accessoryImage,
         saleImage: homePageImages.saleImage,
+        womenPantsImage: homePageImages.womenPantsImage,
+        womenShirtsImage: homePageImages.womenShirtsImage,
+        menPantsImage: homePageImages.menPantsImage,
+        menShirtsImage: homePageImages.menShirtsImage,
         promoLeftImage: homePageImages.promoLeftImage,
         promoRightImage: homePageImages.promoRightImage,
         serviceImage1: homePageImages.serviceImage1,
@@ -138,7 +146,7 @@ const AdminDashboard: React.FC = () => {
             <div>
               <h3 className="text-lg font-semibold">Home Page Image Manager</h3>
               <p className="text-sm text-gray-700">
-                Upload images or videos for hero, men, women, collection, accessory, and sale sections.
+                Upload images or videos for hero, the four category tiles (women's/men's pants &amp; shirts), and promo/service sections.
               </p>
             </div>
             <button

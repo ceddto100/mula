@@ -50,6 +50,10 @@ export interface IShopByStyleContent {
   accessories: ICategoryCard;
   sale: ICategoryCard;
   collections: ICategoryCard;
+  womenPants: ICategoryCard;
+  womenShirts: ICategoryCard;
+  menPants: ICategoryCard;
+  menShirts: ICategoryCard;
 }
 
 export interface IFreshDropsContent {
@@ -182,6 +186,42 @@ const shopByStyleSchema = new Schema<IShopByStyleContent>(
         title: 'COLLECTIONS',
         description: 'Curated Style Sets',
         linkText: 'EXPLORE',
+      }),
+    },
+    womenPants: {
+      type: categoryCardSchema,
+      default: () => ({
+        badge: '',
+        title: "WOMEN'S PANTS",
+        description: '',
+        linkText: 'SHOP',
+      }),
+    },
+    womenShirts: {
+      type: categoryCardSchema,
+      default: () => ({
+        badge: '',
+        title: "WOMEN'S SHIRTS",
+        description: '',
+        linkText: 'SHOP',
+      }),
+    },
+    menPants: {
+      type: categoryCardSchema,
+      default: () => ({
+        badge: '',
+        title: "MEN'S PANTS",
+        description: '',
+        linkText: 'SHOP',
+      }),
+    },
+    menShirts: {
+      type: categoryCardSchema,
+      default: () => ({
+        badge: '',
+        title: "MEN'S SHIRTS",
+        description: '',
+        linkText: 'SHOP',
       }),
     },
   },

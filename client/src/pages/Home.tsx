@@ -16,6 +16,10 @@ const defaultHomePageImages: HomePageImages = {
   collectionImage: '',
   accessoryImage: '',
   saleImage: '',
+  womenPantsImage: '',
+  womenShirtsImage: '',
+  menPantsImage: '',
+  menShirtsImage: '',
   promoLeftImage: '',
   promoRightImage: '',
   serviceImage1: '',
@@ -133,6 +137,10 @@ export const defaultHomePageContent: HomePageContent = {
     accessories: { badge: '', title: 'ACCESSORIES', description: '', linkText: 'VIEW' },
     sale: { badge: '', title: 'SALE', description: 'UP TO 50% OFF', linkText: 'SHOP DEALS' },
     collections: { badge: '', title: 'COLLECTIONS', description: 'Curated Style Sets', linkText: 'EXPLORE' },
+    womenPants: { badge: '', title: "WOMEN'S PANTS", description: '', linkText: 'SHOP' },
+    womenShirts: { badge: '', title: "WOMEN'S SHIRTS", description: '', linkText: 'SHOP' },
+    menPants: { badge: '', title: "MEN'S PANTS", description: '', linkText: 'SHOP' },
+    menShirts: { badge: '', title: "MEN'S SHIRTS", description: '', linkText: 'SHOP' },
   },
   freshDrops: {
     badge: 'NEW ARRIVALS',
@@ -242,11 +250,12 @@ const Home: React.FC = () => {
   const services = content.services ?? defaultHomePageContent.services;
 
   // 4-up category grid — titles come from the editable Shop By Style slots.
+  // Optional chaining guards older content documents saved before these fields existed.
   const categoryTiles = [
-    { title: content.shopByStyle.women.title || "WOMEN'S", img: homePageImages.womenImage, href: '/category/women' },
-    { title: content.shopByStyle.men.title || "MEN'S", img: homePageImages.menImage, href: '/category/men' },
-    { title: content.shopByStyle.accessories.title || 'ACCESSORIES', img: homePageImages.accessoryImage, href: '/category/accessories' },
-    { title: content.shopByStyle.collections.title || 'COLLECTIONS', img: homePageImages.collectionImage, href: '/category/collections' },
+    { title: content.shopByStyle.womenPants?.title || "WOMEN'S PANTS", img: homePageImages.womenPantsImage, href: '/category/women/pants' },
+    { title: content.shopByStyle.womenShirts?.title || "WOMEN'S SHIRTS", img: homePageImages.womenShirtsImage, href: '/category/women/t-shirts' },
+    { title: content.shopByStyle.menPants?.title || "MEN'S PANTS", img: homePageImages.menPantsImage, href: '/category/men/pants' },
+    { title: content.shopByStyle.menShirts?.title || "MEN'S SHIRTS", img: homePageImages.menShirtsImage, href: '/category/men/t-shirts' },
   ];
 
   // 2-up promo split — dedicated images fall back to existing slots until uploaded.
