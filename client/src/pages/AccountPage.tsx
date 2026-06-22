@@ -7,6 +7,7 @@ import { ordersApi } from '../api/orders.api';
 import { authApi } from '../api/auth.api';
 import { Order, Address } from '../types';
 import { formatPrice, formatDate } from '../utils/formatters';
+import { optimizeCloudinaryImage } from '../utils/cloudinary';
 import toast from 'react-hot-toast';
 
 const AccountPage: React.FC = () => {
@@ -274,7 +275,7 @@ const AccountPage: React.FC = () => {
                             >
                               {item.image ? (
                                 <img
-                                  src={item.image}
+                                  src={optimizeCloudinaryImage(item.image, { width: 160, height: 200 })}
                                   alt={item.name}
                                   className="w-full h-full object-cover"
                                 />

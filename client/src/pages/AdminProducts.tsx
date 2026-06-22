@@ -4,6 +4,7 @@ import AdminLayout from '../components/admin/AdminLayout';
 import { adminApi } from '../api/admin.api';
 import { Product, CreateProductData, ProductVariant, ProductOption, ProductImage, ProductMedia } from '../types';
 import { formatPrice } from '../utils/formatters';
+import { optimizeCloudinaryImage } from '../utils/cloudinary';
 import {
   PRODUCT_TYPES,
   GENDERS,
@@ -490,7 +491,7 @@ const AdminProducts: React.FC = () => {
                         <div className="flex items-center gap-3">
                           <div className="w-12 h-12 bg-gray-100 rounded overflow-hidden flex-shrink-0">
                             {product.images[0]?.url ? (
-                              <img src={product.images[0].url} alt={product.images[0].alt || product.title} className="w-full h-full object-cover" />
+                              <img src={optimizeCloudinaryImage(product.images[0].url, { width: 96, height: 96 })} alt={product.images[0].alt || product.title} className="w-full h-full object-cover" />
                             ) : (
                               <div className="w-full h-full flex items-center justify-center text-gray-400"><FiImage size={20} /></div>
                             )}
@@ -545,7 +546,7 @@ const AdminProducts: React.FC = () => {
                   <div className="flex items-start gap-3">
                     <div className="w-16 h-16 bg-gray-100 rounded overflow-hidden flex-shrink-0">
                       {product.images[0]?.url ? (
-                        <img src={product.images[0].url} alt={product.images[0].alt || product.title} className="w-full h-full object-cover" />
+                        <img src={optimizeCloudinaryImage(product.images[0].url, { width: 128, height: 128 })} alt={product.images[0].alt || product.title} className="w-full h-full object-cover" />
                       ) : (
                         <div className="w-full h-full flex items-center justify-center text-gray-400"><FiImage size={20} /></div>
                       )}
@@ -745,7 +746,7 @@ const AdminProducts: React.FC = () => {
                                     preload="metadata"
                                   />
                                 ) : (
-                                  <img src={item.url} alt={item.alt || ''} className="w-full h-32 object-cover rounded-lg border" />
+                                  <img src={optimizeCloudinaryImage(item.url, { width: 480 })} alt={item.alt || ''} className="w-full h-32 object-cover rounded-lg border" />
                                 )}
                                 <button
                                   type="button"

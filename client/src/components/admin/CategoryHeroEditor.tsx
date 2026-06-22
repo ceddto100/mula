@@ -3,6 +3,7 @@ import { FiUploadCloud, FiVideo, FiImage, FiSave, FiLoader } from 'react-icons/f
 import toast from 'react-hot-toast';
 import { adminApi } from '../../api/admin.api';
 import { CategoryHeroConfig, CategoryHeroMedia } from '../../types';
+import { optimizeCloudinaryImage } from '../../utils/cloudinary';
 
 const CATEGORY_TABS = [
   { key: 'men', label: 'Men' },
@@ -178,7 +179,7 @@ const CategoryHeroEditor: React.FC = () => {
                     </video>
                   ) : (
                     <img
-                      src={current.mediaUrl}
+                      src={optimizeCloudinaryImage(current.mediaUrl, { width: 1200, aspectRatio: '16:7' })}
                       alt="Hero preview"
                       className="w-full h-full object-cover"
                     />

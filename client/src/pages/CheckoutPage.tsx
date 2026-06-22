@@ -7,6 +7,7 @@ import { useAuth } from '../context/AuthContext';
 import { ordersApi } from '../api/orders.api';
 import { ShippingAddress } from '../types';
 import { getProductImageUrls, getProductName } from '../utils/productView';
+import { optimizeCloudinaryImage } from '../utils/cloudinary';
 import toast from 'react-hot-toast';
 
 const CheckoutPage: React.FC = () => {
@@ -182,7 +183,7 @@ const CheckoutPage: React.FC = () => {
                   <div className="w-16 h-20 bg-gray-100 rounded overflow-hidden flex-shrink-0">
                     {getProductImageUrls(item.productId)[0] ? (
                       <img
-                        src={getProductImageUrls(item.productId)[0]}
+                        src={optimizeCloudinaryImage(getProductImageUrls(item.productId)[0], { width: 160, height: 200 })}
                         alt={getProductName(item.productId)}
                         className="w-full h-full object-cover"
                       />

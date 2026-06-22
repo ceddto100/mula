@@ -10,6 +10,7 @@ import { capitalizeFirst } from '../utils/formatters';
 import { slugify } from '../utils/constants';
 import { CategoryHeroConfig, CategoryHeroMedia } from '../types';
 import { useSeo } from '../hooks/useSeo';
+import { optimizeCloudinaryImage } from '../utils/cloudinary';
 
 // ─── Text-only fallbacks (media URL comes from backend) ─
 const HERO_FALLBACKS: Record<string, CategoryHeroMedia> = {
@@ -108,16 +109,9 @@ const KNOWN_PARENT_CATEGORIES = new Set([
   'all', 'men', 'women', 'sale', 'new-arrivals', 'new-out', 'collections', 'denim', 'hoodies',
 ]);
 
-const HERO_TRANSFORMS = 'w_2400,h_1200,c_fill,g_auto,f_auto,q_auto';
-
 function getOptimizedHeroUrl(url: string): string {
-  if (!url) return url;
-  const match = url.match(/^(https?:\/\/res\.cloudinary\.com\/[^/]+\/image\/upload\/)(.*)/);
-  if (!match) return url;
-  // Strip any transforms that precede the version segment to avoid conflicting chained transforms.
-  const versionMatch = match[2].match(/(v\d+\/.+)$/);
-  const assetPath = versionMatch ? versionMatch[1] : match[2];
-  return `${match[1]}${HERO_TRANSFORMS}/${assetPath}`;
+  // 2:1 hero crop with AI automatic gravity so the focal point stays in frame.
+  return optimizeCloudinaryImage(url, { width: 2400, height: 1200 });
 }
 
 // ─── CategoryHero ─────────────────────────────────────────────────────────────

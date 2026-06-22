@@ -5,6 +5,7 @@ import { CartItem as CartItemType } from '../../types';
 import { formatPrice } from '../../utils/formatters';
 import { useCart } from '../../context/CartContext';
 import { getProductImageUrls, getProductName, getProductPrice, getProductStock } from '../../utils/productView';
+import { optimizeCloudinaryImage } from '../../utils/cloudinary';
 
 interface CartItemProps {
   item: CartItemType;
@@ -39,7 +40,7 @@ const CartItem: React.FC<CartItemProps> = ({ item }) => {
         <div className="w-24 h-32 bg-gray-100 rounded-lg overflow-hidden">
           {productImages[0] ? (
             <img
-              src={productImages[0]}
+              src={optimizeCloudinaryImage(productImages[0], { width: 240, height: 320 })}
               alt={productName}
               className="w-full h-full object-cover"
             />
