@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { FiPlus, FiX, FiImage, FiTrash2, FiChevronDown, FiChevronUp } from 'react-icons/fi';
+import { FiPlus, FiX, FiImage, FiTrash2, FiChevronDown, FiChevronUp, FiCopy } from 'react-icons/fi';
 import AdminLayout from '../components/admin/AdminLayout';
 import { adminApi } from '../api/admin.api';
 import { Product, CreateProductData, ProductVariant, ProductOption, ProductImage, ProductMedia } from '../types';
@@ -124,6 +124,27 @@ const AdminProducts: React.FC = () => {
   const [collectionInput, setCollectionInput] = useState('');
   const [materialInput, setMaterialInput] = useState('');
   const [mediaUrlInput, setMediaUrlInput] = useState('');
+
+  const copyCloudinaryUrl = async (url: string) => {
+    try {
+      await navigator.clipboard.writeText(url);
+      toast.success('Cloudinary URL copied');
+    } catch {
+      toast.error('Unable to copy Cloudinary URL');
+    }
+  };
+
+  const CopyCloudinaryUrlButton: React.FC<{ url: string; className?: string }> = ({ url, className = '' }) => (
+    <button
+      type="button"
+      onClick={() => copyCloudinaryUrl(url)}
+      className={`mt-1 inline-flex items-center gap-1 rounded border border-gray-300 px-2 py-1 text-[11px] font-medium text-gray-600 hover:bg-gray-50 ${className}`}
+      title="Copy Cloudinary URL"
+    >
+      <FiCopy size={12} />
+      Copy URL
+    </button>
+  );
 
   useEffect(() => {
     fetchProducts();
@@ -477,9 +498,7 @@ const AdminProducts: React.FC = () => {
                           <div className="min-w-0">
                             <span className="font-medium block">{product.title}</span>
                             {getPrimaryCloudinaryUrl(product) && (
-                              <span className="block max-w-xs truncate text-xs text-gray-500" title={getPrimaryCloudinaryUrl(product) || undefined}>
-                                {getPrimaryCloudinaryUrl(product)}
-                              </span>
+                              <CopyCloudinaryUrlButton url={getPrimaryCloudinaryUrl(product) as string} />
                             )}
                             <span className="text-sm text-gray-500">/{product.handle}</span>
                           </div>
@@ -534,9 +553,7 @@ const AdminProducts: React.FC = () => {
                     <div className="flex-1 min-w-0">
                       <h3 className="font-medium text-sm truncate">{product.title}</h3>
                       {getPrimaryCloudinaryUrl(product) && (
-                        <p className="text-xs text-gray-500 truncate" title={getPrimaryCloudinaryUrl(product) || undefined}>
-                          {getPrimaryCloudinaryUrl(product)}
-                        </p>
+                        <CopyCloudinaryUrlButton url={getPrimaryCloudinaryUrl(product) as string} />
                       )}
                       <p className="text-xs text-gray-500 truncate">/{product.handle}</p>
                       <div className="flex items-center gap-2 mt-1">
@@ -625,9 +642,7 @@ const AdminProducts: React.FC = () => {
                 <div>
                   <h3 className="text-lg font-semibold">{editingProduct ? 'Edit Product' : 'Add New Product'}</h3>
                   {editingProduct && getPrimaryCloudinaryUrl(editingProduct) && (
-                    <p className="max-w-3xl truncate text-xs text-gray-500" title={getPrimaryCloudinaryUrl(editingProduct) || undefined}>
-                      {getPrimaryCloudinaryUrl(editingProduct)}
-                    </p>
+                    <CopyCloudinaryUrlButton url={getPrimaryCloudinaryUrl(editingProduct) as string} />
                   )}
                   <p className="text-sm text-gray-500">Keep details consistent before saving.</p>
                 </div>
@@ -746,9 +761,7 @@ const AdminProducts: React.FC = () => {
                                   placeholder="Alt text"
                                   className="mt-2 w-full px-2 py-1 text-xs border rounded"
                                 />
-                                <p className="mt-1 truncate text-[11px] text-gray-500" title={item.url}>
-                                  {item.url}
-                                </p>
+                                <CopyCloudinaryUrlButton url={item.url} />
                               </div>
                             ))}
                           </div>
