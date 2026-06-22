@@ -12,29 +12,19 @@ import {
   getProductSizes,
   getProductStock,
 } from '../../utils/productView';
+import { buildCloudinarySrcSet, optimizeCloudinaryImage } from '../../utils/cloudinary';
 
-const CLOUDINARY_RE = /^(https?:\/\/res\.cloudinary\.com\/[^/]+\/image\/upload\/)(.*)/;
-
-function buildCloudinaryUrl(url: string, width: number): string {
-  if (!url) return url;
-  const match = url.match(CLOUDINARY_RE);
-  if (!match) return url;
-  const versionMatch = match[2].match(/(v\d+\/.+)$/);
-  const assetPath = versionMatch ? versionMatch[1] : match[2];
-  return `${match[1]}f_auto,q_auto,c_fill,g_auto,w_${width}/${assetPath}`;
-}
-
+// Cards render in a 3:4 frame — crop to that ratio so g_auto keeps the most
+// important part of the product in view.
 const CARD_WIDTHS = [240, 360, 480, 720];
+const CARD_ASPECT = '3:4';
 
 function getCardSrcSet(url: string): string | undefined {
-  if (!url || !CLOUDINARY_RE.test(url)) return undefined;
-  return CARD_WIDTHS.map((w) => `${buildCloudinaryUrl(url, w)} ${w}w`).join(', ');
+  return buildCloudinarySrcSet(url, CARD_WIDTHS, { aspectRatio: CARD_ASPECT });
 }
 
 function getCardSrc(url: string): string {
-  if (!url) return url;
-  if (!CLOUDINARY_RE.test(url)) return url;
-  return buildCloudinaryUrl(url, 480);
+  return optimizeCloudinaryImage(url, { width: 480, aspectRatio: CARD_ASPECT });
 }
 
 interface ProductCardProps {

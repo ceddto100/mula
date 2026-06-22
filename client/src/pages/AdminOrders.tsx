@@ -5,6 +5,7 @@ import { adminApi } from '../api/admin.api';
 import { Order } from '../types';
 import { formatPrice, formatDateTime } from '../utils/formatters';
 import { ORDER_STATUSES, PAYMENT_STATUSES } from '../utils/constants';
+import { optimizeCloudinaryImage } from '../utils/cloudinary';
 import toast from 'react-hot-toast';
 
 const AdminOrders: React.FC = () => {
@@ -241,7 +242,7 @@ const AdminOrders: React.FC = () => {
                         <div className="w-16 h-20 bg-gray-100 rounded overflow-hidden flex-shrink-0">
                           {item.image ? (
                             <img
-                              src={item.image}
+                              src={optimizeCloudinaryImage(item.image, { width: 160, height: 200 })}
                               alt={item.name}
                               className="w-full h-full object-cover"
                             />

@@ -8,6 +8,7 @@ import CategoryHeroEditor from '../components/admin/CategoryHeroEditor';
 import { adminApi } from '../api/admin.api';
 import { DashboardStats, HomePageImages } from '../types';
 import { formatPrice, formatDate } from '../utils/formatters';
+import { optimizeCloudinaryImage } from '../utils/cloudinary';
 
 const imageFieldConfig: Array<{ key: keyof HomePageImages; label: string }> = [
   { key: 'heroImage', label: 'Hero Section Image' },
@@ -176,7 +177,7 @@ const AdminDashboard: React.FC = () => {
                       />
                     ) : (
                       <img
-                        src={homePageImages[item.key]}
+                        src={optimizeCloudinaryImage(homePageImages[item.key], { width: 640, aspectRatio: '4:3' })}
                         alt={item.label}
                         className="w-full h-full object-cover"
                       />

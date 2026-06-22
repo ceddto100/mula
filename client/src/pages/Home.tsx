@@ -8,6 +8,11 @@ import { useSeo } from '../hooks/useSeo';
 import { productsApi } from '../api/products.api';
 import { HomePageImages, HomePageContent } from '../types';
 import { applyAccentColor } from '../utils/brandTheme';
+import {
+  buildCloudinarySrcSet,
+  isCloudinaryImageUrl,
+  optimizeCloudinaryImage,
+} from '../utils/cloudinary';
 
 const defaultHomePageImages: HomePageImages = {
   heroImage: '',
@@ -36,23 +41,14 @@ const isVideoUrl = (url?: string): boolean => {
   return /\.(mp4|mov|webm|avi)(\?.*)?$/i.test(url) || url.includes('/video/upload/');
 };
 
-const CLOUDINARY_IMG_RE = /^(https?:\/\/res\.cloudinary\.com\/[^/]+\/image\/upload\/)(.*)/;
-
-const buildCloudinaryImage = (url: string, width: number): string => {
-  const match = url.match(CLOUDINARY_IMG_RE);
-  if (!match) return url;
-  const versionMatch = match[2].match(/(v\d+\/.+)$/);
-  const assetPath = versionMatch ? versionMatch[1] : match[2];
-  return `${match[1]}f_auto,q_auto,c_fill,g_auto,w_${width}/${assetPath}`;
-};
-
 const HERO_WIDTHS = [640, 960, 1280, 1600, 1920];
 const TILE_WIDTHS = [480, 720, 960, 1280];
 
-const buildSrcSet = (url: string, widths: number[]): string | undefined => {
-  if (!CLOUDINARY_IMG_RE.test(url)) return undefined;
-  return widths.map((w) => `${buildCloudinaryImage(url, w)} ${w}w`).join(', ');
-};
+const buildCloudinaryImage = (url: string, width: number): string =>
+  optimizeCloudinaryImage(url, { width });
+
+const buildSrcSet = (url: string, widths: number[]): string | undefined =>
+  buildCloudinarySrcSet(url, widths);
 
 type HomeMediaOptions = {
   eager?: boolean;
@@ -80,7 +76,7 @@ const renderHomeMedia = (url: string, alt: string, className: string, options: H
   const widths = hero ? HERO_WIDTHS : TILE_WIDTHS;
   const srcSet = url ? buildSrcSet(url, widths) : undefined;
   const fallbackWidth = hero ? 1280 : 720;
-  const src = url && CLOUDINARY_IMG_RE.test(url) ? buildCloudinaryImage(url, fallbackWidth) : url;
+  const src = url && isCloudinaryImageUrl(url) ? buildCloudinaryImage(url, fallbackWidth) : url;
 
   return (
     <img
