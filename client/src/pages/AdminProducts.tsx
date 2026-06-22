@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { FiPlus, FiX, FiImage, FiTrash2, FiChevronDown, FiChevronUp } from 'react-icons/fi';
+import { FiPlus, FiX, FiImage, FiTrash2, FiChevronDown, FiChevronUp, FiCopy } from 'react-icons/fi';
 import AdminLayout from '../components/admin/AdminLayout';
 import { adminApi } from '../api/admin.api';
 import { Product, CreateProductData, ProductVariant, ProductOption, ProductImage, ProductMedia } from '../types';
@@ -87,6 +87,13 @@ const toImageList = (media: ProductMedia[]): ProductImage[] =>
       position: item.position ?? idx,
     }));
 
+const getPrimaryCloudinaryUrl = (product: Product): string | null => {
+  const mediaUrl = product.media?.find((item) => item.mediaType === 'image' && item.url.includes('cloudinary.com'))?.url;
+  const imageUrl = product.images?.find((image) => image.url.includes('cloudinary.com'))?.url;
+
+  return mediaUrl || imageUrl || null;
+};
+
 const AdminProducts: React.FC = () => {
   const [products, setProducts] = useState<Product[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -117,6 +124,27 @@ const AdminProducts: React.FC = () => {
   const [collectionInput, setCollectionInput] = useState('');
   const [materialInput, setMaterialInput] = useState('');
   const [mediaUrlInput, setMediaUrlInput] = useState('');
+
+  const copyCloudinaryUrl = async (url: string) => {
+    try {
+      await navigator.clipboard.writeText(url);
+      toast.success('Cloudinary URL copied');
+    } catch {
+      toast.error('Unable to copy Cloudinary URL');
+    }
+  };
+
+  const CopyCloudinaryUrlButton: React.FC<{ url: string; className?: string }> = ({ url, className = '' }) => (
+    <button
+      type="button"
+      onClick={() => copyCloudinaryUrl(url)}
+      className={`mt-1 inline-flex items-center gap-1 rounded border border-gray-300 px-2 py-1 text-[11px] font-medium text-gray-600 hover:bg-gray-50 ${className}`}
+      title="Copy Cloudinary URL"
+    >
+      <FiCopy size={12} />
+      Copy URL
+    </button>
+  );
 
   useEffect(() => {
     fetchProducts();
@@ -467,8 +495,11 @@ const AdminProducts: React.FC = () => {
                               <div className="w-full h-full flex items-center justify-center text-gray-400"><FiImage size={20} /></div>
                             )}
                           </div>
-                          <div>
+                          <div className="min-w-0">
                             <span className="font-medium block">{product.title}</span>
+                            {getPrimaryCloudinaryUrl(product) && (
+                              <CopyCloudinaryUrlButton url={getPrimaryCloudinaryUrl(product) as string} />
+                            )}
                             <span className="text-sm text-gray-500">/{product.handle}</span>
                           </div>
                         </div>
@@ -521,6 +552,9 @@ const AdminProducts: React.FC = () => {
                     </div>
                     <div className="flex-1 min-w-0">
                       <h3 className="font-medium text-sm truncate">{product.title}</h3>
+                      {getPrimaryCloudinaryUrl(product) && (
+                        <CopyCloudinaryUrlButton url={getPrimaryCloudinaryUrl(product) as string} />
+                      )}
                       <p className="text-xs text-gray-500 truncate">/{product.handle}</p>
                       <div className="flex items-center gap-2 mt-1">
                         <span className={`inline-block px-2 py-1 text-xs rounded-full ${product.status === 'active' ? 'bg-green-100 text-green-800' : product.status === 'draft' ? 'bg-gray-100 text-gray-800' : 'bg-red-100 text-red-800'}`}>
@@ -607,6 +641,9 @@ const AdminProducts: React.FC = () => {
               <div className="p-6 border-b flex justify-between items-start sticky top-0 bg-white z-10 rounded-t-xl">
                 <div>
                   <h3 className="text-lg font-semibold">{editingProduct ? 'Edit Product' : 'Add New Product'}</h3>
+                  {editingProduct && getPrimaryCloudinaryUrl(editingProduct) && (
+                    <CopyCloudinaryUrlButton url={getPrimaryCloudinaryUrl(editingProduct) as string} />
+                  )}
                   <p className="text-sm text-gray-500">Keep details consistent before saving.</p>
                 </div>
                 <button onClick={resetForm} className="text-gray-500 hover:text-gray-700"><FiX size={24} /></button>
@@ -724,6 +761,7 @@ const AdminProducts: React.FC = () => {
                                   placeholder="Alt text"
                                   className="mt-2 w-full px-2 py-1 text-xs border rounded"
                                 />
+                                <CopyCloudinaryUrlButton url={item.url} />
                               </div>
                             ))}
                           </div>
